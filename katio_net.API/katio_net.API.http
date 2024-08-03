@@ -1,0 +1,6 @@
+@katio_net.API_HostAddress = http://localhost:5125
+
+GET {{katio_net.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
