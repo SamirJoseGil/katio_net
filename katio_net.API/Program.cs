@@ -1,7 +1,13 @@
 using katio.Business.Services;
 using katio.Business.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using katio.Data;
+
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddDbContext<katioContext>(opt => opt.UseInMemoryDatabase("katio"));
+
 
 // Add services to the container.
 builder.Services.AddControllers();

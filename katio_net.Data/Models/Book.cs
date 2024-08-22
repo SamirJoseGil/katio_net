@@ -1,8 +1,7 @@
 ﻿namespace katio.Data.Models
 {
-    public class Books
+    public class Book : BaseEntity<int>
     {
-        public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
         public string ISBN10 { get; set; } = string.Empty;
         public string ISBN13 { get; set; } = string.Empty;

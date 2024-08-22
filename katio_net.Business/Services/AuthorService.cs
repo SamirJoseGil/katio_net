@@ -6,12 +6,12 @@ namespace katio.Business.Services;
 public class AuthorService : IAuthorService
 {
     // Lista de autores
-    private readonly List<Authors> _authors;
+    private readonly List<Author> _authors;
 
     // Constructor
     public AuthorService()
     {
-        _authors = new List<Authors>();
+        _authors = new List<Author>();
     }
 
     // Traer todos los autores
