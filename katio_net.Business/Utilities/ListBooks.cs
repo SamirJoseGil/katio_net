@@ -14,7 +14,7 @@ public static class ListBooks
         {
             StatusCode = statusCode,
             Message = message,
-            TotalElements = (elements != null && elements.Any()) ? elements.Count : 0,
+            TotalElements = elements != null && elements.Any() ? elements.Count : 0,
             ResponseElements = elements ?? new List<T>()
         };
     }

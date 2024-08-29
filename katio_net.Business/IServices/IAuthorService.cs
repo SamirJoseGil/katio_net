@@ -1,10 +1,17 @@
-﻿using katio.Data.Models;
+﻿using katio.Data.Dto;
+using katio.Data.Models;
 
 namespace katio.Business.Interfaces;
 
 public interface IAuthorService
 {
-    Task<IEnumerable<string>> GetAllAuthors();
-    // Task<string> GetAllAuthorsByName(string Name);
+    Task<BaseMessage<Author>> Index();
+    Task<BaseMessage<Author>> GetAuthorsByName(string Name);
+    Task<BaseMessage<Author>> GetAuthorsByLastName(string LastName);
+    Task<BaseMessage<Author>> GetAuthorsByBirthDate(DateTime StartDate, DateTime EndDate);
+    Task<BaseMessage<Author>> GetAuthorsByCountry(string Country);
+    Task<BaseMessage<Author>> DeleteAuthor(int Id);
+    Task<BaseMessage<Author>> CreateAuthor(Author author);
+    Task<Author> UpdateAuthor(Author author);
 }
 

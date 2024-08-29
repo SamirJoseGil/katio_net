@@ -8,93 +8,92 @@ namespace katio.API.Controllers
     [Route("api/[controller]")]
     public class BooksController : ControllerBase
     {
+        // Servicio de libros
         private readonly IBookService _bookService;
-
+        // Constructor
         public BooksController(IBookService bookService)
         {
             _bookService = bookService;
+        }
+        // Crea un libro
+        [HttpPost]
+        [Route("CreateBook")]
+        public async Task<IActionResult> CreateBook(Book book)
+        {
+            var response = await _bookService.CreateBook(book);
+            return response.StatusCode == System.Net.HttpStatusCode.OK ? Ok(response) : StatusCode((int)response.StatusCode, response);
+        }
+        // Actualiza un libro
+        [HttpPut]
+        [Route("UpdateBook")]
+        public async Task<IActionResult> UpdateBook(Book book)
+        {
+            var response = await _bookService.UpdateBook(book);
+            return response != null ? Ok(response) : StatusCode(StatusCodes.Status404NotFound, response);
+        }
+        //Elimina un libro
+        [HttpDelete]
+        [Route("DeleteBook")]
+        public async Task<IActionResult> DeleteBook(int id)
+        {
+            var response = await _bookService.DeleteBook(id);
+            return response.StatusCode == System.Net.HttpStatusCode.OK ? Ok(response) : StatusCode((int)response.StatusCode, response);
         }
         // Trae todos los libros
         [HttpGet]
         [Route("GetBooks")]
         public async Task<IActionResult> Index()
         {
-            var response = await _bookService.GetAllBooks();
+            var response = await _bookService.Index();
             return response.TotalElements > 0 ? Ok(response) : StatusCode(StatusCodes.Status404NotFound, response);
         }
-        // Crea un libro
-        [HttpPost]
-        [Route("CreateBook")]
-        public async Task<IActionResult> Create(Book book)
-        {
-            var response = await _bookService.CreateBook(book);
-            return response.StatusCode == System.Net.HttpStatusCode.OK ? Ok(response) : StatusCode((int)response.StatusCode, response);
-        }
-
-
-        // TODO DE ACA PARA ABAJO NO FUNCIONA   
-        // Trae los libros por nombre
+        //Trae un libro por su nombre
         [HttpGet]
-        [Route("GetBooksByName")]
-        public async Task<ActionResult<IEnumerable<Book>>> GetBooksByName(string Name)
+        [Route("GetBookByName")]
+        public async Task<IActionResult> GetBookByName(string name)
         {
-            var books = await _bookService.GetAllBooksByName(Name);
-            return Ok(books);
+            var response = await _bookService.GetBooksByName(name);
+            return response != null ? Ok(response) : StatusCode(StatusCodes.Status404NotFound, response);
         }
-
-        // Trae los libros por ISBN10
+        // Trae un libro por su ISBN10
         [HttpGet]
-        [Route("GetBooksByISBN10")]
-        public async Task<ActionResult<IEnumerable<Book>>> GetBooksByISBN10(string ISBN10)
+        [Route("GetBookByISBN10")]
+        public async Task<IActionResult> GetBookByISBN10(string isbn10)
         {
-            var books = await _bookService.GetAllBookByISBN10(ISBN10);
-            return Ok(books);
+            var response = await _bookService.GetBooksByISBN10(isbn10);
+            return response != null ? Ok(response) : StatusCode(StatusCodes.Status404NotFound, response);
         }
-
-        // Trae los libros por ISBN13
+        // Trae un libro por su ISBN13
         [HttpGet]
-        [Route("GetBooksByISBN13")]
-        public async Task<ActionResult<IEnumerable<Book>>> GetBooksByISBN13(string ISBN13)
+        [Route("GetBookByISBN13")]
+        public async Task<IActionResult> GetBookByISBN13(string isbn13)
         {
-            var books = await _bookService.GetAllBookByISBN13(ISBN13);
-            return Ok(books);
+            var response = await _bookService.GetBooksByISBN13(isbn13);
+            return response != null ? Ok(response) : StatusCode(StatusCodes.Status404NotFound, response);
         }
-
-        // Trae los libros por edición
-        [HttpGet]
-        [Route("GetBooksByEdition")]
-        public async Task<ActionResult<IEnumerable<Book>>> GetBooksByEdition(string Edition)
-        {
-            var books = await _bookService.GetAllBookByEdition(Edition);
-            return Ok(books);
-        }
-
-        // Trae los libros por índice Dewey
-        [HttpGet]
-        [Route("GetBooksByDeweyIndex")]
-        public async Task<ActionResult<IEnumerable<Book>>> GetBooksByDeweyIndex(string DeweyIndex)
-        {
-            var books = await _bookService.GetAllBookByDeweyIndex(DeweyIndex);
-            return Ok(books);
-        }
-
-        // Trae los libros por rango de publicación
+        // Trae libros por rango de fecha de publicación
         [HttpGet]
         [Route("GetBooksByPublished")]
-        public async Task<ActionResult<IEnumerable<Book>>> GetBooksByPublished(DateTime StartDate, DateTime EndDate)
+        public async Task<IActionResult> GetBookByPublished(DateTime StartDate, DateTime EndDate)
         {
-            var books = await _bookService.GetAllBookByPublished(StartDate, EndDate);
-            return Ok(books);
+            var response = await _bookService.GetBooksByPublished(StartDate, EndDate);
+            return response != null ? Ok(response) : StatusCode(StatusCodes.Status404NotFound, response);
         }
-
-        // Edita un libro
-        [HttpPut]
-        [Route("UpdateBook")]
-        public async Task<ActionResult<Book>> UpdateBook(Book book)
+        // Trae un libro por su edición
+        [HttpGet]
+        [Route("GetBookByEdition")]
+        public async Task<IActionResult> GetBookByEdition(string edition)
         {
-            var updatedBook = await _bookService.UpdateBook(book);
-            return Ok(updatedBook);
+            var response = await _bookService.GetBooksByEdition(edition);
+            return response != null ? Ok(response) : StatusCode(StatusCodes.Status404NotFound, response);
         }
-
+        // Trae un libro por su índice Dewey
+        [HttpGet]
+        [Route("GetBookByDeweyIndex")]
+        public async Task<IActionResult> GetBookByDeweyIndex(string deweyIndex)
+        {
+            var response = await _bookService.GetBooksByDeweyIndex(deweyIndex);
+            return response != null ? Ok(response) : StatusCode(StatusCodes.Status404NotFound, response);
+        }
     }
 }
