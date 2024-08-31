@@ -6,39 +6,16 @@ namespace katio.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class BooksController : ControllerBase
+    public class BookController : ControllerBase
     {
         // Servicio de libros
         private readonly IBookService _bookService;
         // Constructor
-        public BooksController(IBookService bookService)
+        public BookController(IBookService bookService)
         {
             _bookService = bookService;
         }
-        // Crea un libro
-        [HttpPost]
-        [Route("CreateBook")]
-        public async Task<IActionResult> CreateBook(Book book)
-        {
-            var response = await _bookService.CreateBook(book);
-            return response.StatusCode == System.Net.HttpStatusCode.OK ? Ok(response) : StatusCode((int)response.StatusCode, response);
-        }
-        // Actualiza un libro
-        [HttpPut]
-        [Route("UpdateBook")]
-        public async Task<IActionResult> UpdateBook(Book book)
-        {
-            var response = await _bookService.UpdateBook(book);
-            return response != null ? Ok(response) : StatusCode(StatusCodes.Status404NotFound, response);
-        }
-        //Elimina un libro
-        [HttpDelete]
-        [Route("DeleteBook")]
-        public async Task<IActionResult> DeleteBook(int id)
-        {
-            var response = await _bookService.DeleteBook(id);
-            return response.StatusCode == System.Net.HttpStatusCode.OK ? Ok(response) : StatusCode((int)response.StatusCode, response);
-        }
+
         // Trae todos los libros
         [HttpGet]
         [Route("GetBooks")]
@@ -47,6 +24,41 @@ namespace katio.API.Controllers
             var response = await _bookService.Index();
             return response.TotalElements > 0 ? Ok(response) : StatusCode(StatusCodes.Status404NotFound, response);
         }
+
+        #region Create Update Delete
+
+        // Crea un libro
+        [HttpPost]
+        [Route("CreateBook")]
+        public async Task<IActionResult> CreateBook(Book book)
+        {
+            var response = await _bookService.CreateBook(book);
+            return response.StatusCode == System.Net.HttpStatusCode.OK ? Ok(response) : StatusCode((int)response.StatusCode, response);
+        }
+
+        // Actualiza un libro
+        [HttpPut]
+        [Route("UpdateBook")]
+        public async Task<IActionResult> UpdateBook(Book book)
+        {
+            var response = await _bookService.UpdateBook(book);
+            return response != null ? Ok(response) : StatusCode(StatusCodes.Status404NotFound, response);
+        }
+
+        //Elimina un libro
+        [HttpDelete]
+        [Route("DeleteBook")]
+        public async Task<IActionResult> DeleteBook(int id)
+        {
+            var response = await _bookService.DeleteBook(id);
+            return response.StatusCode == System.Net.HttpStatusCode.OK ? Ok(response) : StatusCode((int)response.StatusCode, response);
+        }
+
+
+        #endregion
+
+        #region Find By Book
+
         //Trae un libro por su nombre
         [HttpGet]
         [Route("GetBookByName")]
@@ -55,6 +67,7 @@ namespace katio.API.Controllers
             var response = await _bookService.GetBooksByName(name);
             return response != null ? Ok(response) : StatusCode(StatusCodes.Status404NotFound, response);
         }
+
         // Trae un libro por su ISBN10
         [HttpGet]
         [Route("GetBookByISBN10")]
@@ -63,6 +76,7 @@ namespace katio.API.Controllers
             var response = await _bookService.GetBooksByISBN10(isbn10);
             return response != null ? Ok(response) : StatusCode(StatusCodes.Status404NotFound, response);
         }
+
         // Trae un libro por su ISBN13
         [HttpGet]
         [Route("GetBookByISBN13")]
@@ -71,14 +85,16 @@ namespace katio.API.Controllers
             var response = await _bookService.GetBooksByISBN13(isbn13);
             return response != null ? Ok(response) : StatusCode(StatusCodes.Status404NotFound, response);
         }
+
         // Trae libros por rango de fecha de publicación
         [HttpGet]
         [Route("GetBooksByPublished")]
-        public async Task<IActionResult> GetBookByPublished(DateTime StartDate, DateTime EndDate)
+        public async Task<IActionResult> GetBookByPublished(DateOnly StartDate, DateOnly EndDate)
         {
             var response = await _bookService.GetBooksByPublished(StartDate, EndDate);
             return response != null ? Ok(response) : StatusCode(StatusCodes.Status404NotFound, response);
         }
+
         // Trae un libro por su edición
         [HttpGet]
         [Route("GetBookByEdition")]
@@ -87,6 +103,7 @@ namespace katio.API.Controllers
             var response = await _bookService.GetBooksByEdition(edition);
             return response != null ? Ok(response) : StatusCode(StatusCodes.Status404NotFound, response);
         }
+
         // Trae un libro por su índice Dewey
         [HttpGet]
         [Route("GetBookByDeweyIndex")]
@@ -95,5 +112,37 @@ namespace katio.API.Controllers
             var response = await _bookService.GetBooksByDeweyIndex(deweyIndex);
             return response != null ? Ok(response) : StatusCode(StatusCodes.Status404NotFound, response);
         }
+
+
+        #endregion
+
+        #region Find By Author Relation
+
+        // Trae un libro por su autor
+        [HttpGet]
+        [Route("GetBookByAuthor")]
+        public async Task<IActionResult> GetBookByAuthor(int AuthorId)
+        {
+            var response = await _bookService.GetBookByAuthorAsync(AuthorId);
+            return response != null ? Ok(response) : StatusCode(StatusCodes.Status404NotFound, response);
+        }
+        // Traer un libro por nombre del autor
+        [HttpGet]
+        [Route("GetBookByAuthorName")]
+        public async Task<IActionResult> GetBookByAuthorName(string AuthorName)
+        {
+            var response = await _bookService.GetBookByAuthorNameAsync(AuthorName);
+            return response != null ? Ok(response) : StatusCode(StatusCodes.Status404NotFound, response);
+        }
+        // Traer un libro por nombre completo del autor
+        [HttpGet]
+        [Route("GetBookByAuthorFullName")]
+        public async Task<IActionResult> GetBookByAuthorFullName(string authorName, string authorLastName)
+        {
+            var response = await _bookService.GetBookByAuthorFullNameAsync(authorName, authorLastName);
+            return response != null ? Ok(response) : StatusCode(StatusCodes.Status404NotFound, response);
+        }
+
+        #endregion
     }
 }

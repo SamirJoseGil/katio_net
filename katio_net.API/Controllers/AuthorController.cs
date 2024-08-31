@@ -10,35 +10,13 @@ namespace katio.API.Controllers
     {
         // Servicio de autores
         private readonly IAuthorService _authorService;
+
         // Constructor
         public AuthorController(IAuthorService authorService)
         {
             _authorService = authorService;
         }
-        // Crear Autores
-        [HttpPost]
-        [Route("CreateAuthor")]
-        public async Task<IActionResult> CreateAuthor(Author author)
-        {
-            var response = await _authorService.CreateAuthor(author);
-            return response.StatusCode == System.Net.HttpStatusCode.OK ? Ok(response) : StatusCode((int)response.StatusCode, response);
-        }
-        // Actualizar Autores
-        [HttpPut]
-        [Route("UpdateAuthor")]
-        public async Task<IActionResult> UpdateAuthor(Author author)
-        {
-            var response = await _authorService.UpdateAuthor(author);
-            return response != null ? Ok(response) : StatusCode(StatusCodes.Status404NotFound, response);
-        }
-        // Elimina un Autor
-        [HttpDelete]
-        [Route("DeleteAuthor")]
-        public async Task<IActionResult> DeleteAuthor(int id)
-        {
-            var response = await _authorService.DeleteAuthor(id);
-            return response.StatusCode == System.Net.HttpStatusCode.OK ? Ok(response) : StatusCode((int)response.StatusCode, response);
-        }
+
         // Trae todos los autores
         [HttpGet]
         [Route("GetAuthors")]
@@ -47,6 +25,40 @@ namespace katio.API.Controllers
             var response = await _authorService.Index();
             return response.TotalElements > 0 ? Ok(response) : StatusCode(StatusCodes.Status404NotFound, response);
         }
+
+        #region Create Update Delete
+
+        // Crear Autores
+        [HttpPost]
+        [Route("CreateAuthor")]
+        public async Task<IActionResult> CreateAuthor(Author author)
+        {
+            var response = await _authorService.CreateAuthor(author);
+            return response.StatusCode == System.Net.HttpStatusCode.OK ? Ok(response) : StatusCode((int)response.StatusCode, response);
+        }
+
+        // Actualizar Autores
+        [HttpPut]
+        [Route("UpdateAuthor")]
+        public async Task<IActionResult> UpdateAuthor(Author author)
+        {
+            var response = await _authorService.UpdateAuthor(author);
+            return response != null ? Ok(response) : StatusCode(StatusCodes.Status404NotFound, response);
+        }
+
+        // Elimina un Autor
+        [HttpDelete]
+        [Route("DeleteAuthor")]
+        public async Task<IActionResult> DeleteAuthor(int id)
+        {
+            var response = await _authorService.DeleteAuthor(id);
+            return response.StatusCode == System.Net.HttpStatusCode.OK ? Ok(response) : StatusCode((int)response.StatusCode, response);
+        }
+
+        #endregion
+
+        #region Find By Author
+
         // Trae un autor por su nombre
         [HttpGet]
         [Route("GetAuthorByName")]
@@ -55,6 +67,7 @@ namespace katio.API.Controllers
             var response = await _authorService.GetAuthorsByName(name);
             return response != null ? Ok(response) : StatusCode(StatusCodes.Status404NotFound, response);
         }
+
         // Trae un autor por su apellido
         [HttpGet]
         [Route("GetAuthorByLastName")]
@@ -63,6 +76,7 @@ namespace katio.API.Controllers
             var response = await _authorService.GetAuthorsByLastName(lastName);
             return response != null ? Ok(response) : StatusCode(StatusCodes.Status404NotFound, response);
         }
+
         // Trae un autor por su pais - region
         [HttpGet]
         [Route("GetAuthorByCountry")]
@@ -71,13 +85,16 @@ namespace katio.API.Controllers
             var response = await _authorService.GetAuthorsByCountry(country);
             return response != null ? Ok(response) : StatusCode(StatusCodes.Status404NotFound, response);
         }
+
         // Trae un autor por rango de fecha
         [HttpGet]
         [Route("GetAuthorByBirthDate")]
-        public async Task<IActionResult> GetAuthorByBirthDate(DateTime startDate, DateTime endDate)
+        public async Task<IActionResult> GetAuthorByBirthDate(DateOnly startDate, DateOnly endDate)
         {
             var response = await _authorService.GetAuthorsByBirthDate(startDate, endDate);
             return response != null ? Ok(response) : StatusCode(StatusCodes.Status404NotFound, response);
         }
+
+        #endregion
     }
 }

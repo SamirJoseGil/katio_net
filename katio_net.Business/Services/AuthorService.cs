@@ -3,7 +3,7 @@ using katio.Data.Models;
 using katio.Data.Dto;
 using katio.Data;
 using System.Net;
-using katio.Business.Utilities;
+using Microsoft.EntityFrameworkCore;
 
 namespace katio.Business.Services;
 
@@ -17,6 +17,18 @@ public class AuthorService : IAuthorService
     {
         _context = context;
     }
+
+    // Traer todos los Autores
+    public async Task<BaseMessage<Author>> Index()
+    {
+        var result = await _context.Authors.ToListAsync();
+        return result.Any() ? Utilities.BuildResponse<Author>
+            (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
+            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Author>());
+    }
+
+    #region Create Update Delete
+
     // Crear Autores
     public async Task<BaseMessage<Author>> CreateAuthor(Author author)
     {
@@ -25,7 +37,7 @@ public class AuthorService : IAuthorService
             Name = author.Name,
             LastName = author.LastName,
             Country = author.Country,
-            Birthdate = author.Birthdate
+            BirthDate = author.BirthDate
         };
         try
         {
@@ -34,10 +46,11 @@ public class AuthorService : IAuthorService
         }
         catch (Exception ex)
         {
-            return ListAuthors.BuildResponse<Author>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
+            return Utilities.BuildResponse<Author>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
         }
-        return ListAuthors.BuildResponse(HttpStatusCode.OK, BaseMessageStatus.OK_200, new List<Author> { newAuthor });
+        return Utilities.BuildResponse(HttpStatusCode.OK, BaseMessageStatus.OK_200, new List<Author> { newAuthor });
     }
+
     // Actualizar Autores
     public async Task<Author> UpdateAuthor(Author author)
     {
@@ -47,11 +60,12 @@ public class AuthorService : IAuthorService
             result.Name = author.Name;
             result.LastName = author.LastName;
             result.Country = author.Country;
-            result.Birthdate = author.Birthdate;
+            result.BirthDate = author.BirthDate;
             await _context.SaveChangesAsync();
         }
         return result;
     }
+
     // Eliminar Autores
     public async Task<BaseMessage<Author>> DeleteAuthor(int Id)
     {
@@ -61,47 +75,47 @@ public class AuthorService : IAuthorService
             _context.Authors.Remove(result);
             await _context.SaveChangesAsync();
         }
-        return result != null ? ListAuthors.BuildResponse(HttpStatusCode.OK, BaseMessageStatus.OK_200, new List<Author> { result }) :
-            ListAuthors.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Author>());
+        return result != null ? Utilities.BuildResponse(HttpStatusCode.OK, BaseMessageStatus.OK_200, new List<Author> { result }) :
+            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Author>());
     }
-    // Traer todos los Autores
-    public async Task<BaseMessage<Author>> Index()
-    {
-        var result = _context.Authors.ToList();
-        return result.Any() ? ListAuthors.BuildResponse<Author>
-            (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
-            ListAuthors.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Author>());
-    }
+
+    #endregion
+
+    #region Find By Author
+
     // Traer los autores por nombre
     public async Task<BaseMessage<Author>> GetAuthorsByName(string name)
     {
-        var result = _context.Authors.Where(b => b.Name.Contains(name, StringComparison.OrdinalIgnoreCase)).ToList();
-        return result.Any() ? ListAuthors.BuildResponse<Author>
+        var result = await _context.Authors.Where(b => b.Name.Contains(name, StringComparison.InvariantCultureIgnoreCase)).ToListAsync();
+        return result.Any() ? Utilities.BuildResponse<Author>
             (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
-            ListAuthors.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Author>());
+            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Author>());
     }
     // Traer los autores por apellido
     public async Task<BaseMessage<Author>> GetAuthorsByLastName(string LastName)
     {
-        var result = _context.Authors.Where(b => b.LastName.Contains(LastName, StringComparison.OrdinalIgnoreCase)).ToList();
-        return result.Any() ? ListAuthors.BuildResponse<Author>
+        var result = await _context.Authors.Where(b => b.LastName.Contains(LastName, StringComparison.InvariantCultureIgnoreCase)).ToListAsync();
+        return result.Any() ? Utilities.BuildResponse<Author>
             (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
-            ListAuthors.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Author>());
+            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Author>());
     }
     // Traer los autores por pais - region
     public async Task<BaseMessage<Author>> GetAuthorsByCountry(string Country)
     {
-        var result = _context.Authors.Where(b => b.Country.Contains(Country, StringComparison.OrdinalIgnoreCase)).ToList();
-        return result.Any() ? ListAuthors.BuildResponse<Author>
+        var result = await _context.Authors.Where(b => b.Country.Contains(Country, StringComparison.InvariantCultureIgnoreCase)).ToListAsync();
+        return result.Any() ? Utilities.BuildResponse<Author>
             (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
-            ListAuthors.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Author>());
+            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Author>());
     }
     // Traer los autores por rango de fecha de nacimiento
-    public async Task<BaseMessage<Author>> GetAuthorsByBirthDate(DateTime StartDate, DateTime EndDate)
+    public async Task<BaseMessage<Author>> GetAuthorsByBirthDate(DateOnly StartDate, DateOnly EndDate)
     {
-        var result = _context.Authors.Where(b => b.Birthdate >= StartDate && b.Birthdate <= EndDate).ToList();
-        return result.Any() ? ListAuthors.BuildResponse<Author>
+        var result = await _context.Authors.Where(b => b.BirthDate >= StartDate && b.BirthDate <= EndDate).ToListAsync();
+        return result.Any() ? Utilities.BuildResponse<Author>
             (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
-            ListAuthors.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Author>());
+            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Author>());
     }
+
+    #endregion
+
 }

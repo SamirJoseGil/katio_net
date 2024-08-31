@@ -11,8 +11,15 @@ public interface IBookService
     Task<BaseMessage<Book>> GetBooksByISBN13(string ISBN13);
     Task<BaseMessage<Book>> GetBooksByEdition(string Edition);
     Task<BaseMessage<Book>> GetBooksByDeweyIndex(string DeweyIndex);
-    Task<BaseMessage<Book>> GetBooksByPublished(DateTime StartDate, DateTime EndDate);
+    Task<BaseMessage<Book>> GetBooksByPublished(DateOnly StartDate, DateOnly EndDate);
     Task<BaseMessage<Book>> DeleteBook(int id);
     Task<BaseMessage<Book>> CreateBook(Book book);
     Task<Book> UpdateBook(Book book);
+
+
+    Task<BaseMessage<Book>> GetBookByAuthorAsync(int AuthorId);
+    Task<BaseMessage<Book>> GetBookByAuthorNameAsync(string AuthorName);
+    Task<BaseMessage<Book>> GetBookByAuthorCountryAsync(string AuthorCountry);
+    Task<BaseMessage<Book>> GetBookByAuthorFullNameAsync(string authorName, string authorLastName);
+    Task<BaseMessage<Book>> GetBookByAuthorBirthDateRange(DateOnly StartDate, DateOnly EndDate);
 }

@@ -18,4 +18,7 @@ public static class BaseMessageStatus
     public const string INTERNAL_SERVER_ERROR_500 = "500 Internal Server Error";
     public const string NOT_FOUND_404 = "404 Not Found";
     public const string BOOK_NOT_FOUND = "404 Book Not Found";
+    public const string AUTHOR_NOT_FOUND = "404 Author Not Found";
+    public const string AUDIOBOOK_NOT_FOUND = "404 AudioBook Not Found";
+    public const string GENRE_NOT_FOUND = "404 Genre Not Found";
 }

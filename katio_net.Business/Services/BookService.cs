@@ -3,19 +3,31 @@ using katio.Data.Models;
 using katio.Data.Dto;
 using katio.Data;
 using System.Net;
-using katio.Business.Utilities;
+using Microsoft.EntityFrameworkCore;
 
 namespace katio.Business.Services;
 
 public class BookService : IBookService
 {
-    // Lsita de libros
+    // Lista de libros
     private readonly katioContext _context;
+
     // Constructor
     public BookService(katioContext context)
     {
-        _context = context; 
+        _context = context;
     }
+
+    // Traer todos los libros
+    public async Task<BaseMessage<Book>> Index()
+    {
+        var result = await _context.Books.ToListAsync();
+        return result.Any() ? Utilities.BuildResponse<Book>(HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
+            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
+    }
+
+    #region Create Update Delete
+
     // Crear un Libro
     public async Task<BaseMessage<Book>> CreateBook(Book book)
     {
@@ -26,19 +38,21 @@ public class BookService : IBookService
             ISBN13 = book.ISBN13,
             Published = book.Published,
             Edition = book.Edition,
-            DeweyIndex = book.DeweyIndex
+            DeweyIndex = book.DeweyIndex,
+            AuthorId = book.AuthorId
         };
         try
         {
-           await _context.Books.AddAsync(newBook);
+            await _context.Books.AddAsync(newBook);
             await _context.SaveChangesAsync();
         }
-        catch (Exception ex) 
+        catch (Exception ex)
         {
-            return ListBooks.BuildResponse<Book>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
+            return Utilities.BuildResponse<Book>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
         }
-        return ListBooks.BuildResponse(HttpStatusCode.OK, BaseMessageStatus.OK_200, new List<Book> { newBook });
+        return Utilities.BuildResponse(HttpStatusCode.OK, BaseMessageStatus.OK_200, new List<Book> { newBook });
     }
+
     // Actualizar un Libro
     public async Task<Book> UpdateBook(Book book)
     {
@@ -55,6 +69,7 @@ public class BookService : IBookService
         }
         return result;
     }
+
     // Eliminar un libro
     public async Task<BaseMessage<Book>> DeleteBook(int Id)
     {
@@ -64,62 +79,157 @@ public class BookService : IBookService
             _context.Books.Remove(result);
             await _context.SaveChangesAsync();
         }
-        return result != null ? ListBooks.BuildResponse<Book>(HttpStatusCode.OK, BaseMessageStatus.OK_200, new List<Book> { result }) :
-            ListBooks.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
+        return result != null ? Utilities.BuildResponse<Book>(HttpStatusCode.OK, BaseMessageStatus.OK_200, new List<Book> { result }) :
+            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
     }
-    // Traer todos los libros
-    public async Task<BaseMessage<Book>> Index()
-    {
-        var result = _context.Books.ToList();
-        return result.Any() ? ListBooks.BuildResponse<Book>(HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
-            ListBooks.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
-    }
+
+    #endregion
+
+    #region Find By Book
+
     // Traer libros por nombre
-    public async Task<BaseMessage<Book>> GetBooksByName(string Name)
+    public async Task<BaseMessage<Book>> GetBooksByName(string name)
     {
-        var result = _context.Books.Where(b => b.Name == Name).ToList();
-        return result.Any() ? ListBooks.BuildResponse<Book>
+        var result = await _context.Books
+            .Where(b => b.Name.Contains(name, StringComparison.InvariantCultureIgnoreCase))
+            .ToListAsync();
+        return result.Any() ? Utilities.BuildResponse<Book>
             (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
-            ListBooks.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
+            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
     }
+
     // Traer libros por ISBN10
     public async Task<BaseMessage<Book>> GetBooksByISBN10(string ISBN10)
     {
-        var result = _context.Books.Where(b => b.ISBN10 == ISBN10).ToList();
-        return result.Any() ? ListBooks.BuildResponse<Book>
+        var result = await _context.Books.Where(b => b.ISBN10 == ISBN10).ToListAsync();
+        return result.Any() ? Utilities.BuildResponse<Book>
             (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
-            ListBooks.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
+            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
     }
+
     // Traer libros por ISBN13
     public async Task<BaseMessage<Book>> GetBooksByISBN13(string ISBN13)
     {
-        var result = _context.Books.Where(b => b.ISBN13 == ISBN13).ToList();
-        return result.Any() ? ListBooks.BuildResponse<Book>
+        var result = await _context.Books.Where(b => b.ISBN13 == ISBN13).ToListAsync();
+        return result.Any() ? Utilities.BuildResponse<Book>
             (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
-            ListBooks.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
+            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
     }
+
     // Traer libros por rango de fecha de publicación
-    public async Task<BaseMessage<Book>> GetBooksByPublished(DateTime StartDate, DateTime EndDate)
+    public async Task<BaseMessage<Book>> GetBooksByPublished(DateOnly startDate, DateOnly endDate)
     {
-        var result = _context.Books.Where(b => b.Published >= StartDate && b.Published <= EndDate).ToList();
-        return result.Any() ? ListBooks.BuildResponse<Book>
+        var result = await _context.Books.Where(b => b.Published >= startDate && b.Published <= endDate).ToListAsync();
+        return result.Any() ? Utilities.BuildResponse<Book>
             (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
-            ListBooks.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
+            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
     }
+
     // Traer libros por edición
-    public async Task<BaseMessage<Book>> GetBooksByEdition(string Edition)
+    public async Task<BaseMessage<Book>> GetBooksByEdition(string edition)
     {
-        var result = _context.Books.Where(b => b.Edition == Edition).ToList();
-        return result.Any() ? ListBooks.BuildResponse<Book>
+        var result = await _context.Books
+            .Where(b => b.Edition.Contains(edition, StringComparison.InvariantCultureIgnoreCase))
+            .ToListAsync();
+        return result.Any() ? Utilities.BuildResponse<Book>
             (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
-            ListBooks.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
+            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
     }
+
     // Traer libros por índice Dewey
-    public async Task<BaseMessage<Book>> GetBooksByDeweyIndex(string DeweyIndex)
+    public async Task<BaseMessage<Book>> GetBooksByDeweyIndex(string deweyIndex)
     {
-        var result = _context.Books.Where(b => b.DeweyIndex == DeweyIndex).ToList();
-        return result.Any() ? ListBooks.BuildResponse<Book>
+        var result = _context.Books.Where(b => b.DeweyIndex == deweyIndex).ToList();
+        return result.Any() ? Utilities.BuildResponse<Book>
             (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
-            ListBooks.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
+            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
     }
+
+    #endregion
+
+    #region Find By Author
+
+    // Traer libros por autor
+    public async Task<BaseMessage<Book>> GetBookByAuthorAsync(int authorId)
+    {
+        var result = await _context.Books
+            .Where(b => b.AuthorId == authorId)
+            .Include(a => a.Author)
+            .ToListAsync();
+
+        return result.Any() ? Utilities.BuildResponse<Book>
+            (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
+            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
+    }
+
+    // Traer libros por nombre del autor
+    public async Task<BaseMessage<Book>> GetBookByAuthorNameAsync(string authorName)
+    {
+        var result = await _context.Books
+            .Include(a => a.Author)
+            .Where(b => b.Author.Name.Contains(authorName, StringComparison.InvariantCultureIgnoreCase))
+            .ToListAsync();
+
+        return result.Any() ? Utilities.BuildResponse<Book>
+            (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
+            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
+    }
+
+    // Traer libros por apellido del autor
+    public async Task<BaseMessage<Book>> GetBookByAuthorLastNameAsync(string authorLastName)
+    {
+        var result = await _context.Books
+            .Include(a => a.Author)
+            .Where(b => b.Author.LastName.Contains(authorLastName, StringComparison.InvariantCultureIgnoreCase))
+            .ToListAsync();
+
+        return result.Any() ? Utilities.BuildResponse<Book>
+            (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
+            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
+    }
+
+    // Traer libros por país del autor
+    public async Task<BaseMessage<Book>> GetBookByAuthorCountryAsync(string authorCountry)
+    {
+        var result = await _context.Books
+            .Include(a => a.Author)
+            .Where(b => b.Author.Country.Contains(authorCountry, StringComparison.InvariantCultureIgnoreCase))
+            .ToListAsync();
+
+        return result.Any() ? Utilities.BuildResponse<Book>
+            (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
+            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
+    }
+
+    // Traer libros por nombre y apellido del autor
+    public async Task<BaseMessage<Book>> GetBookByAuthorFullNameAsync(string authorName, string authorLastName)
+    {
+        var result = await _context.Books
+            .Include(a => a.Author)
+            .Where(b =>
+                b.Author.Name.Contains(authorName, StringComparison.InvariantCultureIgnoreCase) &&
+                b.Author.LastName.Contains(authorLastName, StringComparison.InvariantCultureIgnoreCase))
+            .ToListAsync();
+
+        return result.Any() ? Utilities.BuildResponse<Book>
+            (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
+            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
+    }
+
+    // Traer libros por rango de fecha de nacimiento del autor
+    public async Task<BaseMessage<Book>> GetBookByAuthorBirthDateRange(DateOnly startDate, DateOnly endDate)
+    {
+        var result = await _context.Books
+            .Include(a => a.Author)
+            .Where(b =>
+                b.Author.BirthDate >= startDate &&
+                b.Author.BirthDate <= endDate)
+            .ToListAsync();
+
+        return result.Any() ? Utilities.BuildResponse<Book>
+            (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
+            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
+    }
+
+    #endregion
 }
