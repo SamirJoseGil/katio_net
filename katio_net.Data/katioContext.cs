@@ -3,9 +3,9 @@ using katio.Data.Models;
 
 namespace katio.Data;
 
-public class katioContext : DbContext
+public class KatioContext : DbContext
 {
-    public katioContext(DbContextOptions<katioContext> options) : base(options)
+    public KatioContext(DbContextOptions<KatioContext> options) : base(options)
     {
     }
 

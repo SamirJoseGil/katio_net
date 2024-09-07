@@ -11,10 +11,10 @@ namespace katio.Business.Services;
 public class NarratorService : INarratorService
 {
     // Lista de narradores
-    private readonly katioContext _context;
+    private readonly KatioContext _context;
 
     // Constructor
-    public NarratorService(katioContext context)
+    public NarratorService(KatioContext context)
     {
         _context = context;
     }
