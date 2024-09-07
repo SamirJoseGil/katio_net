@@ -94,6 +94,7 @@ public class BookService : IBookService
     {
         var result = await _unitOfWork.BookRepository.GetAllAsync(b => b.Name.Contains(name, StringComparison.InvariantCultureIgnoreCase));
         return result;
+        //return result.Any() ? Utilities.BuildResponse<Book>
         //    (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
         //    Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
     }
