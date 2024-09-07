@@ -7,7 +7,7 @@ using katio.Data;
 var builder = WebApplication.CreateBuilder(args);
 
 // Create DataBase
-builder.Services.AddDbContext<katioContext>(opt => opt.UseInMemoryDatabase("katio"));
+builder.Services.AddDbContext<KatioContext>(opt => opt.UseInMemoryDatabase("katio"));
 
 // Add services to the container.
 builder.Services.AddControllers();

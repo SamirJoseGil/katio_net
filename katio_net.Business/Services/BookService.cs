@@ -4,24 +4,26 @@ using katio.Data.Dto;
 using katio.Data;
 using System.Net;
 using Microsoft.EntityFrameworkCore;
+using Katio.Data;
 
 namespace katio.Business.Services;
 
 public class BookService : IBookService
 {
     // Lista de libros
-    private readonly katioContext _context;
+    private readonly UnitOfWork _unitOfWork;
+    
 
     // Constructor
-    public BookService(katioContext context)
+    public BookService(UnitOfWork unitOfWork)
     {
-        _context = context;
+        _unitOfWork = unitOfWork;
     }
 
     // Traer todos los libros
     public async Task<BaseMessage<Book>> Index()
     {
-        var result = await _context.Books.ToListAsync();
+        var result = await _unitOfWork.BookRepository.GetAllAsync();
         return result.Any() ? Utilities.BuildResponse<Book>(HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
             Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
     }
@@ -88,14 +90,12 @@ public class BookService : IBookService
     #region Find By Book
 
     // Traer libros por nombre
-    public async Task<BaseMessage<Book>> GetBooksByName(string name)
+    public async Task<IEnumerable<Book>> GetBooksByName(string name)
     {
-        var result = await _context.Books
-            .Where(b => b.Name.Contains(name, StringComparison.InvariantCultureIgnoreCase))
-            .ToListAsync();
-        return result.Any() ? Utilities.BuildResponse<Book>
-            (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
-            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
+        var result = await _unitOfWork.BookRepository.GetAllAsync(b => b.Name.Contains(name, StringComparison.InvariantCultureIgnoreCase));
+        return result;
+        //    (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
+        //    Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
     }
 
     // Traer libros por ISBN10

@@ -10,10 +10,10 @@ namespace katio.Business.Services;
 public class AuthorService : IAuthorService
 {
     // Lista de autores
-    private readonly katioContext _context;
+    private readonly KatioContext _context;
 
     // Constructor
-    public AuthorService(katioContext context)
+    public AuthorService(KatioContext context)
     {
         _context = context;
     }

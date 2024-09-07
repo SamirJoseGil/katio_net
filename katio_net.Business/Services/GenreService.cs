@@ -10,10 +10,10 @@ namespace katio.Business.Services;
 public class GenreService : IGenreService
 {
     // Lista de géneros
-    private readonly katioContext _context;
+    private readonly KatioContext _context;
 
     // Constructor
-    public GenreService(katioContext context)
+    public GenreService(KatioContext context)
     {
         _context = context;
     }
