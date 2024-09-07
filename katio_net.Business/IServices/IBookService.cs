@@ -5,8 +5,8 @@ namespace katio.Business.Interfaces;
 
 public interface IBookService
 {
-    Task<BaseMessage<Book>> Index();
-    Task<BaseMessage<Book>> GetBooksByName(string Name);
+    Task<IEnumerable<Book>> Index();
+    Task<IEnumerable<Book>> GetBooksByName(string Name);
     Task<BaseMessage<Book>> GetBooksByISBN10(string ISBN10);
     Task<BaseMessage<Book>> GetBooksByISBN13(string ISBN13);
     Task<BaseMessage<Book>> GetBooksByEdition(string Edition);

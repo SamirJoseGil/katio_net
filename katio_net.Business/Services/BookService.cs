@@ -12,20 +12,29 @@ public class BookService : IBookService
 {
     // Lista de libros
     private readonly UnitOfWork _unitOfWork;
+
+    private readonly KatioContext _context;
     
 
     // Constructor
-    public BookService(UnitOfWork unitOfWork)
-    {
-        _unitOfWork = unitOfWork;
+    //public BookService(UnitOfWork unitOfWork)
+    //{
+    //    _unitOfWork = unitOfWork;
+    //}
+
+    // Constructor 2
+    public BookService(KatioContext context)
+    {         
+        _context = context;
     }
 
     // Traer todos los libros
-    public async Task<BaseMessage<Book>> Index()
+    public async Task<IEnumerable<Book>> Index()
     {
         var result = await _unitOfWork.BookRepository.GetAllAsync();
-        return result.Any() ? Utilities.BuildResponse<Book>(HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
-            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
+        return result;
+        //return result.Any() ? Utilities.BuildResponse<Book>(HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
+        //    Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
     }
 
     #region Create Update Delete
