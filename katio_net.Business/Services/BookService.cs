@@ -29,10 +29,11 @@ public class BookService : IBookService
     }
 
     // Traer todos los libros
-    public async Task<IEnumerable<Book>> Index()
+    public async Task<BaseMessage<Book>> Index()
     {
         var result = await _unitOfWork.BookRepository.GetAllAsync();
-        return result;
+        return result.Any() ? Utilities.BuildResponse<Book>(HttpStatusCode.OK, BaseMessageStatus.OK_200, result.ToList()) :
+            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
         //return result.Any() ? Utilities.BuildResponse<Book>(HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
         //    Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
     }
@@ -97,6 +98,13 @@ public class BookService : IBookService
     #endregion
 
     #region Find By Book
+    // Traer un libro por su Id
+    public async Task<BaseMessage<Book>> GetBookById(int id)
+    {
+        var result = await _unitOfWork.BookRepository.FindAsync(id);
+        return result != null ? Utilities.BuildResponse(HttpStatusCode.OK, BaseMessageStatus.OK_200, new List<Book>(){result}):
+            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());//Como hago el response si es IEnumerable y no basemessage
+    }
 
     // Traer libros por nombre
     public async Task<IEnumerable<Book>> GetBooksByName(string name)

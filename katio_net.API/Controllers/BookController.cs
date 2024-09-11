@@ -22,7 +22,7 @@ namespace katio.API.Controllers
         public async Task<IActionResult> Index()
         {
             var response = await _bookService.Index();
-            return response.TotalElements > 0 ? Ok(response) : StatusCode(StatusCodes.Status404NotFound, response);
+            return response.Any() ? Ok(response) : StatusCode(StatusCodes.Status404NotFound, response);
         }
 
         #region Create Update Delete
@@ -58,7 +58,14 @@ namespace katio.API.Controllers
         #endregion
 
         #region Find By Book
-
+        //Trae un libro por su Id
+        [HttpGet]
+        [Route("GetBookById")]
+        public async Task<IActionResult> GetBookById(int id)
+        {
+            var response = await _bookService.GetBookById(id);
+            return Ok(response);//arreglar
+        }
         //Trae un libro por su nombre
         [HttpGet]
         [Route("GetBookByName")]
