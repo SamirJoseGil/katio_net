@@ -53,7 +53,7 @@ Esto ejecutará la aplicación en la terminal. Se abrirá en el navegador en la 
 
 
 
-## Entrega Parcial
+## Historia de Usuario / Requisitos:
 
 ### Usuarios
 
