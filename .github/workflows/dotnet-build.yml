@@ -25,7 +25,7 @@ jobs:
       with:
         dotnet-version: '6.0.x'  # Cambia la versión según tu proyecto
 
-    # Paso 3: Restaurar dependencias
+    # Paso 3: Restaurar dependencias en .csproj
     - name: Restore dependencies
       run: dotnet restore
 
@@ -33,6 +33,6 @@ jobs:
     - name: Build the project
       run: dotnet build --configuration Release --no-restore
 
-    # (Opcional) Paso 5: Ejecutar pruebas unitarias
+    # Paso 5: Ejecutar pruebas unitarias
     - name: Run tests
       run: dotnet test --no-build --verbosity normal
