@@ -1,12 +1,8 @@
 # Biblioteca Digital Secretos Para Contar
 
-## Project Katio
+## Katio: Proyecto .NET con C#
 
-Este project de Spring Boot con JPA y MySQL/MongoDB está diseñado para ser una biblioteca o repositorio de libros digital para la Fundación Secretos Para contar.
-
-## Stack Tech
-
-## Como lo instalo
+Este es un proyecto sencillo desarrollado en .NET con C#, diseñado para ser una biblioteca o repositorio de libros digital para la Fundación Secretos Para contar.
 
 ## integrantes
 
@@ -14,6 +10,48 @@ Este project de Spring Boot con JPA y MySQL/MongoDB está diseñado para ser una
 - Felipe Ochoa
 - Samir Gil
 - Maria Estefania
+
+## Requisitos previos:
+Asegúrate de tener lo siguiente instalado en tu sistema:
+
+- .NET SDK (Versión 6.0 o superior)
+- Un IDE o editor de texto compatible con C#, como Visual Studio o Visual Studio Code con la extensión de C# instalada.
+- Git para clonar el repositorio.
+
+## Clonar el repositorio:
+Abre una terminal y ejecuta el siguiente comando para clonar el repositorio en tu máquina local:
+
+´´´
+git clone https://github.com/SamirJoseGil/katio_back.git
+´´´
+
+Luego, navega al directorio del proyecto:
+
+´´´
+cd katio_back
+´´´
+
+## Compilar el proyecto:
+Para compilar el proyecto, ejecuta el siguiente comando en la terminal:
+´´´
+dotnet build
+´´´
+
+## Ejecutar el proyecto:
+Una vez compilado, puedes ejecutar el proyecto con el siguiente comando:
+´´´
+dotnet watch --project Katio_net.API
+´´´
+
+Esto ejecutará la aplicación en la terminal. Se abrirá en el navegador en la URL especificada (por defecto es http://localhost:5000).
+
+## Estructura del proyecto:
+
+- /src: Contiene el código fuente del proyecto.
+- /tests: Contiene las pruebas unitarias del proyecto (si aplicable).
+- /README.md: Este archivo, que explica cómo configurar y ejecutar el proyecto.
+
+
 
 ## Entrega Parcial
 
