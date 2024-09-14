@@ -45,13 +45,6 @@ dotnet watch --project Katio_net.API
 
 Esto ejecutará la aplicación en la terminal. Se abrirá en el navegador en la URL especificada (por defecto es http://localhost:5000).
 
-## Estructura del proyecto:
-
-- /src: Contiene el código fuente del proyecto.
-- /tests: Contiene las pruebas unitarias del proyecto (si aplicable).
-- /README.md: Este archivo, que explica cómo configurar y ejecutar el proyecto.
-
-
 
 ## Historia de Usuario / Requisitos:
 

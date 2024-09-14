@@ -1,0 +1,38 @@
+name: .NET Build
+
+# Define cuándo se ejecutará el workflow
+on:
+  push:
+    branches:
+      - main  # Ejecutar cuando se hace push a la rama main
+  pull_request:
+    branches:
+      - main  # Ejecutar en cada pull request a la rama main
+
+# Define el trabajo o los pasos a seguir en el workflow
+jobs:
+  build:
+    runs-on: ubuntu-latest  # Usa una imagen de Ubuntu para ejecutar el trabajo
+
+    steps:
+    # Paso 1: Clonar el repositorio
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    # Paso 2: Instalar .NET SDK
+    - name: Set up .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '6.0.x'  # Cambia la versión según tu proyecto
+
+    # Paso 3: Restaurar dependencias
+    - name: Restore dependencies
+      run: dotnet restore
+
+    # Paso 4: Compilar el proyecto
+    - name: Build the project
+      run: dotnet build --configuration Release --no-restore
+
+    # (Opcional) Paso 5: Ejecutar pruebas unitarias
+    - name: Run tests
+      run: dotnet test --no-build --verbosity normal
