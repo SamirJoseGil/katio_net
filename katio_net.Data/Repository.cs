@@ -1,9 +1,8 @@
 ﻿using System.Linq.Expressions;
 using katio.Data.Models;
-using katio.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace Katio.Data;
+namespace katio.Data;
 
 public class Repository<TId, TEntity> : IRepository<TId, TEntity>
 where TId : struct
@@ -35,6 +34,7 @@ where TEntity : BaseEntity<TId>
             _dbSet.Attach(entity);
         }
         _dbSet.Remove(entity);
+        await _context.SaveChangesAsync();
     }
 
     public virtual async Task Delete(TId id)
@@ -47,9 +47,10 @@ where TEntity : BaseEntity<TId>
     {
         _dbSet.Attach(entity);
         _context.Entry(entity).State = EntityState.Modified;
+        await _context.SaveChangesAsync();
     }
 
-    public virtual async Task<IEnumerable<TEntity>> GetAllAsync(Expression<Func<TEntity, bool>> filter = null, Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderby = null, string includeProperties = "")
+    public virtual async Task<List<TEntity>> GetAllAsync(Expression<Func<TEntity, bool>> filter = null, Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderby = null, string includeProperties = "")
     {
         IQueryable<TEntity> query = _dbSet;
         if (filter is not null)
