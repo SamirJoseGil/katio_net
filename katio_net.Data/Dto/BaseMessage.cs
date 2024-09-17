@@ -8,7 +8,7 @@ public class BaseMessage<T>
     public string Message { get; set; }
     public HttpStatusCode StatusCode { get; set; }
     public int TotalElements { get; set; }
-    public List<T> ResponseElements { get; set; }
+    public IEnumerable<T> ResponseElements { get; set; }
 }
 
 public static class BaseMessageStatus
