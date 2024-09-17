@@ -17,13 +17,13 @@ namespace katio.API.Controllers
         }
 
         // Trae todos los libros
-        [HttpGet]
-        [Route("GetBooks")]
-        public async Task<IActionResult> Index()
-        {
-            var response = await _bookService.Index();
-            return response.Any() ? Ok(response) : StatusCode(StatusCodes.Status404NotFound, response);
-        }
+        // [HttpGet]
+        // [Route("GetBooks")]
+        // public async Task<IActionResult> Index()
+        // {
+        //     var response = await _bookService.Index();
+        //     //return response.Any() ? Ok(response) : StatusCode(StatusCodes.Status404NotFound, response);
+        // }
 
         #region Create Update Delete
 

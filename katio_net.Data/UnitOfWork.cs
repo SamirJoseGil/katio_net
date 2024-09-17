@@ -11,6 +11,7 @@ public class UnitOfWork : IUnitOfWork, IDisposable
     private bool _disposed = false;
     private IRepository<int, Book> _bookRepository;
     private IRepository<int, Author> _authorRepository;
+    private IRepository<int, AudioBook> _audioBookRepository;
 
     public UnitOfWork(KatioContext context)
     {
@@ -34,6 +35,15 @@ public class UnitOfWork : IUnitOfWork, IDisposable
         {
             _authorRepository ??= new Repository<int, Author>(_context);
             return _authorRepository;
+        }
+    }
+
+    public IRepository<int, AudioBook> AudioBookRepository
+    {
+        get
+        {
+            _audioBookRepository ??= new Repository<int, AudioBook>(_context);
+            return _audioBookRepository;
         }
     }
     #endregion

@@ -4,6 +4,8 @@ using katio.Data.Dto;
 using katio.Data;
 using System.Net;
 using Microsoft.EntityFrameworkCore;
+using Katio.Data;
+using System.Security.Cryptography.X509Certificates;
 
 namespace katio.Business.Services;
 
@@ -11,6 +13,7 @@ public class AuthorService : IAuthorService
 {
     // Lista de autores
     private readonly KatioContext _context;
+    private readonly UnitOfWork _unitOfWork;
 
     // Constructor
     public AuthorService(KatioContext context)
@@ -26,6 +29,20 @@ public class AuthorService : IAuthorService
             (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
             Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Author>());
     }
+    #region Get author by id
+    public async Task<BaseMessage<Author>> GetAuthorById(int id)
+    {
+        var author = await _unitOfWork.AuthorRepository.FindAsync(id);
+        if (author != null)
+        {
+            return Utilities.BuildResponse<Author>(HttpStatusCode.OK, BaseMessageStatus.OK_200, new List<Author> { author });
+        }
+        else
+        {
+            return Utilities.BuildResponse<Author>(HttpStatusCode.NotFound, BaseMessageStatus.AUTHOR_NOT_FOUND, new List<Author>());
+        }
+    }
+    #endregion
 
     #region Create Update Delete
 
