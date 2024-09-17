@@ -4,7 +4,6 @@ using katio.Data.Dto;
 using katio.Data;
 using System.Net;
 using Microsoft.EntityFrameworkCore;
-using Katio.Data;
 
 namespace katio.Business.Services;
 
@@ -95,7 +94,9 @@ public class AudioBookService : IAudioBookService
     public async Task<BaseMessage<AudioBook>> GetAudioBookById(int id)
     {
         var result = await _unitOfWork.AudioBookRepository.FindAsync(id);
-        return
+        return result != null ? Utilities.BuildResponse<AudioBook>
+            (HttpStatusCode.OK, BaseMessageStatus.OK_200, new List<AudioBook> { result }) :
+            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.AUDIOBOOK_NOT_FOUND, new List<AudioBook>());
     } 
     // Buscar por Nombre
     public async Task<BaseMessage<AudioBook>> GetByAudioBookName(string name)

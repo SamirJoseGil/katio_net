@@ -100,14 +100,6 @@ public class BookService : IBookService
     #endregion
 
     #region Find By Book
-    // Traer un libro por su Id
-    public async Task<BaseMessage<Book>> GetBookById(int id)
-    {
-        var result = await _unitOfWork.BookRepository.FindAsync(id);
-        return result != null ? Utilities.BuildResponse(HttpStatusCode.OK, BaseMessageStatus.OK_200, new List<Book>(){result}):
-            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());//Como hago el response si es IEnumerable y no basemessage
-    }
-
     // Traer libros por id
     public async Task<BaseMessage<Book>> GetBookById(int id)
     {

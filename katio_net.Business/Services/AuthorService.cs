@@ -4,8 +4,6 @@ using katio.Data.Dto;
 using katio.Data;
 using System.Net;
 using Microsoft.EntityFrameworkCore;
-using Katio.Data;
-using System.Security.Cryptography.X509Certificates;
 
 namespace katio.Business.Services;
 

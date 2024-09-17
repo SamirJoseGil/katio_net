@@ -1,8 +1,5 @@
-﻿
-
-using katio.Data.Dto;
+﻿using katio.Data.Dto;
 using katio.Data.Models;
-using Katio.Data;
 
 namespace katio.Business.Interfaces;
 
