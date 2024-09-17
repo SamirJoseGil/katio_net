@@ -2,8 +2,6 @@ using katio.Business.Services;
 using katio.Business.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using katio.Data;
-using Katio.Data;
-
 
 var builder = WebApplication.CreateBuilder(args);
 
