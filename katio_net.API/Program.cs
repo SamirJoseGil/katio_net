@@ -20,6 +20,7 @@ builder.Services.AddScoped<IAuthorService, AuthorService>();
 builder.Services.AddScoped<INarratorService, NarratorService>();
 builder.Services.AddScoped<IGenreService, GenreService>();
 builder.Services.AddScoped<IAudioBookService, AudioBookService>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 var app = builder.Build();
 
@@ -37,11 +38,6 @@ app.UseHttpsRedirection();
 app.MapControllers();
 
 app.Run();
-
-
-
-
-
 
 // Datos de Base de Datos en Memoria
 #region PopulateDB

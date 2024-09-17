@@ -1,8 +1,7 @@
 ﻿using katio.Data.Models;
-using katio.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace Katio.Data;
+namespace katio.Data;
 
 public class UnitOfWork : IUnitOfWork, IDisposable
 {
@@ -12,6 +11,8 @@ public class UnitOfWork : IUnitOfWork, IDisposable
     private IRepository<int, Book> _bookRepository;
     private IRepository<int, Author> _authorRepository;
     private IRepository<int, AudioBook> _audioBookRepository;
+    private IRepository<int, Genre> _genreRepository;
+    private IRepository<int, Narrator> _narratorRepository;
 
     public UnitOfWork(KatioContext context)
     {
@@ -28,7 +29,6 @@ public class UnitOfWork : IUnitOfWork, IDisposable
             return _bookRepository;
         }
     }
-
     public IRepository<int, Author> AuthorRepository
     {
         get
@@ -37,7 +37,6 @@ public class UnitOfWork : IUnitOfWork, IDisposable
             return _authorRepository;
         }
     }
-
     public IRepository<int, AudioBook> AudioBookRepository
     {
         get
@@ -45,7 +44,25 @@ public class UnitOfWork : IUnitOfWork, IDisposable
             _audioBookRepository ??= new Repository<int, AudioBook>(_context);
             return _audioBookRepository;
         }
+
     }
+    public IRepository<int, Genre> GenreRepository
+    {
+        get
+        {
+            _genreRepository ??= new Repository<int, Genre>(_context);
+            return _genreRepository;
+        }
+    }
+    public IRepository<int, Narrator> NarratorRepository
+    {
+        get
+        {
+            _narratorRepository ??= new Repository<int, Narrator>(_context);
+            return _narratorRepository;
+        }
+    }
+
     #endregion
 
     public async Task SaveAsync()
