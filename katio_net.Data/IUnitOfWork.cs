@@ -1,4 +1,4 @@
-﻿using katio.Data.Models;
+using katio.Data.Models;
 using katio.Data;
 
 namespace katio.Data;

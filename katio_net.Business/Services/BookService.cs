@@ -100,7 +100,6 @@ public class BookService : IBookService
     #endregion
 
     #region Find By Book
-
     // Traer libros por id
     public async Task<BaseMessage<Book>> GetBookById(int id)
     {

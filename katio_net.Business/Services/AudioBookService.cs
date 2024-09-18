@@ -11,11 +11,18 @@ public class AudioBookService : IAudioBookService
 {
     // Lista de libros
     private readonly KatioContext _context;
+    private readonly IUnitOfWork _unitOfWork;
 
     // Constructor
     public AudioBookService(KatioContext context)
     {
         _context = context;
+    }
+    // Constructor
+    // Constructor
+    public AudioBookService(IUnitOfWork unitOfWork)
+    {
+        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
     }
 
     // Traer todos los Audiolibros
@@ -89,6 +96,14 @@ public class AudioBookService : IAudioBookService
     #endregion
 
     #region Find By AudioBook
+    // Buscar por id
+    public async Task<BaseMessage<AudioBook>> GetAudioBookById(int id)
+    {
+        var result = await _unitOfWork.AudioBookRepository.FindAsync(id);
+        return result != null ? Utilities.BuildResponse<AudioBook>
+            (HttpStatusCode.OK, BaseMessageStatus.OK_200, new List<AudioBook> { result }) :
+            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.AUDIOBOOK_NOT_FOUND, new List<AudioBook>());
+    } 
     // Buscar por Nombre
     public async Task<BaseMessage<AudioBook>> GetByAudioBookName(string name)
     {

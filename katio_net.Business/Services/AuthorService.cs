@@ -11,11 +11,16 @@ public class AuthorService : IAuthorService
 {
     // Lista de autores
     private readonly KatioContext _context;
+    private readonly IUnitOfWork _unitOfWork;
 
     // Constructor
     public AuthorService(KatioContext context)
     {
         _context = context;
+    }
+    public AuthorService(IUnitOfWork unitOfWork)
+    {
+        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
     }
 
     // Traer todos los Autores
@@ -26,6 +31,15 @@ public class AuthorService : IAuthorService
             (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
             Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Author>());
     }
+    #region Get author by id
+    public async Task<BaseMessage<Author>> GetAuthorById(int id)
+    {
+        var author = await _unitOfWork.AuthorRepository.FindAsync(id);
+        return author != null ? Utilities.BuildResponse<Author>
+            (HttpStatusCode.OK, BaseMessageStatus.OK_200, new List<Author> { author }) :
+            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.AUTHOR_NOT_FOUND, new List<Author>());
+    }
+    #endregion
 
     #region Create Update Delete
 
