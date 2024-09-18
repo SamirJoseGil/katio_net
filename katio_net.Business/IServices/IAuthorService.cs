@@ -6,7 +6,7 @@ namespace katio.Business.Interfaces;
 public interface IAuthorService
 {
     Task<BaseMessage<Author>> Index();
-    Task<BaseMessage<Author>> GetAuthorById(int id);
+    Task<BaseMessage<Author>> GetAuthorById(int Id);
     Task<BaseMessage<Author>> GetAuthorsByName(string Name);
     Task<BaseMessage<Author>> GetAuthorsByLastName(string LastName);
     Task<BaseMessage<Author>> GetAuthorsByBirthDate(DateOnly StartDate, DateOnly EndDate);

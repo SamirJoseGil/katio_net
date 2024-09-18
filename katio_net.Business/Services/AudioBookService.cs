@@ -11,12 +11,18 @@ public class AudioBookService : IAudioBookService
 {
     // Lista de libros
     private readonly KatioContext _context;
-    private readonly UnitOfWork _unitOfWork;
+    private readonly IUnitOfWork _unitOfWork;
 
     // Constructor
     public AudioBookService(KatioContext context)
     {
         _context = context;
+    }
+    // Constructor
+    // Constructor
+    public AudioBookService(IUnitOfWork unitOfWork)
+    {
+        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
     }
 
     // Traer todos los Audiolibros

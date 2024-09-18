@@ -12,11 +12,16 @@ public class NarratorService : INarratorService
 {
     // Lista de narradores
     private readonly KatioContext _context;
+    private readonly IUnitOfWork _unitOfWork;
 
     // Constructor
     public NarratorService(KatioContext context)
     {
         _context = context;
+    }
+    public NarratorService(IUnitOfWork unitOfWork)
+    {
+        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
     }
 
     // Traer todos los Narradores
@@ -82,6 +87,15 @@ public class NarratorService : INarratorService
     #endregion
 
     #region  Find By Narrator
+    //Buscar narrador por Id
+    public async Task<BaseMessage<Narrator>> GetNarratorById(int id)
+    {
+        var result = await _unitOfWork.NarratorRepository.FindAsync(id);
+        return result != null ? Utilities.BuildResponse<Narrator>
+            (HttpStatusCode.OK, BaseMessageStatus.OK_200, new List<Narrator> { result }) :
+            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Narrator>());
+    
+    }
 
     // Buscar Narradores por Nombre
     public async Task<BaseMessage<Narrator>> GetNarratorsByName(string name)

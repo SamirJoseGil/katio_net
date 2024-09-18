@@ -62,10 +62,10 @@ namespace katio.API.Controllers
         // Trae un Autor por su Id
         [HttpGet]
         [Route("GetAuthorById")]
-        public async Task<IActionResult> GetAuthorById(int id)
+        public async Task<IActionResult> GetAuthorById(int Id)
         {
-            var response = await _authorService.GetAuthorById(id);
-            return response.StatusCode == System.Net.HttpStatusCode.OK ? Ok(response) : StatusCode((int)response.StatusCode, response);
+            var author = await _authorService.GetAuthorById(Id);
+            return author != null ? Ok(author) : StatusCode(StatusCodes.Status404NotFound, author);
         }
 
         // Trae un autor por su nombre

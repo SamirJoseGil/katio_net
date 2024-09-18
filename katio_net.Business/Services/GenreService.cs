@@ -11,11 +11,16 @@ public class GenreService : IGenreService
 {
     // Lista de géneros
     private readonly KatioContext _context;
+    private readonly IUnitOfWork _unitOfWork;
 
     // Constructor
     public GenreService(KatioContext context)
     {
         _context = context;
+    }
+    public GenreService(IUnitOfWork unitOfWork)
+    {
+        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
     }
 
     // Traer todos los géneros
@@ -78,6 +83,14 @@ public class GenreService : IGenreService
     #endregion
 
     #region Find By Genre
+    // Buscar por el id
+    public async Task<BaseMessage<Genre>> GetByGenreId(int id)
+    {
+        var result = await _unitOfWork.GenreRepository.FindAsync(id);
+        return result != null ? Utilities.BuildResponse<Genre>
+            (HttpStatusCode.OK, BaseMessageStatus.OK_200, new List<Genre> { result }) :
+            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.GENRE_NOT_FOUND, new List<Genre>());
+    }
 
     // Buscar género por Nombre
     public async Task<BaseMessage<Genre>> GetGenresByName(string name)
