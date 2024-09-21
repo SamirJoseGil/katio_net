@@ -1,13 +1,14 @@
 using katio.Business.Services;
 using katio.Business.Interfaces;
-using Microsoft.EntityFrameworkCore;
 using katio.Data;
+using Microsoft.EntityFrameworkCore;
 
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Create DataBase
-builder.Services.AddDbContext<KatioContext>(opt => opt.UseInMemoryDatabase("katio"));
+builder.Services.AddDbContext<KatioContext>(
+    opt => opt.UseNpgsql(builder.Configuration.GetConnectionString("KatioDBPSQL")));
 
 // Add services to the container.
 builder.Services.AddControllers();
@@ -30,7 +31,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-PopulateDB(app);
+//PopulateDB(app);
 
 app.UseHttpsRedirection();
 
