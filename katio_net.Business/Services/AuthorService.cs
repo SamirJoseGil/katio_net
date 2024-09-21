@@ -18,10 +18,6 @@ public class AuthorService : IAuthorService
     {
         _context = context;
     }
-    public AuthorService(IUnitOfWork unitOfWork)
-    {
-        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-    }
 
     // Traer todos los Autores
     public async Task<BaseMessage<Author>> Index()
