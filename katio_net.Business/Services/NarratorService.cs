@@ -19,10 +19,7 @@ public class NarratorService : INarratorService
     {
         _context = context;
     }
-    public NarratorService(IUnitOfWork unitOfWork)
-    {
-        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-    }
+    
 
     // Traer todos los Narradores
     public async Task<BaseMessage<Narrator>> Index()

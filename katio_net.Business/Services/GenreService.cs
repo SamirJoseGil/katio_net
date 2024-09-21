@@ -18,10 +18,6 @@ public class GenreService : IGenreService
     {
         _context = context;
     }
-    public GenreService(IUnitOfWork unitOfWork)
-    {
-        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-    }
 
     // Traer todos los géneros
     public async Task<BaseMessage<Genre>> Index()

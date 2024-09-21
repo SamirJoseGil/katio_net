@@ -14,21 +14,18 @@ public class AudioBookService : IAudioBookService
     private readonly IUnitOfWork _unitOfWork;
 
     // Constructor
-    public AudioBookService(KatioContext context)
+    public AudioBookService(KatioContext context, IUnitOfWork unitOfWork)
     {
         _context = context;
+        _unitOfWork = unitOfWork;
     }
     // Constructor
-    // Constructor
-    public AudioBookService(IUnitOfWork unitOfWork)
-    {
-        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-    }
 
     // Traer todos los Audiolibros
     public async Task<BaseMessage<AudioBook>> Index()
     {
-        var result = await _context.AudioBooks.ToListAsync();
+        // var result = await _context.AudioBooks.ToListAsync();
+        var result = await _unitOfWork.AudioBookRepository.GetAllAsync();
         return result.Any() ? Utilities.BuildResponse<AudioBook>(HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
             Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.AUDIOBOOK_NOT_FOUND, new List<AudioBook>());
     }
