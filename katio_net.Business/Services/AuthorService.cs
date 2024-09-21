@@ -14,9 +14,10 @@ public class AuthorService : IAuthorService
     private readonly IUnitOfWork _unitOfWork;
 
     // Constructor
-    public AuthorService(KatioContext context)
+    public AuthorService(KatioContext context, IUnitOfWork unitOfWork)
     {
         _context = context;
+        _unitOfWork = unitOfWork;
     }
 
     // Traer todos los Autores
@@ -27,15 +28,7 @@ public class AuthorService : IAuthorService
             (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
             Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Author>());
     }
-    #region Get author by id
-    public async Task<BaseMessage<Author>> GetAuthorById(int id)
-    {
-        var author = await _unitOfWork.AuthorRepository.FindAsync(id);
-        return author != null ? Utilities.BuildResponse<Author>
-            (HttpStatusCode.OK, BaseMessageStatus.OK_200, new List<Author> { author }) :
-            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.AUTHOR_NOT_FOUND, new List<Author>());
-    }
-    #endregion
+
 
     #region Create Update Delete
 
@@ -94,6 +87,14 @@ public class AuthorService : IAuthorService
     #endregion
 
     #region Find By Author
+    //Traer autores por Id
+    public async Task<BaseMessage<Author>> GetAuthorById(int id)
+    {
+        var author = await _unitOfWork.AuthorRepository.FindAsync(id);
+        return author != null ? Utilities.BuildResponse<Author>
+            (HttpStatusCode.OK, BaseMessageStatus.OK_200, new List<Author> { author }) :
+            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.AUTHOR_NOT_FOUND, new List<Author>());
+    }
 
     // Traer los autores por nombre
     public async Task<BaseMessage<Author>> GetAuthorsByName(string name)
