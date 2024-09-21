@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using katio.Data.Models;
 
+
 namespace katio.Data;
 
 public class KatioContext : DbContext
@@ -17,14 +18,18 @@ public class KatioContext : DbContext
 
 
 
-    //protected override void OnModelCreating(ModelBuilder modelBuilder)
-    //{
-    //    base.OnModelCreating(modelBuilder);
+    protected override void OnModelCreating(ModelBuilder builder)
+    {
+        if(builder == null)
+        {
+            return;
+        }
 
-
-    //    modelBuilder.Entity<Book>()
-    //        .HasOne(b => b.Author)
-    //        .WithMany(a => a.Books)
-    //        .HasForeignKey(b => b.AuthorId);
-    //}
+        builder.Entity<Book>().ToTable("Book").HasKey(k => k.Id);
+        builder.Entity<Author>().ToTable("Author").HasKey(k => k.Id);
+        builder.Entity<Narrator>().ToTable("Narrator").HasKey(k => k.Id);
+        builder.Entity<Genre>().ToTable("Genre").HasKey(k => k.Id);
+        builder.Entity<AudioBook>().ToTable("AudioBook").HasKey(k => k.Id);
+        base.OnModelCreating(builder);
+    }
 }
