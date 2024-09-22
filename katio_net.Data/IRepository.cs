@@ -17,4 +17,5 @@ where TEntity : BaseEntity<TId>
         Func<IQueryable<TEntity>,
         IOrderedQueryable<TEntity>> orderby = null,
         string includeProperties = "");
+    // Task FindAsync(Func<object, bool> value);
 }
