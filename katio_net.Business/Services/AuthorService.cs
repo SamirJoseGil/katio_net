@@ -3,20 +3,17 @@ using katio.Data.Models;
 using katio.Data.Dto;
 using katio.Data;
 using System.Net;
-using Microsoft.EntityFrameworkCore;
 
 namespace katio.Business.Services;
 
 public class AuthorService : IAuthorService
 {
     // Lista de autores
-    private readonly KatioContext _context;
     private readonly IUnitOfWork _unitOfWork;
 
     // Constructor
-    public AuthorService(KatioContext context, IUnitOfWork unitOfWork)
+    public AuthorService(IUnitOfWork unitOfWork)
     {
-        _context = context;
         _unitOfWork = unitOfWork;
     }
 
@@ -26,7 +23,7 @@ public class AuthorService : IAuthorService
         var result = await _unitOfWork.AuthorRepository.GetAllAsync();
         return result.Any() ? Utilities.BuildResponse<Author>
             (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
-            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Author>());
+            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.AUTHOR_NOT_FOUND, new List<Author>());
     }
 
 
@@ -45,7 +42,6 @@ public class AuthorService : IAuthorService
         try
         {
             await _unitOfWork.AuthorRepository.AddAsync(newAuthor);
-            await _unitOfWork.SaveAsync();
         }
         catch (Exception ex)
         {
@@ -55,32 +51,46 @@ public class AuthorService : IAuthorService
     }
 
     // Actualizar Autores
-    public async Task<Author> UpdateAuthor(Author author)
+    public async Task<BaseMessage<Author>> UpdateAuthor(Author author)
     {
         var result = await _unitOfWork.AuthorRepository.FindAsync(author.Id);
-        if (result != null)
+        if (result == null)
         {
-            result.Name = author.Name;
-            result.LastName = author.LastName;
-            result.Country = author.Country;
-            result.BirthDate = author.BirthDate;
-            await _unitOfWork.SaveAsync();
+            return Utilities.BuildResponse<Author>(HttpStatusCode.NotFound, BaseMessageStatus.AUTHOR_NOT_FOUND, new List<Author>());
         }
-        return result;
+        result.Name = author.Name;
+        result.LastName = author.LastName;
+        result.Country = author.Country;
+        result.BirthDate = author.BirthDate;
+
+        try
+        {
+            await _unitOfWork.AuthorRepository.Update(result);
+        }
+        catch (Exception ex)
+        {
+            return Utilities.BuildResponse<Author>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
+        }
+        return Utilities.BuildResponse(HttpStatusCode.OK, BaseMessageStatus.OK_200, new List<Author> { result });
     }
 
     // Eliminar Autores
     public async Task<BaseMessage<Author>> DeleteAuthor(int Id)
     {
-        var result = await _unitOfWork.AuthorRepository.GetAllAsync(b => b.Id == Id);
-    
-        if (result.Any())
+        var result = await _unitOfWork.AuthorRepository.FindAsync(Id);
+        if (result == null)
         {
-            await _unitOfWork.AuthorRepository.Delete(Id); 
-            await _context.SaveChangesAsync();
-            return Utilities.BuildResponse(HttpStatusCode.OK, BaseMessageStatus.OK_200, result);
+            return Utilities.BuildResponse<Author>(HttpStatusCode.NotFound, BaseMessageStatus.AUTHOR_NOT_FOUND, new List<Author>());
         }
-        return Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Author>());
+        try 
+        {
+            await _unitOfWork.AuthorRepository.Delete(result);
+        }
+        catch (Exception ex)
+        {
+            return Utilities.BuildResponse<Author>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
+        }
+        return Utilities.BuildResponse(HttpStatusCode.OK, BaseMessageStatus.OK_200, new List<Author> { result });
     }
 
 
@@ -97,28 +107,28 @@ public class AuthorService : IAuthorService
     }
 
     // Traer los autores por nombre
-    public async Task<BaseMessage<Author>> GetAuthorsByName(string name)
+    public async Task<BaseMessage<Author>> GetAuthorsByName(string Name)
     {
-        var result = await _unitOfWork.AuthorRepository.GetAllAsync(b => b.Name.ToLower().Contains(name.ToLower()));
+        var result = await _unitOfWork.AuthorRepository.GetAllAsync(b => b.Name.Contains(Name, StringComparison.InvariantCultureIgnoreCase));
         return result.Any() ? Utilities.BuildResponse<Author>
             (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
-            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Author>());
+            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.AUTHOR_NOT_FOUND, new List<Author>());
     }
     // Traer los autores por apellido
     public async Task<BaseMessage<Author>> GetAuthorsByLastName(string LastName)
     {
-        var result = await _unitOfWork.AuthorRepository.GetAllAsync(b => b.LastName.ToLower().Contains(LastName.ToLower()));
+        var result = await _unitOfWork.AuthorRepository.GetAllAsync(b => b.LastName.Contains(LastName, StringComparison.InvariantCultureIgnoreCase));
         return result.Any() ? Utilities.BuildResponse<Author>
             (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
-            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Author>());
+            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.AUTHOR_NOT_FOUND, new List<Author>());
     }
     // Traer los autores por pais - region
     public async Task<BaseMessage<Author>> GetAuthorsByCountry(string Country)
     {
-        var result = await _unitOfWork.AuthorRepository.GetAllAsync(b => b.Country.ToLower().Contains(Country.ToLower()));
+        var result = await _unitOfWork.AuthorRepository.GetAllAsync(b => b.Country.Contains(Country, StringComparison.InvariantCultureIgnoreCase));
         return result.Any() ? Utilities.BuildResponse<Author>
             (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
-            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Author>());
+            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.AUTHOR_NOT_FOUND, new List<Author>());
     }
     // Traer los autores por rango de fecha de nacimiento
     public async Task<BaseMessage<Author>> GetAuthorsByBirthDate(DateOnly StartDate, DateOnly EndDate)
@@ -126,7 +136,7 @@ public class AuthorService : IAuthorService
         var result = await _unitOfWork.AuthorRepository.GetAllAsync(b => b.BirthDate >= StartDate && b.BirthDate <= EndDate);
         return result.Any() ? Utilities.BuildResponse<Author>
             (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
-            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Author>());
+            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.AUTHOR_NOT_FOUND, new List<Author>());
     }
 
     #endregion
