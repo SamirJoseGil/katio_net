@@ -34,6 +34,13 @@ public class AudioBookService : IAudioBookService
     // Crear un Audiolibro
     public async Task<BaseMessage<AudioBook>> CreateAudioBook(AudioBook audioBook)
     {
+        var existingAudiobook = await  _unitOfWork.AudioBookRepository.GetAllAsync(
+        a => a.ISBN10 == audioBook.ISBN10 || a.ISBN13 == audioBook.ISBN13);
+
+        if (existingAudiobook.Any())
+        {
+            return Utilities.BuildResponse<AudioBook>(HttpStatusCode.Conflict, "El audiolibro ya existe en el sistema con el mismo ISBN10 o ISBN13.", existingAudiobook);
+        }
         var newAudioBook = new AudioBook()
         {
             Name = audioBook.Name,
