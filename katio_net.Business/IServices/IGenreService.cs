@@ -11,5 +11,5 @@ public interface IGenreService
     Task<BaseMessage<Genre>> GetGenresByDescription(string Description);
     Task<BaseMessage<Genre>> DeleteGenre(int Id);
     Task<BaseMessage<Genre>> CreateGenre(Genre genre);
-    Task<Genre> UpdateGenre(Genre genre);
+    Task<BaseMessage<Genre>> UpdateGenre(Genre genre);
 }

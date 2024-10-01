@@ -49,24 +49,26 @@ public class GenreService : IGenreService
     }
 
     // Actualizar géneros
-    public async Task<Genre> UpdateGenre(Genre genre)
+    public async Task<BaseMessage<Genre>> UpdateGenre(Genre genre)
     {
         var result = await _unitOfWork.GenreRepository.FindAsync(genre.Id);
         if (result == null)
         {
-            return Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.GENRE_NOT_FOUND, new List<Genre>());
+            return Utilities.BuildResponse<Genre>(HttpStatusCode.NotFound, BaseMessageStatus.GENRE_NOT_FOUND);
         }
+        
         result.Name = genre.Name;
         result.Description = genre.Description;
+
         try
         {
             await _unitOfWork.GenreRepository.Update(result);
-            await _unitOfWork.SaveAsync();
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             return Utilities.BuildResponse<Genre>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
         }
+
         return Utilities.BuildResponse(HttpStatusCode.OK, BaseMessageStatus.OK_200, new List<Genre> { result });
     }
 
@@ -81,7 +83,6 @@ public class GenreService : IGenreService
         try
         {
             await _unitOfWork.GenreRepository.Delete(result);
-            await _unitOfWork.SaveAsync();
         }
         catch (Exception ex)
         {
