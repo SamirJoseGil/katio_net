@@ -106,7 +106,7 @@ public class GenreService : IGenreService
     // Buscar género por Nombre
     public async Task<BaseMessage<Genre>> GetGenresByName(string name)
     {
-        var result = await _unitOfWork.GenreRepository.GetAllAsync(b => b.Name.Contains(name, StringComparison.InvariantCultureIgnoreCase));
+        var result = await _unitOfWork.GenreRepository.GetAllAsync(b => b.Name.ToLower().Contains(name.ToLower()));
         return result.Any() ? Utilities.BuildResponse<Genre>
             (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
             Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Genre>());
@@ -114,7 +114,7 @@ public class GenreService : IGenreService
     //Buscar genero por descripcion
     public async Task<BaseMessage<Genre>> GetGenresByDescription(string description)
     {
-        var result = await _unitOfWork.GenreRepository.GetAllAsync(b => b.Description.Contains(description, StringComparison.InvariantCultureIgnoreCase));
+        var result = await _unitOfWork.GenreRepository.GetAllAsync(b => b.Description.ToLower().Contains(description.ToLower()));
         return result.Any() ? Utilities.BuildResponse<Genre>
             (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
             Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Genre>());
