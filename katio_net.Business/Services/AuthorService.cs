@@ -117,6 +117,7 @@ public class AuthorService : IAuthorService
             Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.AUTHOR_NOT_FOUND, new List<Author>());
     }
     // Traer los autores por apellido
+    //este metodo
     public async Task<BaseMessage<Author>> GetAuthorsByLastName(string LastName)
     {
         var result = await _unitOfWork.AuthorRepository.GetAllAsync(b => b.LastName.ToLower().Contains(LastName.ToLower()));
