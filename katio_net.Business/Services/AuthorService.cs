@@ -102,6 +102,7 @@ public class AuthorService : IAuthorService
             Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Author>());
     }
     // Traer los autores por apellido
+    //los trae
     public async Task<BaseMessage<Author>> GetAuthorsByLastName(string LastName)
     {
         var result = await _context.Authors.Where(b => b.LastName.Contains(LastName, StringComparison.InvariantCultureIgnoreCase)).ToListAsync();
@@ -125,6 +126,7 @@ public class AuthorService : IAuthorService
             (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
             Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Author>());
     }
+
 
     #endregion
 
