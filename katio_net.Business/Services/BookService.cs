@@ -112,8 +112,7 @@ public class BookService : IBookService
     // Traer libros por nombre
     public async Task<BaseMessage<Book>> GetBooksByName(string name)
     {
-        var result = await _unitOfWork.BookRepository.GetAllAsync(b => b.Name.Contains(name, StringComparison.InvariantCultureIgnoreCase));
-        //return result;
+        var result = await _unitOfWork.BookRepository.GetAllAsync(b => b.Name.ToLower().Contains(name.ToLower()));
         return result.Any() ? Utilities.BuildResponse<Book>
             (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
             Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
@@ -149,7 +148,7 @@ public class BookService : IBookService
     // Traer libros por edición
     public async Task<BaseMessage<Book>> GetBooksByEdition(string edition)
     {
-        var result = await _unitOfWork.BookRepository.GetAllAsync(b => b.Edition.Contains(edition, StringComparison.InvariantCultureIgnoreCase));
+        var result = await _unitOfWork.BookRepository.GetAllAsync(b => b.Edition.ToLower().Contains(edition.ToLower()));
         return result.Any() ? Utilities.BuildResponse<Book>
             (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
             Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
@@ -183,7 +182,7 @@ public class BookService : IBookService
     public async Task<BaseMessage<Book>> GetBookByAuthorNameAsync(string authorName)
     {
         var result = await _unitOfWork.BookRepository.GetAllAsync
-            (b => b.Author.Name.Contains(authorName, StringComparison.InvariantCultureIgnoreCase), 
+            (b => b.Author.Name.ToLower().Contains(authorName.ToLower()), 
             includeProperties: "Author");
         return result.Any() ? Utilities.BuildResponse<Book>
             (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
@@ -194,7 +193,7 @@ public class BookService : IBookService
     public async Task<BaseMessage<Book>> GetBookByAuthorLastNameAsync(string authorLastName)
     {
         var result = await _unitOfWork.BookRepository.GetAllAsync
-            (b => b.Author.LastName.Contains(authorLastName, StringComparison.InvariantCultureIgnoreCase),
+            (b => b.Author.LastName.ToLower().Contains(authorLastName.ToLower()),
             includeProperties: "Author");
         return result.Any() ? Utilities.BuildResponse<Book>
             (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
@@ -205,7 +204,7 @@ public class BookService : IBookService
     public async Task<BaseMessage<Book>> GetBookByAuthorCountryAsync(string authorCountry)
     {
         var result = await _unitOfWork.BookRepository.GetAllAsync(
-            b => b.Author.Country.Contains(authorCountry, StringComparison.InvariantCultureIgnoreCase),
+            b => b.Author.Country.ToLower().Contains(authorCountry.ToLower()),
             includeProperties: "Author");
         return result.Any() ? Utilities.BuildResponse<Book>
             (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
@@ -216,8 +215,8 @@ public class BookService : IBookService
     public async Task<BaseMessage<Book>> GetBookByAuthorFullNameAsync(string authorName, string authorLastName)
     {
         var result = await _unitOfWork.BookRepository.GetAllAsync((
-            b => b.Author.Name.Contains(authorName, StringComparison.InvariantCultureIgnoreCase) &&
-            b.Author.LastName.Contains(authorLastName, StringComparison.InvariantCultureIgnoreCase)),
+            b => b.Author.Name.ToLower().Contains(authorName.ToLower()) &&
+            b.Author.LastName.ToLower().Contains(authorLastName.ToLower())),
             includeProperties: "Author");
         return result.Any() ? Utilities.BuildResponse<Book>
             (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
