@@ -31,6 +31,13 @@ public class BookService : IBookService
     // Crear un Libro
     public async Task<BaseMessage<Book>> CreateBook(Book book)
     {
+        var existingBook = await _unitOfWork.BookRepository.GetAllAsync(b => b.ISBN10 == book.ISBN10 || b.ISBN13 == book.ISBN13);
+
+        if (existingBook != null)
+        {
+           
+            return Utilities.BuildResponse<Book>(HttpStatusCode.Conflict, $"{BaseMessageStatus.BAD_REQUEST_400} | Ya hay un libro registrado con el mismo ISBN.");
+        }
         var newBook = new Book()
         {
             Name = book.Name,

@@ -31,6 +31,12 @@ public class GenreService : IGenreService
     // Crear géneros
     public async Task<BaseMessage<Genre>> CreateGenre(Genre genre)
     {
+        var existingGenre = await _unitOfWork.GenreRepository.GetAllAsync(g => g.Name == genre.Name);
+
+        if (existingGenre != null)
+        {
+            return Utilities.BuildResponse<Genre>(HttpStatusCode.Conflict, $"{BaseMessageStatus.BAD_REQUEST_400} | El género ya está registrado en el sistema.");
+        }
         var newGenre = new Genre()
         {
             Name = genre.Name,

@@ -35,6 +35,12 @@ public class NarratorService : INarratorService
     // Crear Narradores
     public async Task<BaseMessage<Narrator>> CreateNarrator(Narrator narrator)
     {
+        var existingNarrator = await _unitOfWork.NarratorRepository.GetAllAsync(n => n.Name == narrator.Name && n.LastName == narrator.LastName);
+
+        if (existingNarrator != null)
+        {
+            return Utilities.BuildResponse<Narrator>(HttpStatusCode.Conflict, $"{BaseMessageStatus.BAD_REQUEST_400} | El narrador ya está registrado en el sistema.");
+        }
         var newNarrator = new Narrator()
         {
             Name = narrator.Name,
