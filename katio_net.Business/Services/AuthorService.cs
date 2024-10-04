@@ -35,6 +35,12 @@ public class AuthorService : IAuthorService
     // Crear Autores
     public async Task<BaseMessage<Author>> CreateAuthor(Author author)
     {
+        var existingAuthor = await _unitOfWork.AuthorRepository.GetAllAsync(a => a.Name == author.Name && a.LastName == author.LastName);
+
+        if (existingAuthor != null)
+        {
+            return Utilities.BuildResponse<Author>(HttpStatusCode.Conflict, $"{BaseMessageStatus.BAD_REQUEST_400} | El autor ya está registrado en el sistema.");
+        }
         var newAuthor = new Author()
         {
             Name = author.Name,
