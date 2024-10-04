@@ -3,29 +3,27 @@ using katio.Data.Models;
 using katio.Data.Dto;
 using katio.Data;
 using System.Net;
-using Microsoft.EntityFrameworkCore;
 
 namespace katio.Business.Services;
 
 public class GenreService : IGenreService
 {
     // Lista de géneros
-    private readonly KatioContext _context;
     private readonly IUnitOfWork _unitOfWork;
 
     // Constructor
-    public GenreService(KatioContext context)
+    public GenreService(IUnitOfWork unitOfWork)
     {
-        _context = context;
+        _unitOfWork = unitOfWork;
     }
 
     // Traer todos los géneros
     public async Task<BaseMessage<Genre>> Index()
     {
-        var result = await _context.Genres.ToListAsync();
+        var result = await _unitOfWork.GenreRepository.GetAllAsync();
         return result.Any() ? Utilities.BuildResponse<Genre>
             (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
-            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Genre>());
+            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.GENRE_NOT_FOUND, new List<Genre>());
     }
 
     #region Create Update Delete
@@ -40,8 +38,8 @@ public class GenreService : IGenreService
         };
         try
         {
-            await _context.Genres.AddAsync(newGenre);
-            await _context.SaveChangesAsync();
+            await _unitOfWork.GenreRepository.AddAsync(newGenre);
+            await _unitOfWork.SaveAsync();
         }
         catch (Exception ex)
         {
@@ -51,29 +49,46 @@ public class GenreService : IGenreService
     }
 
     // Actualizar géneros
-    public async Task<Genre> UpdateGenre(Genre genre)
+    public async Task<BaseMessage<Genre>> UpdateGenre(Genre genre)
     {
-        var result = _context.Genres.FirstOrDefault(b => b.Id == genre.Id);
-        if (result != null)
+        var result = await _unitOfWork.GenreRepository.FindAsync(genre.Id);
+        if (result == null)
         {
-            result.Name = genre.Name;
-            result.Description = genre.Description;
-            await _context.SaveChangesAsync();
+            return Utilities.BuildResponse<Genre>(HttpStatusCode.NotFound, BaseMessageStatus.GENRE_NOT_FOUND);
         }
-        return result;
+        
+        result.Name = genre.Name;
+        result.Description = genre.Description;
+
+        try
+        {
+            await _unitOfWork.GenreRepository.Update(result);
+        }
+        catch (Exception ex)
+        {
+            return Utilities.BuildResponse<Genre>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
+        }
+
+        return Utilities.BuildResponse(HttpStatusCode.OK, BaseMessageStatus.OK_200, new List<Genre> { result });
     }
 
     // Eliminar géneros
     public async Task<BaseMessage<Genre>> DeleteGenre(int id)
     {
-        var result = _context.Genres.FirstOrDefault(b => b.Id == id);
-        if (result != null)
+        var result = await _unitOfWork.GenreRepository.FindAsync(id);
+        if (result == null)
         {
-            _context.Genres.Remove(result);
-            await _context.SaveChangesAsync();
-            return Utilities.BuildResponse(HttpStatusCode.OK, BaseMessageStatus.OK_200, new List<Genre> { result });
+            return Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.GENRE_NOT_FOUND, new List<Genre>());
         }
-        return Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Genre>());
+        try
+        {
+            await _unitOfWork.GenreRepository.Delete(result);
+        }
+        catch (Exception ex)
+        {
+            return Utilities.BuildResponse<Genre>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
+        }
+        return Utilities.BuildResponse(HttpStatusCode.OK, BaseMessageStatus.OK_200, new List<Genre> { result });
     }
 
     #endregion
@@ -91,14 +106,15 @@ public class GenreService : IGenreService
     // Buscar género por Nombre
     public async Task<BaseMessage<Genre>> GetGenresByName(string name)
     {
-        var result = await _context.Genres.Where(b => b.Name.Contains(name, StringComparison.InvariantCultureIgnoreCase)).ToListAsync();
+        var result = await _unitOfWork.GenreRepository.GetAllAsync(b => b.Name.ToLower().Contains(name.ToLower()));
         return result.Any() ? Utilities.BuildResponse<Genre>
             (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
             Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Genre>());
     }
+    //Buscar genero por descripcion
     public async Task<BaseMessage<Genre>> GetGenresByDescription(string description)
     {
-        var result = await _context.Genres.Where(b => b.Description.Contains(description, StringComparison.InvariantCultureIgnoreCase)).ToListAsync();
+        var result = await _unitOfWork.GenreRepository.GetAllAsync(b => b.Description.ToLower().Contains(description.ToLower()));
         return result.Any() ? Utilities.BuildResponse<Genre>
             (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
             Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Genre>());
