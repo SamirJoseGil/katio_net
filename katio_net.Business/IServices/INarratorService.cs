@@ -11,7 +11,7 @@ public interface INarratorService
     Task<BaseMessage<Narrator>> GetNarratorsByLastName(string LastName);
     Task<BaseMessage<Narrator>> GetNarratorsByGenre(string Genre);
     Task<BaseMessage<Narrator>> CreateNarrator(Narrator narrator);
-    Task<Narrator> UpdateNarrator(Narrator narrator);
+    Task<BaseMessage<Narrator>> UpdateNarrator(Narrator narrator);
     Task<BaseMessage<Narrator>> DeleteNarrator(int id);
     
 }
