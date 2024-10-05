@@ -14,9 +14,8 @@ public class AuthorService : IAuthorService
     private readonly IUnitOfWork _unitOfWork;
 
     // Constructor
-    public AuthorService(KatioContext context, IUnitOfWork unitOfWork)
+    public AuthorService(IUnitOfWork unitOfWork)
     {
-        _context = context;
         _unitOfWork = unitOfWork;
     }
 
