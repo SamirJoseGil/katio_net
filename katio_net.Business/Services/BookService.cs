@@ -21,9 +21,15 @@ public class BookService : IBookService
     // Traer todos los libros
     public async Task<BaseMessage<Book>> Index()
     {
-        var result = await _unitOfWork.BookRepository.GetAllAsync();
-        return result.Any() ? Utilities.BuildResponse<Book>(HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
-            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
+        try
+        {
+            var result = await _unitOfWork.BookRepository.GetAllAsync();
+            return Utilities.BuildResponse<Book>(HttpStatusCode.OK, BaseMessageStatus.OK_200, result);
+        }
+        catch (Exception ex)
+        {
+            return Utilities.BuildResponse<Book>(HttpStatusCode.InternalServerError, BaseMessageStatus.INTERNAL_SERVER_ERROR_500);
+        }
     }
 
     #region Create Update Delete
@@ -51,8 +57,7 @@ public class BookService : IBookService
         try
         {
             await _unitOfWork.BookRepository.AddAsync(newBook);
-        }
-        catch (Exception ex)
+        } catch (Exception ex)
         {
             return Utilities.BuildResponse<Book>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
         }
@@ -77,8 +82,7 @@ public class BookService : IBookService
         try 
         {
             await _unitOfWork.BookRepository.Update(result);
-        }
-        catch (Exception ex)
+        } catch (Exception ex)
         {
             return Utilities.BuildResponse<Book>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
         }
@@ -96,8 +100,7 @@ public class BookService : IBookService
         try
         {
             await _unitOfWork.BookRepository.Delete(result);
-        }
-        catch (Exception ex)
+        } catch (Exception ex)
         {
             return Utilities.BuildResponse<Book>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
         }
@@ -110,64 +113,106 @@ public class BookService : IBookService
     // Traer libros por id
     public async Task<BaseMessage<Book>> GetBookById(int id)
     {
-        var result = await _unitOfWork.BookRepository.FindAsync(id);
-        return result != null ? Utilities.BuildResponse<Book>
-            (HttpStatusCode.OK, BaseMessageStatus.OK_200, new List<Book> { result }) :
-            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
+        try
+        {
+            var result = await _unitOfWork.BookRepository.FindAsync(id);
+            return result != null ? Utilities.BuildResponse<Book>
+                (HttpStatusCode.OK, BaseMessageStatus.OK_200, new List<Book> { result }) :
+                Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
+        } catch (Exception ex)
+        {
+            return Utilities.BuildResponse<Book>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
+        }
     }
 
     // Traer libros por nombre
     public async Task<BaseMessage<Book>> GetBooksByName(string name)
     {
-        var result = await _unitOfWork.BookRepository.GetAllAsync(b => b.Name.ToLower().Contains(name.ToLower()));
-        return result.Any() ? Utilities.BuildResponse<Book>
-            (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
-            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
+        try
+        {
+            var result = await _unitOfWork.BookRepository.GetAllAsync(b => b.Name.ToLower().Contains(name.ToLower()));
+            return result.Any() ? Utilities.BuildResponse<Book>
+                (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
+                Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
+        } catch (Exception ex)
+        {
+            return Utilities.BuildResponse<Book>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
+        }
     }
 
     // Traer libros por ISBN10
     public async Task<BaseMessage<Book>> GetBooksByISBN10(string ISBN10)
     {
+        try
+        {
         var result = await _unitOfWork.BookRepository.GetAllAsync(b => b.ISBN10 == ISBN10);
         return result.Any() ? Utilities.BuildResponse<Book>
             (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
             Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
+        } catch (Exception ex)
+        {
+            return Utilities.BuildResponse<Book>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
+        }
     }
 
     // Traer libros por ISBN13
     public async Task<BaseMessage<Book>> GetBooksByISBN13(string ISBN13)
     {
-        var result = await _unitOfWork.BookRepository.GetAllAsync(b => b.ISBN13 == ISBN13);
-        return result.Any() ? Utilities.BuildResponse<Book>
-            (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
-            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
+        try
+        {
+            var result = await _unitOfWork.BookRepository.GetAllAsync(b => b.ISBN13 == ISBN13);
+            return result.Any() ? Utilities.BuildResponse<Book>
+                (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
+                Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
+        } catch (Exception ex)
+        {
+            return Utilities.BuildResponse<Book>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
+        }
     }
 
     // Traer libros por rango de fecha de publicación
     public async Task<BaseMessage<Book>> GetBooksByPublished(DateOnly startDate, DateOnly endDate)
     {
-        var result = await _unitOfWork.BookRepository.GetAllAsync(b => b.Published >= startDate && b.Published <= endDate);
-        return result.Any() ? Utilities.BuildResponse<Book>
-            (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
-            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
+        try
+        {
+            var result = await _unitOfWork.BookRepository.GetAllAsync(b => b.Published >= startDate && b.Published <= endDate);
+            return result.Any() ? Utilities.BuildResponse<Book>
+                (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
+                Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
+        } catch (Exception ex) 
+        {
+            return Utilities.BuildResponse<Book>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
+        }
     }
 
     // Traer libros por edición
     public async Task<BaseMessage<Book>> GetBooksByEdition(string edition)
     {
-        var result = await _unitOfWork.BookRepository.GetAllAsync(b => b.Edition.ToLower().Contains(edition.ToLower()));
-        return result.Any() ? Utilities.BuildResponse<Book>
-            (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
-            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
+        try
+        {
+            var result = await _unitOfWork.BookRepository.GetAllAsync(b => b.Edition.ToLower().Contains(edition.ToLower()));
+            return result.Any() ? Utilities.BuildResponse<Book>
+                (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
+                Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
+        } catch (Exception ex)
+        {
+            return Utilities.BuildResponse<Book>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
+        }
     }
 
     // Traer libros por índice Dewey
     public async Task<BaseMessage<Book>> GetBooksByDeweyIndex(string deweyIndex)
     {
-        var result = await _unitOfWork.BookRepository.GetAllAsync(b => b.DeweyIndex == deweyIndex);
-        return result.Any() ? Utilities.BuildResponse<Book>
-            (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
-            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
+        try
+        {
+            var result = await _unitOfWork.BookRepository.GetAllAsync(b => b.DeweyIndex == deweyIndex);
+            return result.Any() ? Utilities.BuildResponse<Book>
+                (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
+                Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
+        } catch (Exception ex)
+        {
+            return Utilities.BuildResponse<Book>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
+        }
     }
 
     #endregion
@@ -177,69 +222,104 @@ public class BookService : IBookService
     // Traer libros por autor
     public async Task<BaseMessage<Book>> GetBookByAuthorAsync(int authorId)
     {
-        var result = await _unitOfWork.BookRepository.GetAllAsync
-            ((b => b.AuthorId == authorId), 
-            includeProperties: "Author");
-        return result.Any() ? Utilities.BuildResponse<Book>
-            (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
-            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
+        try
+        {
+            var result = await _unitOfWork.BookRepository.GetAllAsync
+                ((b => b.AuthorId == authorId),
+                includeProperties: "Author");
+            return result.Any() ? Utilities.BuildResponse<Book>
+                (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
+                Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
+        } catch (Exception ex)
+        {
+            return Utilities.BuildResponse<Book>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
+        }
     }
 
     // Traer libros por nombre del autor
     public async Task<BaseMessage<Book>> GetBookByAuthorNameAsync(string authorName)
     {
-        var result = await _unitOfWork.BookRepository.GetAllAsync
-            (b => b.Author.Name.ToLower().Contains(authorName.ToLower()), 
-            includeProperties: "Author");
-        return result.Any() ? Utilities.BuildResponse<Book>
-            (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
-            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
+        try
+        {
+            var result = await _unitOfWork.BookRepository.GetAllAsync
+                (b => b.Author.Name.ToLower().Contains(authorName.ToLower()),
+                includeProperties: "Author");
+            return result.Any() ? Utilities.BuildResponse<Book>
+                (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
+                Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
+        } catch (Exception ex)
+        {
+            return Utilities.BuildResponse<Book>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
+        }
     }
 
     // Traer libros por apellido del autor
     public async Task<BaseMessage<Book>> GetBookByAuthorLastNameAsync(string authorLastName)
     {
-        var result = await _unitOfWork.BookRepository.GetAllAsync
-            (b => b.Author.LastName.ToLower().Contains(authorLastName.ToLower()),
-            includeProperties: "Author");
-        return result.Any() ? Utilities.BuildResponse<Book>
-            (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
-            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
+        try
+        {
+            var result = await _unitOfWork.BookRepository.GetAllAsync
+                (b => b.Author.LastName.ToLower().Contains(authorLastName.ToLower()),
+                includeProperties: "Author");
+            return result.Any() ? Utilities.BuildResponse<Book>
+                (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
+                Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
+        } catch (Exception ex)
+        {
+            return Utilities.BuildResponse<Book>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
+        }
     }
 
     // Traer libros por país del autor
     public async Task<BaseMessage<Book>> GetBookByAuthorCountryAsync(string authorCountry)
     {
-        var result = await _unitOfWork.BookRepository.GetAllAsync(
-            b => b.Author.Country.ToLower().Contains(authorCountry.ToLower()),
-            includeProperties: "Author");
-        return result.Any() ? Utilities.BuildResponse<Book>
-            (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
-            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
+        try
+        {
+            var result = await _unitOfWork.BookRepository.GetAllAsync(
+                b => b.Author.Country.ToLower().Contains(authorCountry.ToLower()),
+                includeProperties: "Author");
+            return result.Any() ? Utilities.BuildResponse<Book>
+                (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
+                Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
+        } catch (Exception ex)
+        {
+            return Utilities.BuildResponse<Book>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
+        }
     }
 
     // Traer libros por nombre y apellido del autor
     public async Task<BaseMessage<Book>> GetBookByAuthorFullNameAsync(string authorName, string authorLastName)
     {
-        var result = await _unitOfWork.BookRepository.GetAllAsync((
-            b => b.Author.Name.ToLower().Contains(authorName.ToLower()) &&
-            b.Author.LastName.ToLower().Contains(authorLastName.ToLower())),
-            includeProperties: "Author");
-        return result.Any() ? Utilities.BuildResponse<Book>
-            (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
-            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
+        try
+        {
+            var result = await _unitOfWork.BookRepository.GetAllAsync((
+                b => b.Author.Name.ToLower().Contains(authorName.ToLower()) &&
+                b.Author.LastName.ToLower().Contains(authorLastName.ToLower())),
+                includeProperties: "Author");
+            return result.Any() ? Utilities.BuildResponse<Book>
+                (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
+                Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
+        } catch (Exception ex)
+        {
+            return Utilities.BuildResponse<Book>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
+        }
     }
 
     // Traer libros por rango de fecha de nacimiento del autor
     public async Task<BaseMessage<Book>> GetBookByAuthorBirthDateRange(DateOnly startDate, DateOnly endDate)
     {
-        var result = await _unitOfWork.BookRepository.GetAllAsync(
-            b => b.Author.BirthDate >= startDate && b.Author.BirthDate <= endDate,
-            includeProperties: "Author");
-        return result.Any() ? Utilities.BuildResponse<Book>
-            (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
-            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
+        try
+        {
+            var result = await _unitOfWork.BookRepository.GetAllAsync(
+                b => b.Author.BirthDate >= startDate && b.Author.BirthDate <= endDate,
+                includeProperties: "Author");
+            return result.Any() ? Utilities.BuildResponse<Book>
+                (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
+                Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
+        } catch (Exception ex)
+        {
+            return Utilities.BuildResponse<Book>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
+        }
     }
-
     #endregion
 }

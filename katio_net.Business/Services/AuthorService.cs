@@ -23,10 +23,16 @@ public class AuthorService : IAuthorService
     // Traer todos los Autores
     public async Task<BaseMessage<Author>> Index()
     {
-        var result = await _unitOfWork.AuthorRepository.GetAllAsync();
-        return result.Any() ? Utilities.BuildResponse<Author>
-            (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
-            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Author>());
+        try
+        {
+            var result = await _unitOfWork.AuthorRepository.GetAllAsync();
+            return result.Any() ? Utilities.BuildResponse<Author>
+                (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
+                Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Author>());
+        } catch (Exception ex)
+        {
+            return Utilities.BuildResponse<Author>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
+        }
     }
 
 
@@ -51,8 +57,7 @@ public class AuthorService : IAuthorService
         try
         {
             await _unitOfWork.AuthorRepository.AddAsync(newAuthor);
-        }
-        catch (Exception ex)
+        } catch (Exception ex)
         {
             return Utilities.BuildResponse<Author>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
         }
@@ -75,8 +80,7 @@ public class AuthorService : IAuthorService
         try 
         {
             await _unitOfWork.AuthorRepository.Update(result);
-        }
-        catch (Exception ex)
+        } catch (Exception ex)
         {
             return Utilities.BuildResponse<Author>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
         }
@@ -94,8 +98,7 @@ public class AuthorService : IAuthorService
         try
         {
             await _unitOfWork.AuthorRepository.Delete(result);
-        }
-        catch (Exception ex)
+        } catch (Exception ex)
         {
             return Utilities.BuildResponse<Author>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
         }
@@ -108,46 +111,74 @@ public class AuthorService : IAuthorService
     //Traer autores por Id
     public async Task<BaseMessage<Author>> GetAuthorById(int id)
     {
-        var author = await _unitOfWork.AuthorRepository.FindAsync(id);
-        return author != null ? Utilities.BuildResponse<Author>
-            (HttpStatusCode.OK, BaseMessageStatus.OK_200, new List<Author> { author }) :
-            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.AUTHOR_NOT_FOUND, new List<Author>());
+        try
+        {
+            var author = await _unitOfWork.AuthorRepository.FindAsync(id);
+            return author != null ? Utilities.BuildResponse<Author>
+                (HttpStatusCode.OK, BaseMessageStatus.OK_200, new List<Author> { author }) :
+                Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.AUTHOR_NOT_FOUND, new List<Author>());
+        } catch (Exception ex)
+        {
+            return Utilities.BuildResponse<Author>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
+        }
     }
 
     // Traer los autores por nombre
     public async Task<BaseMessage<Author>> GetAuthorsByName(string name)
     {
-        var result = await _unitOfWork.AuthorRepository.GetAllAsync(b => b.Name.ToLower().Contains(name.ToLower()));
-        return result.Any() ? Utilities.BuildResponse<Author>
-            (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
-            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.AUTHOR_NOT_FOUND, new List<Author>());
+        try
+        {
+            var result = await _unitOfWork.AuthorRepository.GetAllAsync(b => b.Name.ToLower().Contains(name.ToLower()));
+            return result.Any() ? Utilities.BuildResponse<Author>
+                (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
+                Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.AUTHOR_NOT_FOUND, new List<Author>());
+        } catch (Exception ex)
+        {
+            return Utilities.BuildResponse<Author>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
+        }
     }
     // Traer los autores por apellido
     //este metodo
     public async Task<BaseMessage<Author>> GetAuthorsByLastName(string LastName)
     {
-        var result = await _unitOfWork.AuthorRepository.GetAllAsync(b => b.LastName.ToLower().Contains(LastName.ToLower()));
-        return result.Any() ? Utilities.BuildResponse<Author>
-            (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
-            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.AUTHOR_NOT_FOUND, new List<Author>());
+        try
+        {
+            var result = await _unitOfWork.AuthorRepository.GetAllAsync(b => b.LastName.ToLower().Contains(LastName.ToLower()));
+            return result.Any() ? Utilities.BuildResponse<Author>
+                (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
+                Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.AUTHOR_NOT_FOUND, new List<Author>());
+        } catch (Exception ex)
+        {
+            return Utilities.BuildResponse<Author>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
+        }
     }
     // Traer los autores por pais - region
     public async Task<BaseMessage<Author>> GetAuthorsByCountry(string Country)
     {
-        var result = await _unitOfWork.AuthorRepository.GetAllAsync(b => b.Country.ToLower().Contains(Country.ToLower()));
-        return result.Any() ? Utilities.BuildResponse<Author>
-            (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
-            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.AUTHOR_NOT_FOUND, new List<Author>());
+        try
+        {
+            var result = await _unitOfWork.AuthorRepository.GetAllAsync(b => b.Country.ToLower().Contains(Country.ToLower()));
+            return result.Any() ? Utilities.BuildResponse<Author>
+                (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
+                Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.AUTHOR_NOT_FOUND, new List<Author>());
+        } catch (Exception ex)
+        {
+            return Utilities.BuildResponse<Author>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
+        }
     }
     // Traer los autores por rango de fecha de nacimiento
     public async Task<BaseMessage<Author>> GetAuthorsByBirthDate(DateOnly StartDate, DateOnly EndDate)
     {
-        var result = await _unitOfWork.AuthorRepository.GetAllAsync(b => b.BirthDate >= StartDate && b.BirthDate <= EndDate);
-        return result.Any() ? Utilities.BuildResponse<Author>
-            (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
-            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.AUTHOR_NOT_FOUND, new List<Author>());
+        try
+        {
+            var result = await _unitOfWork.AuthorRepository.GetAllAsync(b => b.BirthDate >= StartDate && b.BirthDate <= EndDate);
+            return result.Any() ? Utilities.BuildResponse<Author>
+                (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
+                Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.AUTHOR_NOT_FOUND, new List<Author>());
+        } catch (Exception ex)
+        {
+            return Utilities.BuildResponse<Author>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
+        }
     }
-
     #endregion
-
 }
