@@ -25,10 +25,14 @@ public class AudioBookService : IAudioBookService
     // Traer todos los Audiolibros
     public async Task<BaseMessage<AudioBook>> Index()
     {
-        
-        var result = await _unitOfWork.AudioBookRepository.GetAllAsync();
-        return result.Any() ? Utilities.BuildResponse<AudioBook>(HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
-            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.AUDIOBOOK_NOT_FOUND, new List<AudioBook>());
+        try
+        {
+            var result = await _unitOfWork.AudioBookRepository.GetAllAsync();
+            return result.Any() ? Utilities.BuildResponse<AudioBook>(HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
+                Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.AUDIOBOOK_NOT_FOUND, new List<AudioBook>());
+        } catch (Exception ex) {
+            return Utilities.BuildResponse<AudioBook>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
+        }
     }
 
     #region Create Update Delete
@@ -57,8 +61,7 @@ public class AudioBookService : IAudioBookService
         try
         {
             await _unitOfWork.AudioBookRepository.AddAsync(newAudioBook);
-        }
-        catch (Exception ex)
+        } catch (Exception ex)
         {
             return Utilities.BuildResponse<AudioBook>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
         }
@@ -87,8 +90,7 @@ public class AudioBookService : IAudioBookService
         try 
         {
             await _unitOfWork.AudioBookRepository.Update(result);
-        }
-        catch (Exception ex)
+        } catch (Exception ex)
         {
             return Utilities.BuildResponse<AudioBook>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
         }
@@ -106,8 +108,7 @@ public class AudioBookService : IAudioBookService
         try
         {
             await _unitOfWork.AudioBookRepository.Delete(result);
-        }
-        catch (Exception ex)
+        } catch (Exception ex)
         {
             return Utilities.BuildResponse<AudioBook>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
         }
@@ -119,78 +120,118 @@ public class AudioBookService : IAudioBookService
     // Buscar por id
     public async Task<BaseMessage<AudioBook>> GetAudioBookById(int id)
     {
-        var result = await _unitOfWork.AudioBookRepository.FindAsync(id);
+        try
+        {
+            var result = await _unitOfWork.AudioBookRepository.FindAsync(id);
 
-        return result != null ? Utilities.BuildResponse<AudioBook>
-            (HttpStatusCode.OK, BaseMessageStatus.OK_200, new List<AudioBook> { result }) :
-            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.AUDIOBOOK_NOT_FOUND, new List<AudioBook>());
+            return result != null ? Utilities.BuildResponse<AudioBook>
+                (HttpStatusCode.OK, BaseMessageStatus.OK_200, new List<AudioBook> { result }) :
+                Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.AUDIOBOOK_NOT_FOUND, new List<AudioBook>());
+        } catch (Exception ex)
+        {
+            return Utilities.BuildResponse<AudioBook>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
+        }
     } 
     // Buscar por Nombre
     public async Task<BaseMessage<AudioBook>> GetByAudioBookName(string name)
     {
-        
-        var result = await _unitOfWork.AudioBookRepository.GetAllAsync(a => a.Name.ToLower().Contains( name.ToLower()) );
-        return result.Any() ? Utilities.BuildResponse<AudioBook>(HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
-            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.AUDIOBOOK_NOT_FOUND, new List<AudioBook>());
+       try
+       {
+            var result = await _unitOfWork.AudioBookRepository.GetAllAsync(a => a.Name.ToLower().Contains(name.ToLower()));
+            return result.Any() ? Utilities.BuildResponse<AudioBook>(HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
+                Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.AUDIOBOOK_NOT_FOUND, new List<AudioBook>());
+       } catch (Exception ex)
+       {
+            return Utilities.BuildResponse<AudioBook>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
+       }
     }
 
     // Buscar por ISBN10
     public async Task<BaseMessage<AudioBook>> GetByAudioBookISBN10(string ISBN10)
     {
-        // var result = await _context.AudioBooks.Where(b => b.ISBN10 == ISBN10).ToListAsync();
+        try 
+        {
         var result = await _unitOfWork.AudioBookRepository.GetAllAsync(a => a.ISBN10 == ISBN10);
-
         return result.Any() ? Utilities.BuildResponse<AudioBook>(HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
             Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.AUDIOBOOK_NOT_FOUND, new List<AudioBook>());
+        } catch (Exception ex)
+        {
+            return Utilities.BuildResponse<AudioBook>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
+        }
     }
 
     // Buscar por ISBN13
     public async Task<BaseMessage<AudioBook>> GetByAudioBookISBN13(string ISBN13)
     {
-        // var result = await _context.AudioBooks.Where(b => b.ISBN13 == ISBN13).ToListAsync();
-        var result = await _unitOfWork.AudioBookRepository.GetAllAsync(a => a.ISBN13 == ISBN13);
-
-        return result.Any() ? Utilities.BuildResponse<AudioBook>(HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
-            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.AUDIOBOOK_NOT_FOUND, new List<AudioBook>());
+        try 
+        {
+            var result = await _unitOfWork.AudioBookRepository.GetAllAsync(a => a.ISBN13 == ISBN13);
+            return result.Any() ? Utilities.BuildResponse<AudioBook>(HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
+                Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.AUDIOBOOK_NOT_FOUND, new List<AudioBook>());
+        } catch (Exception ex)
+        {
+            return Utilities.BuildResponse<AudioBook>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
+        }
     }
 
     // Buscar por Rango de Fecha de Publicación
     public async Task<BaseMessage<AudioBook>> GetByAudioBookPublished(DateOnly startDate, DateOnly endDate)
     {
-        var result = await _unitOfWork.AudioBookRepository.GetAllAsync(b => b.Published >= startDate && b.Published <= endDate);
-
-        return result.Any() ? Utilities.BuildResponse<AudioBook>
-            (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
-            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.AUDIOBOOK_NOT_FOUND, new List<AudioBook>());
+        try
+        {
+            var result = await _unitOfWork.AudioBookRepository.GetAllAsync(b => b.Published >= startDate && b.Published <= endDate);
+            return result.Any() ? Utilities.BuildResponse<AudioBook>
+                (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
+                Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.AUDIOBOOK_NOT_FOUND, new List<AudioBook>());
+        } catch (Exception ex)
+        {
+            return Utilities.BuildResponse<AudioBook>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
+        }
     }
 
     // Buscar por Edición
     public async Task<BaseMessage<AudioBook>> GetByAudioBookEdition(string edition)
     {
+        try {
         var result = await _unitOfWork.AudioBookRepository.GetAllAsync(a => a.Edition.ToLower().Contains( edition.ToLower()) );
-    return result.Any()
-        ? Utilities.BuildResponse<AudioBook>(HttpStatusCode.OK, BaseMessageStatus.OK_200, result)
-        : Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.AUDIOBOOK_NOT_FOUND, new List<AudioBook>());
+        return result.Any() ? Utilities.BuildResponse<AudioBook>
+                (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) : 
+                Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.AUDIOBOOK_NOT_FOUND, new List<AudioBook>());
+        } catch (Exception ex)
+        {
+            return Utilities.BuildResponse<AudioBook>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
+        }
 }
 
     // Buscar por Género
     public async Task<BaseMessage<AudioBook>> GetByAudioBookGenre(string genre)
     {
-        var result = await _unitOfWork.AudioBookRepository.GetAllAsync(a => a.Genre.ToLower().Contains( genre.ToLower()) );
-        return result.Any()
-            ? Utilities.BuildResponse<AudioBook>(HttpStatusCode.OK, BaseMessageStatus.OK_200, result)
-            : Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.AUDIOBOOK_NOT_FOUND, new List<AudioBook>());
+        try
+        {
+            var result = await _unitOfWork.AudioBookRepository.GetAllAsync(a => a.Genre.ToLower().Contains(genre.ToLower()));
+            return result.Any()
+                ? Utilities.BuildResponse<AudioBook>(HttpStatusCode.OK, BaseMessageStatus.OK_200, result)
+                : Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.AUDIOBOOK_NOT_FOUND, new List<AudioBook>());
+        } catch (Exception ex)
+        {
+            return Utilities.BuildResponse<AudioBook>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
+        }
     }
 
 
     // Buscar por Duración en Segundos
     public async Task<BaseMessage<AudioBook>> GetByAudioBookLenghtInSeconds(int lenghtInSeconds)
     {
-        var result = await _unitOfWork.AudioBookRepository.FindAsync(lenghtInSeconds);
-
-        return (result != null)
-            ? Utilities.BuildResponse<AudioBook>(HttpStatusCode.OK, BaseMessageStatus.OK_200, new List<AudioBook> { result } )
-            : Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.AUDIOBOOK_NOT_FOUND, new List<AudioBook>());
+        try
+        {
+            var result = await _unitOfWork.AudioBookRepository.FindAsync(lenghtInSeconds);
+            return (result != null)
+                ? Utilities.BuildResponse<AudioBook>(HttpStatusCode.OK, BaseMessageStatus.OK_200, new List<AudioBook> { result })
+                : Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.AUDIOBOOK_NOT_FOUND, new List<AudioBook>());
+        } catch (Exception ex)
+        {
+            return Utilities.BuildResponse<AudioBook>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
+        }
     }
 
 
@@ -201,74 +242,98 @@ public class AudioBookService : IAudioBookService
     // Buscar por Autor
     public async Task<BaseMessage<AudioBook>> GetAudioBookByAuthor(int authorId)
     {
-        var result = await _unitOfWork.AudioBookRepository.FindAsync(authorId);
-
-        return (result != null)
-            ? Utilities.BuildResponse<AudioBook>(HttpStatusCode.OK, BaseMessageStatus.OK_200, new List<AudioBook> { result })
-            : Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.AUDIOBOOK_NOT_FOUND, new List<AudioBook>());
+        try 
+        {
+            var result = await _unitOfWork.AudioBookRepository.FindAsync(authorId);
+            return (result != null)
+                ? Utilities.BuildResponse<AudioBook>(HttpStatusCode.OK, BaseMessageStatus.OK_200, new List<AudioBook> { result })
+                : Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.AUDIOBOOK_NOT_FOUND, new List<AudioBook>());
+        } catch (Exception ex)
+        {
+            return Utilities.BuildResponse<AudioBook>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
+        }
     }
 
 
     // Buscar por Nombre de Autor
     public async Task<BaseMessage<AudioBook>> GetAudioBookByAuthorName(string authorName)
     {
-        var result = await _unitOfWork.AudioBookRepository.GetAllAsync(a => a.Name.ToLower().Contains( authorName.ToLower()) );
-
-        return result.Any()
-            ? Utilities.BuildResponse<AudioBook>(HttpStatusCode.OK, BaseMessageStatus.OK_200, result)
-            : Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.AUDIOBOOK_NOT_FOUND, new List<AudioBook>());
+        try
+        {
+            var result = await _unitOfWork.AudioBookRepository.GetAllAsync(a => a.Author.Name.ToLower().Contains(authorName.ToLower()),
+            includeProperties: "Author");
+            return result.Any()
+                ? Utilities.BuildResponse<AudioBook>(HttpStatusCode.OK, BaseMessageStatus.OK_200, result)
+                : Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.AUDIOBOOK_NOT_FOUND, new List<AudioBook>());
+        } catch (Exception ex)
+        {
+            return Utilities.BuildResponse<AudioBook>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
+        }
     }
 
     // Buscar por Apellido del Autor
     public async Task<BaseMessage<AudioBook>> GetAudioBookByAuthorLastName(string authorLastName)
     {
-        if (string.IsNullOrWhiteSpace(authorLastName))
+        try
         {
-            return Utilities.BuildResponse(HttpStatusCode.BadRequest, BaseMessageStatus.AUDIOBOOK_NOT_FOUND, new List<AudioBook>());
-        }
-        var result = await _unitOfWork.AudioBookRepository.GetAllAsync(b => b.Author.LastName.ToLower().Contains(authorLastName),
+            var result = await _unitOfWork.AudioBookRepository.GetAllAsync(b => b.Author.LastName.ToLower().Contains(authorLastName.ToLower()),
             includeProperties: "Author");
-
-        return result.Any()
-            ? Utilities.BuildResponse<AudioBook>(HttpStatusCode.OK, BaseMessageStatus.OK_200, result)
-            : Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.AUDIOBOOK_NOT_FOUND, new List<AudioBook>());
+            return result.Any()
+                ? Utilities.BuildResponse<AudioBook>(HttpStatusCode.OK, BaseMessageStatus.OK_200, result)
+                : Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.AUDIOBOOK_NOT_FOUND, new List<AudioBook>());
+        } catch (Exception ex) {
+            return Utilities.BuildResponse<AudioBook>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
+        }
     }
 
     // Buscar por Nombre y Apellido de Autor
     public async Task<BaseMessage<AudioBook>> GetAudioBookByAuthorFullName(string authorName, string authorLastName)
     {
-        if (string.IsNullOrWhiteSpace(authorLastName))
+        try
         {
-            return Utilities.BuildResponse(HttpStatusCode.BadRequest, BaseMessageStatus.AUDIOBOOK_NOT_FOUND, new List<AudioBook>());
+            var result = await _unitOfWork.AudioBookRepository.GetAllAsync(a => a.Author.Name.ToLower().Contains(authorName.ToLower()) &&
+            a.Author.LastName.ToLower().Contains(authorLastName.ToLower()), 
+            includeProperties: "Author");
+            return result.Any()
+                ? Utilities.BuildResponse<AudioBook>(HttpStatusCode.OK, BaseMessageStatus.OK_200, result)
+                : Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.AUDIOBOOK_NOT_FOUND, new List<AudioBook>());
+        } catch (Exception ex)
+        {
+            return Utilities.BuildResponse<AudioBook>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
         }
-        var result = await _unitOfWork.AudioBookRepository.GetAllAsync(a => a.Author.Name.ToLower().Contains(authorName.ToLower()) && 
-            a.Author.LastName.ToLower().Contains(authorLastName.ToLower()), includeProperties: "Author");
-            
-
-        return result.Any()
-            ? Utilities.BuildResponse<AudioBook>(HttpStatusCode.OK, BaseMessageStatus.OK_200, result)
-            : Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.AUDIOBOOK_NOT_FOUND, new List<AudioBook>());
     }
 
 
     // Buscar por País de Autor
     public async Task<BaseMessage<AudioBook>> GetAudioBookByAuthorCountry(string authorCountry)
     {
-        var result = await _unitOfWork.AudioBookRepository.GetAllAsync(a => a.Author.Country.ToLower().Contains( authorCountry.ToLower()), includeProperties: "Author");
-
-        return result.Any()
-            ? Utilities.BuildResponse<AudioBook>(HttpStatusCode.OK, BaseMessageStatus.OK_200, result)
-            : Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.AUDIOBOOK_NOT_FOUND, new List<AudioBook>());
+        try
+        {
+            var result = await _unitOfWork.AudioBookRepository.GetAllAsync(a => a.Author.Country.ToLower().Contains(authorCountry.ToLower()), 
+            includeProperties: "Author");
+            return result.Any()
+                ? Utilities.BuildResponse<AudioBook>(HttpStatusCode.OK, BaseMessageStatus.OK_200, result)
+                : Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.AUDIOBOOK_NOT_FOUND, new List<AudioBook>());
+        } catch (Exception ex)
+        {
+            return Utilities.BuildResponse<AudioBook>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
+        }
     }
 
     // Buscar por Rango de Fecha de Nacimiento de Autor
     public async Task<BaseMessage<AudioBook>> GetAudioBookByAuthorBirthDateRange(DateOnly startDate, DateOnly endDate)
     {
-        var result = await _unitOfWork.AudioBookRepository.GetAllAsync(b => b.Author.BirthDate >= startDate && b.Author.BirthDate <= endDate, includeProperties: "Author");
-
-        return result.Any()
-            ? Utilities.BuildResponse<AudioBook>(HttpStatusCode.OK, BaseMessageStatus.OK_200, result)
-            : Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.AUDIOBOOK_NOT_FOUND, new List<AudioBook>());
+        try
+        {
+            var result = await _unitOfWork.AudioBookRepository.GetAllAsync(b => b.Author.BirthDate >= startDate && b.Author.BirthDate <= endDate,
+            includeProperties: "Author");
+            return result.Any()
+                ? Utilities.BuildResponse<AudioBook>(HttpStatusCode.OK, BaseMessageStatus.OK_200, result)
+                : Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.AUDIOBOOK_NOT_FOUND, new List<AudioBook>());
+        } catch (Exception ex)
+        {
+            return Utilities.BuildResponse<AudioBook>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
+        }
     }
     #endregion
 }
