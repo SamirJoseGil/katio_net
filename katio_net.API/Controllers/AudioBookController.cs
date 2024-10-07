@@ -58,6 +58,15 @@ namespace katio.API.Controllers
 
         #region Find By AudioBook
 
+        // Busca AudioLibro por su Id
+        [HttpGet]
+        [Route("FindAudioBookById")]
+        public async Task<IActionResult> GetByAudioBookId(int id)
+        {
+            var response = await _audioBookService.GetAudioBookById(id);
+            return response != null ? Ok(response) : StatusCode(StatusCodes.Status404NotFound, response);
+        }
+
         // Busca un Audiolibro por su Nombre
         [HttpGet]
         [Route("FindAudioBookByName")]

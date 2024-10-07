@@ -1,6 +1,4 @@
-﻿
-
-using katio.Data.Dto;
+﻿using katio.Data.Dto;
 using katio.Data.Models;
 
 namespace katio.Business.Interfaces;
@@ -10,8 +8,8 @@ public interface IAudioBookService
     Task<BaseMessage<AudioBook>> Index();
     Task<BaseMessage<AudioBook>> CreateAudioBook(AudioBook audioBook);
     Task<BaseMessage<AudioBook>> DeleteAudioBook(int id);
-    Task<AudioBook> UpdateAudioBook(AudioBook audioBook);
-
+    Task<BaseMessage<AudioBook>> UpdateAudioBook(AudioBook audioBook);
+    Task<BaseMessage<AudioBook>> GetAudioBookById(int id);
     Task<BaseMessage<AudioBook>> GetByAudioBookName(string name);
     Task<BaseMessage<AudioBook>> GetByAudioBookISBN10(string ISBN10);
     Task<BaseMessage<AudioBook>> GetByAudioBookISBN13(string ISBN13);
