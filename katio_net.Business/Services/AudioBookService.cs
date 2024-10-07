@@ -10,14 +10,11 @@ namespace katio.Business.Services;
 public class AudioBookService : IAudioBookService
 {
     // Lista de libros
-    private readonly KatioContext _context;
-
     private readonly IUnitOfWork _unitOfWork;
 
     // Constructor
-    public AudioBookService(KatioContext context, IUnitOfWork unitOfWork)
+    public AudioBookService(IUnitOfWork unitOfWork)
     {
-        _context = context;
         _unitOfWork = unitOfWork;
     }
     // Constructor

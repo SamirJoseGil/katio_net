@@ -3,7 +3,6 @@ using katio.Data.Models;
 using katio.Data.Dto;
 using katio.Data;
 using System.Net;
-using Microsoft.EntityFrameworkCore;
 
 namespace katio.Business.Services;
 
@@ -15,7 +14,7 @@ public class BookService : IBookService
     // Constructor
     public BookService(IUnitOfWork unitOfWork)
     {
-        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+        _unitOfWork = unitOfWork;
     }
 
     // Traer todos los libros
