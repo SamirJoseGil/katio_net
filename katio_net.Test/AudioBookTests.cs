@@ -257,14 +257,8 @@ public class AudioBookTests
 
         _audioBookRepository.GetAllAsync(Arg.Any<Expression<Func<AudioBook, bool>>>()).Returns(new List<AudioBook> { audioBook });
 
-
-
         // Act
-
         var result = await _audioBookService.GetByAudioBookISBN13(audioBook.ISBN13);
-
-
-
         // Assert
 
         Assert.IsTrue(result.ResponseElements.Any());
@@ -602,21 +596,13 @@ public class AudioBookTests
 
         // Arrange
 
-        var narratorName = "Narrator1";  // Cambia por el nombre del narrador que necesites
+        var narratorName = "Narrator1";  
 
-        var audioBook = _audioBooks.First(); // Usa el primer audiolibro de la lista de ejemplos
+        var audioBook = _audioBooks.First(); 
 
-        audioBook.Narrator = new Narrator { Name = narratorName }; // Asegúrate de asignar un narrador
+        audioBook.Narrator = new Narrator { Name = narratorName }; 
 
-
-
-        // Simulas la búsqueda en el repositorio utilizando GetAllAsync con un filtro
-
-        _audioBookRepository
-
-      .GetAllAsync(Arg.Any<Expression<Func<AudioBook, bool>>>())
-
-      .ReturnsForAnyArgs(new List<AudioBook> { audioBook });
+        _audioBookRepository.GetAllAsync(Arg.Any<Expression<Func<AudioBook, bool>>>()).ReturnsForAnyArgs(new List<AudioBook> { audioBook });
 
 
 
@@ -673,36 +659,6 @@ public class AudioBookTests
         Assert.IsFalse(result.ResponseElements.Any());
 
     }
-
-    // Test for find by narrator name exeption
-
-    [TestMethod]
-
-    public async Task GetAudioBookByNarratorName_Exeption()
-
-    {
-
-        // Arrange
-
-        _audioBookRepository
-
-      .GetAllAsync(Arg.Any<Expression<Func<AudioBook, bool>>>())
-
-      .ThrowsForAnyArgs(new Exception());
-
-        var result = await _audioBookService.GetByAudioBookName(Arg.Any<string>());
-
-
-
-        Assert.AreEqual((int)result.StatusCode, 500);
-
-    }
-
-
-
-
-
-
 
     #endregion
 
@@ -952,8 +908,95 @@ public class AudioBookTests
 
     }
 
+    // Test for find by narrator name exeption
+    [TestMethod]
+
+    public async Task GetAudioBookByNarratorName_Exeption()
+
+    {
+
+        // Arrange
+
+        _audioBookRepository.GetAllAsync(Arg.Any<Expression<Func<AudioBook, bool>>>()).ThrowsForAnyArgs(new Exception());
+
+        var result = await _audioBookService.GetByAudioBookName(Arg.Any<string>());
 
 
+        Assert.AreEqual((int)result.StatusCode, 500);
+
+    }
+
+    // Test for find ba narrator id exeption
+    [TestMethod]
+    public async Task GetAudioBookByNarratorId_Exeption()
+    {
+        
+        // Arrange
+
+        var audioBook = _audioBooks.First();
+
+        _audioBookRepository.When(x => x.FindAsync(audioBook.NarratorId)).Do(x => throw new Exception());
+
+        var result = await _audioBookService.GetAudioBookByNarrator(audioBook.NarratorId);
+
+
+
+        Assert.AreEqual((int)result.StatusCode, 500);
+    }
+
+    // Test for find by narrator last name exeption
+    [TestMethod]
+
+    public async Task GetAudioBookByNarratorLastName_Exeption()
+
+    {
+
+        // Arrange
+
+        _audioBookRepository.GetAllAsync(Arg.Any<Expression<Func<AudioBook, bool>>>()).ThrowsForAnyArgs(new Exception());
+
+        var result = await _audioBookService.GetAudioBookByNarratorLastName(Arg.Any<string>());
+
+
+        Assert.AreEqual((int)result.StatusCode, 500);
+
+
+    }
+
+    // Test for find by narrator full name exeption
+    [TestMethod]
+
+    public async Task GetAudioBookByNarratorFullName()
+
+    {
+
+        // Arrange
+
+        _audioBookRepository.GetAllAsync(Arg.Any<Expression<Func<AudioBook, bool>>>()).ThrowsForAnyArgs(new Exception());
+
+        var result = await _audioBookService.GetAudioBookByNarratorFullName(Arg.Any<string>(),Arg.Any<string>());
+
+        Assert.AreEqual((int)result.StatusCode, 500);
+
+
+    }
+
+    // Test for find by narrator genre exeption
+    [TestMethod]
+
+    public async Task GetAudioBookByNarratorGenre()
+
+    {
+        // Arrange
+
+        _audioBookRepository.GetAllAsync(Arg.Any<Expression<Func<AudioBook, bool>>>()).ThrowsForAnyArgs(new Exception());
+
+        var result = await _audioBookService.GetAudioBookByNarratorGenre(Arg.Any<string>());
+
+        Assert.AreEqual((int)result.StatusCode, 500);
+
+
+    }
 
     #endregion
 
