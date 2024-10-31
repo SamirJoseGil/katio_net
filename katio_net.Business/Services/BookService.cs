@@ -27,7 +27,7 @@ public class BookService : IBookService
         }
         catch (Exception ex)
         {
-            return Utilities.BuildResponse<Book>(HttpStatusCode.InternalServerError, BaseMessageStatus.INTERNAL_SERVER_ERROR_500);
+            return Utilities.BuildResponse<Book>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}" );
         }
     }
 
