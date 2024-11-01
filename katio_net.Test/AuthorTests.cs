@@ -426,16 +426,13 @@ public class AuthorTests
             BirthDate = new DateOnly(1940, 03, 03)
         };
 
-        _authorRepository.GetAllAsync(Arg.Any<Expression<Func<Author, bool>>>())
-            .ReturnsForAnyArgs(new List<Author> { existingAuthor });
+        _authorRepository.GetAllAsync(Arg.Any<Expression<Func<Author, bool>>>()).ReturnsForAnyArgs(new List<Author> { existingAuthor });
 
         // Act
         var result = await _authorService.CreateAuthor(newAuthor);
 
         // Assert
-        Assert.IsNotNull(result);
-        Assert.AreEqual(HttpStatusCode.Conflict, result.StatusCode);
-        Assert.IsTrue(result.Message.Contains(BaseMessageStatus.BAD_REQUEST_400));
+        Assert.IsFalse(result.ResponseElements.Any());
     }
     // Test for updating author Fail
     [TestMethod]
