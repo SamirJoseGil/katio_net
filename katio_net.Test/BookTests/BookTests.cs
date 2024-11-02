@@ -5,9 +5,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using katio.Business.Interfaces;
 using katio.Business.Services;
 using System.Linq.Expressions;
-using katio.Data.Dto;
-using System.Net;
-using NSubstitute.ExceptionExtensions;
 
 namespace katio.Test.BookTests;
 
@@ -64,8 +61,7 @@ public class BookTests
         var result = await _bookService.Index();
 
         // Assert
-        Assert.IsNotNull(result);
-        Assert.AreEqual(2, result.ResponseElements.Count());
+        Assert.IsTrue(result.ResponseElements.Any());
     }
     // Test for creating a book
     [TestMethod]

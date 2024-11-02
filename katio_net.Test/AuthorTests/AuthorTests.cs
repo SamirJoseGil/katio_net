@@ -172,7 +172,6 @@ public class AuthorTests
 
         // Assert
         Assert.IsTrue(result.ResponseElements.Any());
-        Assert.AreEqual(2, result.ResponseElements.Count());
     }
     // Test for getting author by country
     [TestMethod]

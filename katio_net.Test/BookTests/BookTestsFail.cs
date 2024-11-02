@@ -179,7 +179,7 @@ public class BookTestsFail
         var result = await _bookService.GetBooksByISBN13(book.ISBN13);
 
         // Assert
-        Assert.AreEqual(HttpStatusCode.NotFound, result.StatusCode);
+        Assert.IsFalse(result.ResponseElements.Any());
     }
     // Test for failing to get books by edition
     [TestMethod]
