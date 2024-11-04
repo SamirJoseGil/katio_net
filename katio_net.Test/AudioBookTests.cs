@@ -697,7 +697,64 @@ public class AudioBookTests
 
     #region Test Fail(NotFound)
 
-    
+
+    // Test for creating AudioBook Fail
+    [TestMethod]
+    public async Task CreateAudioBookFail_NotFound()
+    {
+        // Arrange
+        var existingAudioBook = new AudioBook
+        {
+            Id = 1,
+            Name = "Cien años de soledad",
+            ISBN10 = "8420471836",
+            ISBN13 = "978-8420471839",
+            Published = new DateOnly(1967, 06, 05),
+            Edition = "RAE Obra Académica",
+            Genre = "Ficcion",
+            LenghtInSeconds = 1,
+            Path = "C:/Users/Usuario/Downloads/Cien a�os de soledad.mp3",
+            NarratorId = 1
+            
+        };
+        _audioBookRepository.GetAllAsync(Arg.Any<Expression<Func<AudioBook, bool>>>()).ReturnsForAnyArgs(new List<AudioBook> { existingAudioBook });
+
+        // Act
+        var result = await _audioBookService.CreateAudioBook(existingAudioBook);
+
+        // Assert
+        Assert.IsFalse(result.ResponseElements.Any());
+    }
+
+    // Test for updating audio book Fail
+    [TestMethod]
+    public async Task UpdateAuthor_NotFound()
+    {
+        // Arrange
+        _audioBookRepository.Update(Arg.Any<AudioBook>()).ThrowsAsyncForAnyArgs(new Exception());
+        _unitOfWork.AudioBookRepository.Returns(_audioBookRepository);
+
+        // Act
+        var result = await _audioBookService.UpdateAudioBook(new AudioBook());
+
+        // Assert
+        Assert.IsFalse(result.ResponseElements.Any());
+    }
+
+    // Test for deleting audio book Fail
+    [TestMethod]
+    public async Task DeleteAuthor_NotFound()
+    {
+        // Arrange
+        var authorToDelete = _audioBooks.First();
+        _audioBookRepository.FindAsync(authorToDelete.Id).ReturnsForAnyArgs(Task.FromResult<AudioBook>(null));
+
+        // Act
+        var result = await _audioBookService.DeleteAudioBook(authorToDelete.Id);
+
+        // Assert
+        Assert.IsFalse(result.ResponseElements.Any());
+    }
     
     // Test for find by audiobook  Fail
     [TestMethod]
@@ -714,7 +771,23 @@ public class AudioBookTests
         Assert.IsFalse(result.ResponseElements.Any());
 
     }
-    
+
+
+    // Test for getting audiobook by id Fail
+    [TestMethod]
+    public async Task GetAudioBookById_NotFound()
+    {
+        // Arrange
+        var audioBook = _audioBooks.First();
+        _audioBookRepository.FindAsync(audioBook.Id).ReturnsForAnyArgs(Task.FromResult<AudioBook>(null));
+
+        // Act
+        var result = await _audioBookService.GetAudioBookById(audioBook.Id);
+
+        // Assert
+        Assert.IsFalse(result.ResponseElements.Any());
+    }
+
     // Test for find by audiobook name Fail
     [TestMethod]
     public async Task GetAudioBookName_NotFound()
@@ -836,42 +909,45 @@ public class AudioBookTests
 
     }
                
-//     // Test for find by audiobook ISB13 Fail
-//     [TestMethod]
-//     public async Task GetByAudioBookEdition_NotFound()
-//     {
-//         var audioBookEdition = "Edition"; 
-//         var audioBook = _audioBooks.First();
+    // Test for find by audiobook Length in seconds Fail
+    [TestMethod]
+    public async Task GetByAudioBookLenghtInSeconds_NotFound()
+    {
+        var audioBookLength = 0; 
+        var audioBook = _audioBooks.First();
 
-//         audioBook = new AudioBook { Edition = audioBookEdition }; 
-//         // Arrange
-//         _audioBookRepository.GetAllAsync(Arg.Any<Expression<Func<AudioBook, bool>>>())
-//         .ReturnsForAnyArgs(new List<AudioBook>());
+        audioBook = new AudioBook { LenghtInSeconds = audioBookLength }; 
+        // Arrange
+        _audioBookRepository.GetAllAsync(Arg.Any<Expression<Func<AudioBook, bool>>>())
+        .ReturnsForAnyArgs(new List<AudioBook>());
 
-//         // Act
-//         var result = await _audioBookService.GetByAudioBookEdition(audioBookEdition);
+        // Act
+        var result = await _audioBookService.GetByAudioBookLenghtInSeconds(audioBookLength);
 
-//         // Assert
-//         Assert.IsFalse(result.ResponseElements.Any());
+        // Assert
+        Assert.IsFalse(result.ResponseElements.Any());
 
-//     }
+    }
 
-//     // Test for find by narrator  Fail
-//     [TestMethod]
-//     public async Task GetAudioBookByNarratorById_NotFound()
-//     {
-//         var audioBook = _audioBooks.First();
-//         // Arrange
-//         _audioBookRepository.FindAsync(0)
-//         .ReturnsForAnyArgs(null);
+    // Test for find by narrator  Fail
+    [TestMethod]
+    public async Task GetAudioBookByNarrator_NotFound()
+    {
+        var narratorId = 0; 
+        var audioBook = _audioBooks.First();
 
-//         // Act
-//         var result = await _audioBookService.GetAudioBookByNarrator();
+        audioBook = new AudioBook { NarratorId = narratorId }; 
+        // Arrange
+        _audioBookRepository.GetAllAsync(Arg.Any<Expression<Func<AudioBook, bool>>>())
+        .ReturnsForAnyArgs(new List<AudioBook>());
 
-//         // Assert
-//         Assert.IsFalse(result.ResponseElements.Any());
+        // Act
+        var result = await _audioBookService.GetAudioBookByNarrator(narratorId);
 
-//     }
+        // Assert
+        Assert.IsFalse(result.ResponseElements.Any());
+
+    }
 
 
 
@@ -1209,9 +1285,6 @@ public class AudioBookTests
 
     }
 
-    // Test for find to create audio book exeption
-
-
     // Test for find by narrator name exeption
     [TestMethod]
 
@@ -1300,6 +1373,64 @@ public class AudioBookTests
         Assert.AreEqual((int)result.StatusCode, 500);
 
 
+    }
+
+    // Test for creating audio book with repository exceptions
+    [TestMethod]
+    public async Task CreateAudioBookRepositoryException()
+    {
+        // Arrange
+        var newAudioBook = new AudioBook
+        {
+            Id = 1,
+            Name = "Cien años de soledad",
+            ISBN10 = "8420471836",
+            ISBN13 = "978-8420471839",
+            Published = new DateOnly(1967, 06, 05),
+            Edition = "RAE Obra Académica",
+            Genre = "Ficcion",
+            LenghtInSeconds = 1,
+            Path = "C:/Users/Usuario/Downloads/Cien a�os de soledad.mp3",
+            NarratorId = 1
+        };
+        _audioBookRepository.GetAllAsync(Arg.Any<Expression<Func<AudioBook, bool>>>()).Returns(new List<AudioBook>());
+        _audioBookRepository.When(x => x.AddAsync(Arg.Any<AudioBook>())).Do(x => throw new Exception("Repository error"));
+
+        // Act
+        var result = await _audioBookService.CreateAudioBook(newAudioBook);
+
+        // Assert
+        Assert.AreEqual((int)result.StatusCode, 500);
+    }
+
+    // Test for updating audio book with repository exceptions
+    [TestMethod]
+    public async Task UpdateAudioBookRepositoryException()
+    {
+        // Arrange
+        var audioBookToUpdate = _audioBooks.First();
+        _audioBookRepository.FindAsync(audioBookToUpdate.Id).Returns(audioBookToUpdate);
+        var updatedAudioBook = new AudioBook
+        {
+            Id = 1,
+            Name = "Cien años de soledad",
+            ISBN10 = "8420471836",
+            ISBN13 = "978-8420471839",
+            Published = new DateOnly(1967, 06, 05),
+            Edition = "RAE Obra Académica",
+            Genre = "Ficcion",
+            LenghtInSeconds = 1,
+            Path = "C:/Users/Usuario/Downloads/Cien a�os de soledad.mp3",
+            NarratorId = 1
+        };
+        _audioBookRepository.FindAsync(audioBookToUpdate.Id).Returns(audioBookToUpdate);
+        _audioBookRepository.When(x => x.Update(Arg.Any<AudioBook>())).Do(x => throw new Exception("Repository error"));
+
+        // Act
+        var result = await _audioBookService.UpdateAudioBook(updatedAudioBook);
+
+        // Assert
+        Assert.AreEqual((int)result.StatusCode, 500);
     }
 
     #endregion
