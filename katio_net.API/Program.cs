@@ -2,7 +2,6 @@ using katio.Business.Services;
 using katio.Business.Interfaces;
 using katio.Data;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,8 +10,8 @@ builder.Services.AddDbContext<KatioContext>(
     opt => opt.UseNpgsql(builder.Configuration.GetConnectionString("KatioDBPSQL")));
 
 // Configure CrossOrigin
-builder.Services.AddCors(Options => {
-    Options.AddPolicy(name: "katioRules", builder => {
+builder.Services.AddCors(options => {
+    options.AddPolicy(name: "katioRules", builder => {
         builder.AllowAnyHeader();
         builder.AllowAnyMethod();
         builder.AllowAnyOrigin();
@@ -23,7 +22,6 @@ builder.Services.AddCors(Options => {
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
 
 // Inject services to the container.
 builder.Services.AddScoped<IBookService, BookService>();
@@ -43,13 +41,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-
-// PopulateDB(app);
-
-
 app.UseHttpsRedirection();
+app.UseCors("katioRules"); // Asegúrate de aplicar la política de CORS aquí
 app.MapControllers();
-app.UseCors();
 
 // App run
 app.Run();

@@ -3,6 +3,7 @@ using katio.Data.Models;
 using katio.Data.Dto;
 using katio.Data;
 using System.Net;
+using System.Linq.Expressions;
 
 namespace katio.Business.Services;
 
@@ -33,6 +34,69 @@ public class AuthorService : IAuthorService
         }
     }
 
+    public async Task<BaseMessage<Author>> SearchAuthorsAsync(string searchTerm)
+    {
+        try
+        {
+            var parameter = Expression.Parameter(typeof(Author), "author");
+            var searchExpressions = new List<Expression>();
+
+            var lowerSearchTerm = Expression.Constant(searchTerm.ToLower(), typeof(string));
+
+            // Search in Name
+            var nameProperty = Expression.Property(parameter, nameof(Author.Name));
+            var nameToLower = Expression.Call(nameProperty, "ToLower", null);
+            var nameContains = Expression.Call(
+                nameToLower,
+                "Contains",
+                null,
+                lowerSearchTerm
+            );
+            searchExpressions.Add(nameContains);
+
+            // Search in LastName
+            var lastNameProperty = Expression.Property(parameter, nameof(Author.LastName));
+            var lastNameToLower = Expression.Call(lastNameProperty, "ToLower", null);
+            var lastNameContains = Expression.Call(
+                lastNameToLower,
+                "Contains",
+                null,
+                lowerSearchTerm
+            );
+            searchExpressions.Add(lastNameContains);
+
+            // Search in Country
+            var countryProperty = Expression.Property(parameter, nameof(Author.Country));
+            var countryToLower = Expression.Call(countryProperty, "ToLower", null);
+            var countryContains = Expression.Call(
+                countryToLower,
+                "Contains",
+                null,
+                lowerSearchTerm
+            );
+            searchExpressions.Add(countryContains);
+
+            // Search in BirthDate (if searchTerm is a valid date)
+            if (DateOnly.TryParse(searchTerm, out var birthDate))
+            {
+                var birthDateProperty = Expression.Property(parameter, nameof(Author.BirthDate));
+                var birthDateEquals = Expression.Equal(birthDateProperty, Expression.Constant(birthDate));
+                searchExpressions.Add(birthDateEquals);
+            }
+
+            // Combine all search expressions with OR
+            var body = searchExpressions.Aggregate(Expression.OrElse);
+            var lambda = Expression.Lambda<Func<Author, bool>>(body, parameter);
+
+            var result = await _unitOfWork.AuthorRepository.GetAllAsync(lambda);
+            return result.Any() ? Utilities.BuildResponse(HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
+                Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.AUTHOR_NOT_FOUND, new List<Author>());
+        }
+        catch (Exception ex)
+        {
+            return Utilities.BuildResponse<Author>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
+        }
+    }
 
     #region Create Update Delete
 
