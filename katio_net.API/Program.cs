@@ -68,7 +68,9 @@ async Task PopulateDB(WebApplication app)
             Name = "Gabriel",
             LastName = "García Márquez",
             Country = "Colombia",
-            BirthDate = new DateOnly(1940, 03, 03)
+            BirthDate = new DateOnly(1940, 03, 03),
+            ProfilePicture = "",
+            Biography = "Aca va la Biografia de el autor"
         });
 
         await AuthorService.CreateAuthor(new katio.Data.Models.Author
@@ -76,7 +78,9 @@ async Task PopulateDB(WebApplication app)
             Name = "Jorge",
             LastName = "Isaacs",
             Country = "Colombia",
-            BirthDate = new DateOnly(1836, 04, 01)
+            BirthDate = new DateOnly(1836, 04, 01),
+            ProfilePicture = "",
+            Biography = "Aca va la Biografia de el autor"
         });
 
         await AuthorService.CreateAuthor(new katio.Data.Models.Author
@@ -84,7 +88,9 @@ async Task PopulateDB(WebApplication app)
             Name = "Germán",
             LastName = "Castro-Caycedo",
             Country = "Colombia",
-            BirthDate = new DateOnly(1940, 03, 03)
+            BirthDate = new DateOnly(1940, 03, 03),
+            ProfilePicture = "",
+            Biography = "Aca va la Biografia de el autor"
         });
 
         await AuthorService.CreateAuthor(new katio.Data.Models.Author
@@ -92,7 +98,9 @@ async Task PopulateDB(WebApplication app)
             Name = "Silvia",
             LastName = "Moreno García",
             Country = "México",
-            BirthDate = new DateOnly(1981, 04, 25)
+            BirthDate = new DateOnly(1981, 04, 25),
+            ProfilePicture = "",
+            Biography = "Aca va la Biografia de el autor"
         });
 
         await AuthorService.CreateAuthor(new katio.Data.Models.Author
@@ -100,7 +108,9 @@ async Task PopulateDB(WebApplication app)
             Name = "Irene",
             LastName = "Vallejo",
             Country = "España",
-            BirthDate = new DateOnly(1979, 06, 06)
+            BirthDate = new DateOnly(1979, 06, 06),
+            ProfilePicture = "",
+            Biography = "Aca va la Biografia de el autor"
         });
 
         await AuthorService.CreateAuthor(new katio.Data.Models.Author
@@ -108,7 +118,9 @@ async Task PopulateDB(WebApplication app)
             Name = "Sarah J",
             LastName = "Maas",
             Country = "EEUU",
-            BirthDate = new DateOnly(1986, 03, 05)
+            BirthDate = new DateOnly(1986, 03, 05),
+            ProfilePicture = "",
+            Biography = "Aca va la Biografia de el autor"
         });
 
         await AuthorService.CreateAuthor(new katio.Data.Models.Author
@@ -116,7 +128,9 @@ async Task PopulateDB(WebApplication app)
             Name = "Mario",
             LastName = "Mendoza",
             Country = "Colombia",
-            BirthDate = new DateOnly(1964, 01, 10)
+            BirthDate = new DateOnly(1964, 01, 10),
+            ProfilePicture = "",
+            Biography = "Aca va la Biografia de el autor"
         });
 
         await AuthorService.CreateAuthor(new katio.Data.Models.Author
@@ -124,7 +138,9 @@ async Task PopulateDB(WebApplication app)
             Name = "Hector",
             LastName = "Abad Faciolince",
             Country = "Colombia",
-            BirthDate = new DateOnly(1958, 10, 01)
+            BirthDate = new DateOnly(1958, 10, 01),
+            ProfilePicture = "",
+            Biography = "Aca va la Biografia de el autor"
         });
 
         await AuthorService.CreateAuthor(new katio.Data.Models.Author
@@ -132,7 +148,9 @@ async Task PopulateDB(WebApplication app)
             Name = "Laura",
             LastName = "Restrepo",
             Country = "Colombia",
-            BirthDate = new DateOnly(1950, 01, 01)
+            BirthDate = new DateOnly(1950, 01, 01),
+            ProfilePicture = "",
+            Biography = "Aca va la Biografia de el autor"
         });
 
         await AuthorService.CreateAuthor(new katio.Data.Models.Author
@@ -140,7 +158,9 @@ async Task PopulateDB(WebApplication app)
             Name = "Piedad",
             LastName = "Bonnet",
             Country = "Colombia",
-            BirthDate = new DateOnly(1951, 01, 01)
+            BirthDate = new DateOnly(1951, 01, 01),
+            ProfilePicture = "",
+            Biography = "Aca va la Biografia de el autor"
         });
 
         await AuthorService.CreateAuthor(new katio.Data.Models.Author
@@ -148,7 +168,9 @@ async Task PopulateDB(WebApplication app)
             Name = "Fernando",
             LastName = "Vallejo",
             Country = "Colombia",
-            BirthDate = new DateOnly(1942, 10, 24)
+            BirthDate = new DateOnly(1942, 10, 24),
+            ProfilePicture = "",
+            Biography = "Aca va la Biografia de el autor"
         });
 
         await AuthorService.CreateAuthor(new katio.Data.Models.Author
@@ -156,133 +178,171 @@ async Task PopulateDB(WebApplication app)
             Name = "Antonio",
             LastName = "Caballero",
             Country = "Colombia",
-            BirthDate = new DateOnly(1945, 05, 15)
+            BirthDate = new DateOnly(1945, 05, 15),
+            ProfilePicture = "",
+            Biography = "Aca va la Biografia de el autor"
         });
         await AuthorService.CreateAuthor(new katio.Data.Models.Author
         {
             Name = "William",
             LastName = "Ospina",
             Country = "Colombia",
-            BirthDate = new DateOnly(1954, 03, 02)
+            BirthDate = new DateOnly(1954, 03, 02),
+            ProfilePicture = "",
+            Biography = "Aca va la Biografia de el autor"
         });
         await AuthorService.CreateAuthor(new katio.Data.Models.Author
         {
             Name = "Juan Gabriel",
             LastName = "Vasquez",
             Country = "Colombia",
-            BirthDate = new DateOnly(1973, 01, 01)
+            BirthDate = new DateOnly(1973, 01, 01),
+            ProfilePicture = "",
+            Biography = "Aca va la Biografia de el autor"
         });
         await AuthorService.CreateAuthor(new katio.Data.Models.Author
         {
             Name = "Santiago",
             LastName = "Gamboa",
             Country = "Colombia",
-            BirthDate = new DateOnly(1965, 01, 01)
+            BirthDate = new DateOnly(1965, 01, 01),
+            ProfilePicture = "",
+            Biography = "Aca va la Biografia de el autor"
         });
         await AuthorService.CreateAuthor(new katio.Data.Models.Author
         {
             Name = "Angela",
             LastName = "Becerra",
             Country = "Colombia",
-            BirthDate = new DateOnly(1957, 07, 17)
+            BirthDate = new DateOnly(1957, 07, 17),
+            ProfilePicture = "",
+            Biography = "Aca va la Biografia de el autor"
         });
         await AuthorService.CreateAuthor(new katio.Data.Models.Author
         {
             Name = "Stephen",
             LastName = "King",
             Country = "EEUU",
-            BirthDate = new DateOnly(1947, 09, 21)
+            BirthDate = new DateOnly(1947, 09, 21),
+            ProfilePicture = "",
+            Biography = "Aca va la Biografia de el autor"
         });
         await AuthorService.CreateAuthor(new katio.Data.Models.Author
         {
             Name = "Anne",
             LastName = "Rice",
             Country = "EEUU",
-            BirthDate = new DateOnly(1941, 10, 04)
+            BirthDate = new DateOnly(1941, 10, 04),
+            ProfilePicture = "",
+            Biography = "Aca va la Biografia de el autor"
         });
         await AuthorService.CreateAuthor(new katio.Data.Models.Author
         {
             Name = "Jeff",
             LastName = "Vandermeer",
             Country = "EEUU",
-            BirthDate = new DateOnly(1968, 07, 07)
+            BirthDate = new DateOnly(1968, 07, 07),
+            ProfilePicture = "",
+            Biography = "Aca va la Biografia de el autor"
         });
         await AuthorService.CreateAuthor(new katio.Data.Models.Author
         {
             Name = "Liu",
             LastName = "Cixin",
             Country = "China",
-            BirthDate = new DateOnly(1963, 06, 30)
+            BirthDate = new DateOnly(1963, 06, 30),
+            ProfilePicture = "",
+            Biography = "Aca va la Biografia de el autor"
         });
         await AuthorService.CreateAuthor(new katio.Data.Models.Author
         {
             Name = "Fyodor",
             LastName = "Dvostoesky",
             Country = "Rusia",
-            BirthDate = new DateOnly(1821, 11, 11)
+            BirthDate = new DateOnly(1821, 11, 11),
+            ProfilePicture = "",
+            Biography = "Aca va la Biografia de el autor"
         });
         await AuthorService.CreateAuthor(new katio.Data.Models.Author
         {
             Name = "Leo",
             LastName = "Tolstoy",
             Country = "Rusia",
-            BirthDate = new DateOnly(1928, 09, 09)
+            BirthDate = new DateOnly(1928, 09, 09),
+            ProfilePicture = "",
+            Biography = "Aca va la Biografia de el autor"
         });
         await AuthorService.CreateAuthor(new katio.Data.Models.Author
         {
             Name = "Anton",
             LastName = "Chekhov",
             Country = "Rusia",
-            BirthDate = new DateOnly(1860, 01, 29)
+            BirthDate = new DateOnly(1860, 01, 29),
+            ProfilePicture = "",
+            Biography = "Aca va la Biografia de el autor"
         });
         await AuthorService.CreateAuthor(new katio.Data.Models.Author
         {
             Name = "Issac",
             LastName = "Asimov",
             Country = "Rusia, EEUU",
-            BirthDate = new DateOnly(1920, 01, 02)
+            BirthDate = new DateOnly(1920, 01, 02),
+            ProfilePicture = "",
+            Biography = "Aca va la Biografia de el autor"
         });
         await AuthorService.CreateAuthor(new katio.Data.Models.Author
         {
             Name = "Rudyard",
             LastName = "Kipling",
             Country = "India",
-            BirthDate = new DateOnly(1865, 12, 30)
+            BirthDate = new DateOnly(1865, 12, 30),
+            ProfilePicture = "",
+            Biography = "Aca va la Biografia de el autor"
         });
         await AuthorService.CreateAuthor(new katio.Data.Models.Author
         {
             Name = "Jon Ronald Reuel",
             LastName = "Tolkien",
             Country = "Surafrica",
-            BirthDate = new DateOnly(1892, 01, 03)
+            BirthDate = new DateOnly(1892, 01, 03),
+            ProfilePicture = "",
+            Biography = "Aca va la Biografia de el autor"
         });
         await AuthorService.CreateAuthor(new katio.Data.Models.Author
         {
             Name = "Clive Staples",
             LastName = "Lewis",
             Country = "Reino Unido",
-            BirthDate = new DateOnly(1898, 11, 29)
+            BirthDate = new DateOnly(1898, 11, 29),
+            ProfilePicture = "",
+            Biography = "Aca va la Biografia de el autor"
         });
         await AuthorService.CreateAuthor(new katio.Data.Models.Author
         {
             Name = "George Raymond Richard",
             LastName = "Martin",
             Country = "EEUU",
-            BirthDate = new DateOnly(1948, 09, 20)
+            BirthDate = new DateOnly(1948, 09, 20),
+            ProfilePicture = "",
+            Biography = "Aca va la Biografia de el autor"
         });
         await AuthorService.CreateAuthor(new katio.Data.Models.Author
         {
             Name = "Frank",
             LastName = "Herbert",
             Country = "EEUU",
-            BirthDate = new DateOnly(1920, 10, 28)
+            BirthDate = new DateOnly(1920, 10, 28),
+            ProfilePicture = "",
+            Biography = "Aca va la Biografia de el autor"
         });
         await AuthorService.CreateAuthor(new katio.Data.Models.Author
         {
             Name = "Albert",
             LastName = "Camus",
             Country = "Francia",
-            BirthDate = new DateOnly(1913, 11, 07)
+            BirthDate = new DateOnly(1913, 11, 07),
+            ProfilePicture = "",
+            Biography = "Aca va la Biografia de el autor"
         });
 
         await AuthorService.CreateAuthor(new katio.Data.Models.Author
@@ -290,7 +350,9 @@ async Task PopulateDB(WebApplication app)
             Name = "Margaret",
             LastName = "Atwood",
             Country = "Canadá",
-            BirthDate = new DateOnly(1939, 11, 18)
+            BirthDate = new DateOnly(1939, 11, 18),
+            ProfilePicture = "",
+            Biography = "Aca va la Biografia de el autor"
         });
 
         await AuthorService.CreateAuthor(new katio.Data.Models.Author
@@ -298,21 +360,27 @@ async Task PopulateDB(WebApplication app)
             Name = "Mary",
             LastName = "Shelley",
             Country = "Inglaterra",
-            BirthDate = new DateOnly(1890, 09, 15)
+            BirthDate = new DateOnly(1890, 09, 15),
+            ProfilePicture = "",
+            Biography = "Aca va la Biografia de el autor"
         });
         await AuthorService.CreateAuthor(new katio.Data.Models.Author
         {
             Name = "Agatha",
             LastName = "Christie",
             Country = "Inglaterra",
-            BirthDate = new DateOnly(1890, 09, 15)
+            BirthDate = new DateOnly(1890, 09, 15),
+            ProfilePicture = "",
+            Biography = "Aca va la Biografia de el autor"
         });
         await AuthorService.CreateAuthor(new katio.Data.Models.Author
         {
             Name = "Ursula K",
             LastName = "Le Guin",
             Country = "EEUU",
-            BirthDate = new DateOnly(1929, 10, 21)
+            BirthDate = new DateOnly(1929, 10, 21),
+            ProfilePicture = "",
+            Biography = "Aca va la Biografia de el autor"
         });
         #endregion
 
