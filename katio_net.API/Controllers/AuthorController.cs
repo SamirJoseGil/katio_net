@@ -30,7 +30,7 @@ namespace katio.API.Controllers
         [Route("SearchAuthor")]
         public async Task<IActionResult> SearchAuthorsAsync(string searchTerm)
         {
-            var response = await _authorService.SearchAuthorsAsync(searchTerm);
+            var response = await _authorService.SearchAuthorAsync(searchTerm);
             return response.TotalElements > 0 ? Ok(response) : StatusCode(StatusCodes.Status404NotFound, response);
         }
 
