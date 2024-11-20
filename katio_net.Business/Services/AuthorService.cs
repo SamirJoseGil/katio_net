@@ -34,7 +34,7 @@ public class AuthorService : IAuthorService
         }
     }
 
-    public async Task<BaseMessage<Author>> SearchAuthorsAsync(string searchTerm)
+    public async Task<BaseMessage<Author>> SearchAuthorAsync(string searchTerm)
     {
         try
         {

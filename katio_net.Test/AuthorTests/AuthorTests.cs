@@ -115,6 +115,22 @@ public class AuthorTests
         // Assert
         Assert.IsTrue(result.ResponseElements.Any());
     }
+    // Test for searching author omniscient
+    [TestMethod]
+    public async Task SearchAuthorAsync()
+    {
+        // Arrange
+        var searchTerm = "Cien";
+        var author = _authors;
+        _authorRepository.GetAllAsync(Arg.Any<Expression<Func<Author, bool>>>())
+        .Returns(author);
+
+        // Act
+        var result = await _authorService.SearchAuthorAsync(searchTerm);
+
+        // Assert
+        Assert.IsTrue(result.ResponseElements.Any());
+    }
     // Test for getting author by id
     [TestMethod]
     public async Task GetAuthorById()

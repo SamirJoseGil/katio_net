@@ -112,6 +112,19 @@ public class AuthorTestsFail
         // Assert
         Assert.IsFalse(result.ResponseElements.Any());
     }
+    // Test for search author Omniscient fail
+    [TestMethod]
+    public async Task SearchAuthorAsyncFail()
+    {
+        // Arrange
+        _authorRepository.GetAllAsync().Returns(new List<Author>());
+
+        // Act
+        var result = await _authorService.SearchAuthorAsync(searchTerm: "omniscient");
+
+        // Assert
+        Assert.IsFalse(result.ResponseElements.Any());
+    }
     // Test for getting author by id Fail
     [TestMethod]
     public async Task GetAuthorByIdFail()

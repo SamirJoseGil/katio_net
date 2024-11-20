@@ -115,6 +115,20 @@ public class AuthorTestsException
         // Assert
         Assert.AreEqual((int)result.StatusCode, 500);
     }
+    // Test for getting author omniscient with repository exceptions
+    [TestMethod]
+    public async Task SearchAuthorAsyncRepositoryException()
+    {
+        // Arrange
+        var searchTerm = "Author";
+        _authorRepository.When(x => x.GetAllAsync(Arg.Any<Expression<Func<Author, bool>>>())).Do(x => throw new Exception("Repository error"));
+
+        // Act
+        var result = await _authorService.SearchAuthorAsync(searchTerm);
+
+        // Assert
+        Assert.AreEqual((int)result.StatusCode, 500);
+    }
     // Test for getting author by id with repository exceptions
     [TestMethod]
     public async Task GetAuthorByIdRepositoryException()
