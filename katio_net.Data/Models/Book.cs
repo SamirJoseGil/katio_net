@@ -10,6 +10,7 @@ namespace katio.Data.Models
         public DateOnly Published { get; set; } = new DateOnly();
         public string Edition { get; set; } = string.Empty;
         public string DeweyIndex { get; set; } = string.Empty;
+        public string? bookCover { get; set; } = null;
 
 
 

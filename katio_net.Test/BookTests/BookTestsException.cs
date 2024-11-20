@@ -64,6 +64,20 @@ public class BookTestsException
         // Assert
         Assert.AreEqual((int)result.StatusCode, 500);
     }
+        // Test for getting Book omniscient with repository exceptions
+    [TestMethod]
+    public async Task SearchBookAsyncRepositoryException()
+    {
+        // Arrange
+        var searchTerm = "Book";
+        _bookRepository.When(x => x.GetAllAsync(Arg.Any<Expression<Func<Book, bool>>>())).Do(x => throw new Exception("Repository error"));
+
+        // Act
+        var result = await _bookService.SearchBookAsync(searchTerm);
+
+        // Assert
+        Assert.AreEqual((int)result.StatusCode, 500);
+    }
     // Test for creating book with repository exceptions
     [TestMethod]
     public async Task CreatebookRepositoryException()
