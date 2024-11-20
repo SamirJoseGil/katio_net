@@ -25,6 +25,15 @@ namespace katio.API.Controllers
             return response.TotalElements > 0 ? Ok(response) : StatusCode(StatusCodes.Status404NotFound, response);
         }
 
+        // Busca un Audiolibro omniscient
+        [HttpGet]
+        [Route("SearchAudioBook")]
+        public async Task<IActionResult> SearchAudioBook(string searchTerm)
+        {
+            var response = await _audioBookService.SearchAudioBookAsync(searchTerm);
+            return response.TotalElements > 0 ? Ok(response) : StatusCode(StatusCodes.Status404NotFound, response);
+        }
+
         #region Create Update Delete
 
         // Crea un Audiolibro

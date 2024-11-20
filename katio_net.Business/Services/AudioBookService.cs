@@ -3,6 +3,7 @@ using katio.Data.Models;
 using katio.Data.Dto;
 using katio.Data;
 using System.Net;
+using System.Linq.Expressions;
 
 namespace katio.Business.Services;
 
@@ -24,6 +25,93 @@ public class AudioBookService : IAudioBookService
         {
             var result = await _unitOfWork.AudioBookRepository.GetAllAsync();
             return result.Any() ? Utilities.BuildResponse<AudioBook>(HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
+                Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.AUDIOBOOK_NOT_FOUND, new List<AudioBook>());
+        }
+        catch (Exception ex)
+        {
+            return Utilities.BuildResponse<AudioBook>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
+        }
+    }
+
+    // Buscar un Audiolibro omniscient
+    public async Task<BaseMessage<AudioBook>> SearchAudioBookAsync(string searchTerm)
+    {
+        try
+        {
+            var parameter = Expression.Parameter(typeof(AudioBook), "audioBook");
+            var searchExpressions = new List<Expression>();
+
+            var lowerSearchTerm = Expression.Constant(searchTerm.ToLower(), typeof(string));
+
+            // Search in Name
+            var nameProperty = Expression.Property(parameter, nameof(AudioBook.Name));
+            var nameToLower = Expression.Call(nameProperty, "ToLower", null);
+            var nameContains = Expression.Call(
+                nameToLower,
+                "Contains",
+                null,
+                lowerSearchTerm
+            );
+            searchExpressions.Add(nameContains);
+
+            // Search in ISBN10
+            var isbn10Property = Expression.Property(parameter, nameof(AudioBook.ISBN10));
+            var isbn10ToLower = Expression.Call(isbn10Property, "ToLower", null);
+            var isbn10Contains = Expression.Call(
+                isbn10ToLower,
+                "Contains",
+                null,
+                lowerSearchTerm
+            );
+            searchExpressions.Add(isbn10Contains);
+
+            // Search in ISBN13
+            var isbn13Property = Expression.Property(parameter, nameof(AudioBook.ISBN13));
+            var isbn13ToLower = Expression.Call(isbn13Property, "ToLower", null);
+            var isbn13Contains = Expression.Call(
+                isbn13ToLower,
+                "Contains",
+                null,
+                lowerSearchTerm
+            );
+            searchExpressions.Add(isbn13Contains);
+
+            // Search in Edition
+            var editionProperty = Expression.Property(parameter, nameof(AudioBook.Edition));
+            var editionToLower = Expression.Call(editionProperty, "ToLower", null);
+            var editionContains = Expression.Call(
+                editionToLower,
+                "Contains",
+                null,
+                lowerSearchTerm
+            );
+            searchExpressions.Add(editionContains);
+
+            // Search in Genre
+            var genreProperty = Expression.Property(parameter, nameof(AudioBook.Genre));
+            var genreToLower = Expression.Call(genreProperty, "ToLower", null);
+            var genreContains = Expression.Call(
+                genreToLower,
+                "Contains",
+                null,
+                lowerSearchTerm
+            );
+            searchExpressions.Add(genreContains);
+
+            // Search in Published (if searchTerm is a valid date)
+            if (DateOnly.TryParse(searchTerm, out var publishedDate))
+            {
+                var publishedProperty = Expression.Property(parameter, nameof(AudioBook.Published));
+                var publishedEquals = Expression.Equal(publishedProperty, Expression.Constant(publishedDate));
+                searchExpressions.Add(publishedEquals);
+            }
+
+            // Combine all search expressions with OR
+            var body = searchExpressions.Aggregate(Expression.OrElse);
+            var lambda = Expression.Lambda<Func<AudioBook, bool>>(body, parameter);
+
+            var result = await _unitOfWork.AudioBookRepository.GetAllAsync(lambda);
+            return result.Any() ? Utilities.BuildResponse(HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
                 Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.AUDIOBOOK_NOT_FOUND, new List<AudioBook>());
         }
         catch (Exception ex)
