@@ -63,6 +63,22 @@ public class BookTests
         // Assert
         Assert.IsTrue(result.ResponseElements.Any());
     }
+    // Test for searching book omniscient
+    [TestMethod]
+    public async Task SearchBookAsync()
+    {
+        // Arrange
+        var searchTerm = "Cien";
+        var Books = _books;
+        _bookRepository.GetAllAsync(Arg.Any<Expression<Func<Book, bool>>>())
+        .Returns(Books);
+
+        // Act
+        var result = await _bookService.SearchBookAsync(searchTerm);
+
+        // Assert
+        Assert.IsTrue(result.ResponseElements.Any());
+    }
     // Test for creating a book
     [TestMethod]
     public async Task CreateBook()

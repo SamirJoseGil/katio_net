@@ -5,7 +5,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using katio.Business.Interfaces;
 using katio.Business.Services;
 using System.Linq.Expressions;
-using System.Net;
 using NSubstitute.ExceptionExtensions;
 
 namespace katio.Test.NarratorTests;
@@ -27,19 +26,19 @@ public class NarratorTestsFail
 
         _narrators = new List<Narrator>
         {
-            new Narrator 
-            { 
-                Id = 1, 
-                Name = "Maria Camila", 
-                LastName = "Gil Rojas", 
-                Genre = "Ficcion" 
+            new Narrator
+            {
+                Id = 1,
+                Name = "Maria Camila",
+                LastName = "Gil Rojas",
+                Genre = "Ficcion"
             },
-            new Narrator 
-            { 
-                Id = 2, 
-                Name = "Juan", 
-                LastName = "Perez", 
-                Genre = "Ficcion" 
+            new Narrator
+            {
+                Id = 2,
+                Name = "Juan",
+                LastName = "Perez",
+                Genre = "Ficcion"
             }
         };
     }
@@ -49,17 +48,17 @@ public class NarratorTestsFail
     public async Task CreateNarratorFail()
     {
         // Arrange
-        var existingNarrator = new Narrator 
-        { 
-            Name = "Maria Camila", 
-            LastName = "Gil Rojas", 
-            Genre = "Ficcion" 
+        var existingNarrator = new Narrator
+        {
+            Name = "Maria Camila",
+            LastName = "Gil Rojas",
+            Genre = "Ficcion"
         };
-        var newNarrator = new Narrator 
-        { 
-            Name = "Maria Camila", 
-            LastName = "Gil Rojas", 
-            Genre = "Ficcion" 
+        var newNarrator = new Narrator
+        {
+            Name = "Maria Camila",
+            LastName = "Gil Rojas",
+            Genre = "Ficcion"
         };
         _narratorRepository.GetAllAsync(Arg.Any<Expression<Func<Narrator, bool>>>()).ReturnsForAnyArgs(new List<Narrator> { existingNarrator });
 
@@ -105,6 +104,19 @@ public class NarratorTestsFail
 
         // Act
         var result = await _narratorService.Index();
+
+        // Assert
+        Assert.IsFalse(result.ResponseElements.Any());
+    }
+    // Test for getting a narrator omniscient Fail
+    [TestMethod]
+    public async Task SearchNarratorAsyncFail()
+    {
+        // Arrange
+        _narratorRepository.GetAllAsync().Returns(new List<Narrator>());
+
+        // Act
+        var result = await _narratorService.SearchNarratorAsync(searchTerm: "omniscient");
 
         // Assert
         Assert.IsFalse(result.ResponseElements.Any());

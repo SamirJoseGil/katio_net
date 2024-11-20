@@ -26,6 +26,15 @@ namespace katio.API.Controllers
             return response.TotalElements > 0 ? Ok(response) : StatusCode(StatusCodes.Status404NotFound, response);
         }
 
+        // Busca un narrador por su nombre, apellido o genero
+        [HttpGet]
+        [Route("SearchNarrator")]
+        public async Task<IActionResult> SearchNarratorAsync(string searchTerm)
+        {
+            var response = await _narratorService.SearchNarratorAsync(searchTerm);
+            return response.TotalElements > 0 ? Ok(response) : StatusCode(StatusCodes.Status404NotFound, response);
+        }
+
         #region Create Update Delete
 
         // Crear Narradores

@@ -27,6 +27,15 @@ namespace katio.API.Controllers
             return response !=null ? Ok(response) : StatusCode(StatusCodes.Status404NotFound, response);
         }
 
+        // Busca libros por término de búsqueda
+        [HttpGet]
+        [Route("SearchBook")]
+        public async Task<IActionResult> SearchBook(string searchTerm)
+        {
+            var response = await _bookService.SearchBookAsync(searchTerm);
+            return response != null ? Ok(response) : StatusCode(StatusCodes.Status404NotFound, response);
+        }
+
         #region Create Update Delete
 
         // Crea un libro

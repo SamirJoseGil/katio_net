@@ -5,6 +5,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using katio.Business.Interfaces;
 using katio.Business.Services;
 using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore.Query;
 
 namespace katio.Test.NarratorTests;
 
@@ -25,19 +26,19 @@ public class NarratorTests
 
         _narrators = new List<Narrator>
         {
-            new Narrator 
-            { 
-                Id = 1, 
-                Name = "Maria Camila", 
-                LastName = "Gil Rojas", 
-                Genre = "Ficcion" 
+            new Narrator
+            {
+                Id = 1,
+                Name = "Maria Camila",
+                LastName = "Gil Rojas",
+                Genre = "Ficcion"
             },
-            new Narrator 
-            { 
-                Id = 2, 
-                Name = "Juan", 
-                LastName = "Perez", 
-                Genre = "Ficcion" 
+            new Narrator
+            {
+                Id = 2,
+                Name = "Juan",
+                LastName = "Perez",
+                Genre = "Ficcion"
             }
         };
     }
@@ -47,11 +48,11 @@ public class NarratorTests
     public async Task CreateNarrator()
     {
         // Arrange
-        var newNarrator = new Narrator 
-        { 
-            Name = "Maria Camila", 
-            LastName = "Gil Rojas", 
-            Genre = "Ficcion" 
+        var newNarrator = new Narrator
+        {
+            Name = "Maria Camila",
+            LastName = "Gil Rojas",
+            Genre = "Ficcion"
         };
         _narratorRepository.GetAllAsync(Arg.Any<Expression<Func<Narrator, bool>>>()).Returns(new List<Narrator>());
         _narratorRepository.AddAsync(newNarrator).Returns(Task.CompletedTask);
@@ -103,13 +104,34 @@ public class NarratorTests
     }
     // Test for getting all narrators
     [TestMethod]
-    public async Task GetAllNarrators() 
+    public async Task GetAllNarrators()
     {
         // Arrange
         _narratorRepository.GetAllAsync().Returns(_narrators);
 
         // Act
         var result = await _narratorService.Index();
+
+        // Assert
+        Assert.IsTrue(result.ResponseElements.Any());
+    }
+    // Test for getting narrator omniscient
+    [TestMethod]
+    public async Task SearchNarratorAsync()
+    {
+        // Arrange
+        var searchTerm = "John";
+        var narrators = new List<Narrator>
+    {
+        new Narrator { Name = "John", LastName = "Doe", Genre = "Fiction" },
+        new Narrator { Name = "Jane", LastName = "Smith", Genre = "Non-Fiction" }
+    };
+
+        _narratorRepository.GetAllAsync(Arg.Any<Expression<Func<Narrator, bool>>>())
+        .Returns(narrators);
+
+        // Act
+        var result = await _narratorService.SearchNarratorAsync(searchTerm);
 
         // Assert
         Assert.IsTrue(result.ResponseElements.Any());

@@ -126,6 +126,19 @@ public class BookTestsFail
         // Assert
         Assert.IsFalse(result.ResponseElements.Any());
     }
+    // Test for search book Omniscient fail
+    [TestMethod]
+    public async Task SearchBookAsyncFail()
+    {
+        // Arrange
+        _bookRepository.GetAllAsync().Returns(new List<Book>());
+
+        // Act
+        var result = await _bookService.SearchBookAsync(searchTerm: "omniscient");
+
+        // Assert
+        Assert.IsFalse(result.ResponseElements.Any());
+    }
     // Test for failing to get book by ID
     [TestMethod]
     public async Task GetBookByIdFail()

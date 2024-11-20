@@ -6,6 +6,7 @@ namespace katio.Business.Interfaces;
 public interface IAudioBookService
 {
     Task<BaseMessage<AudioBook>> Index();
+    Task<BaseMessage<AudioBook>> SearchAudioBookAsync(string searchTerm);
     Task<BaseMessage<AudioBook>> CreateAudioBook(AudioBook audioBook);
     Task<BaseMessage<AudioBook>> DeleteAudioBook(int id);
     Task<BaseMessage<AudioBook>> UpdateAudioBook(AudioBook audioBook);

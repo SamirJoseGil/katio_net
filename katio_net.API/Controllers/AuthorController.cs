@@ -26,7 +26,8 @@ namespace katio.API.Controllers
             return response.TotalElements > 0 ? Ok(response) : StatusCode(StatusCodes.Status404NotFound, response);
         }
 
-        [HttpPost("search")]
+        [HttpPost]
+        [Route("SearchAuthor")]
         public async Task<IActionResult> SearchAuthorsAsync(string searchTerm)
         {
             var response = await _authorService.SearchAuthorsAsync(searchTerm);

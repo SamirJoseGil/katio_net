@@ -3,6 +3,7 @@ using katio.Data.Models;
 using katio.Data.Dto;
 using katio.Data;
 using System.Net;
+using System.Linq.Expressions;
 
 namespace katio.Business.Services;
 
@@ -32,6 +33,92 @@ public class BookService : IBookService
         }
     }
 
+    public async Task<BaseMessage<Book>> SearchBookAsync(string searchTerm)
+    {
+        try
+        {
+            var parameter = Expression.Parameter(typeof(Book), "book");
+            var searchExpressions = new List<Expression>();
+
+            var lowerSearchTerm = Expression.Constant(searchTerm.ToLower(), typeof(string));
+
+            // Search in Name
+            var nameProperty = Expression.Property(parameter, nameof(Book.Name));
+            var nameToLower = Expression.Call(nameProperty, "ToLower", null);
+            var nameContains = Expression.Call(
+                nameToLower,
+                "Contains",
+                null,
+                lowerSearchTerm
+            );
+            searchExpressions.Add(nameContains);
+
+            // Search in ISBN10
+            var isbn10Property = Expression.Property(parameter, nameof(Book.ISBN10));
+            var isbn10ToLower = Expression.Call(isbn10Property, "ToLower", null);
+            var isbn10Contains = Expression.Call(
+                isbn10ToLower,
+                "Contains",
+                null,
+                lowerSearchTerm
+            );
+            searchExpressions.Add(isbn10Contains);
+
+            // Search in ISBN13
+            var isbn13Property = Expression.Property(parameter, nameof(Book.ISBN13));
+            var isbn13ToLower = Expression.Call(isbn13Property, "ToLower", null);
+            var isbn13Contains = Expression.Call(
+                isbn13ToLower,
+                "Contains",
+                null,
+                lowerSearchTerm
+            );
+            searchExpressions.Add(isbn13Contains);
+
+            // Search in Edition
+            var editionProperty = Expression.Property(parameter, nameof(Book.Edition));
+            var editionToLower = Expression.Call(editionProperty, "ToLower", null);
+            var editionContains = Expression.Call(
+                editionToLower,
+                "Contains",
+                null,
+                lowerSearchTerm
+            );
+            searchExpressions.Add(editionContains);
+
+            // Search in DeweyIndex
+            var deweyIndexProperty = Expression.Property(parameter, nameof(Book.DeweyIndex));
+            var deweyIndexToLower = Expression.Call(deweyIndexProperty, "ToLower", null);
+            var deweyIndexContains = Expression.Call(
+                deweyIndexToLower,
+                "Contains",
+                null,
+                lowerSearchTerm
+            );
+            searchExpressions.Add(deweyIndexContains);
+
+            // Search in Published (if searchTerm is a valid date)
+            if (DateOnly.TryParse(searchTerm, out var publishedDate))
+            {
+                var publishedProperty = Expression.Property(parameter, nameof(Book.Published));
+                var publishedEquals = Expression.Equal(publishedProperty, Expression.Constant(publishedDate));
+                searchExpressions.Add(publishedEquals);
+            }
+
+            // Combine all search expressions with OR
+            var body = searchExpressions.Aggregate(Expression.OrElse);
+            var lambda = Expression.Lambda<Func<Book, bool>>(body, parameter);
+
+            var result = await _unitOfWork.BookRepository.GetAllAsync(lambda);
+            return result.Any() ? Utilities.BuildResponse(HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
+                Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
+        }
+        catch (Exception ex)
+        {
+            return Utilities.BuildResponse<Book>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
+        }
+    }
+
     #region Create Update Delete
 
     // Crear un Libro
@@ -41,14 +128,14 @@ public class BookService : IBookService
 
         if (existingBook.Any())
         {
-           
+
             return Utilities.BuildResponse<Book>(HttpStatusCode.Conflict, BaseMessageStatus.BOOK_ALREADY_EXISTS);
         }
         try
         {
             await _unitOfWork.BookRepository.AddAsync(book);
             await _unitOfWork.SaveAsync();
-        } 
+        }
         catch (Exception ex)
         {
             return Utilities.BuildResponse<Book>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
@@ -65,12 +152,13 @@ public class BookService : IBookService
         {
             return Utilities.BuildResponse<Book>(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
         }
-        try 
+        try
         {
             await _unitOfWork.BookRepository.Update(book);
             await _unitOfWork.SaveAsync();
-            
-        } catch (Exception ex)
+
+        }
+        catch (Exception ex)
         {
             return Utilities.BuildResponse<Book>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
         }
@@ -89,11 +177,12 @@ public class BookService : IBookService
         try
         {
             await _unitOfWork.BookRepository.Delete(id);
-        } catch (Exception ex)
+        }
+        catch (Exception ex)
         {
             return Utilities.BuildResponse<Book>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
         }
-        return Utilities.BuildResponse(HttpStatusCode.OK, BaseMessageStatus.OK_200, new List<Book> {  });
+        return Utilities.BuildResponse(HttpStatusCode.OK, BaseMessageStatus.OK_200, new List<Book> { });
     }
 
     #endregion
@@ -108,7 +197,7 @@ public class BookService : IBookService
             return result != null ? Utilities.BuildResponse<Book>
                 (HttpStatusCode.OK, BaseMessageStatus.OK_200, new List<Book> { result }) :
                 Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
-        } 
+        }
         catch (Exception ex)
         {
             return Utilities.BuildResponse<Book>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
@@ -124,7 +213,7 @@ public class BookService : IBookService
             return result.Any() ? Utilities.BuildResponse<Book>
                 (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
                 Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
-        } 
+        }
         catch (Exception ex)
         {
             return Utilities.BuildResponse<Book>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
@@ -136,11 +225,11 @@ public class BookService : IBookService
     {
         try
         {
-        var result = await _unitOfWork.BookRepository.GetAllAsync(b => b.ISBN10 == ISBN10);
-        return result.Any() ? Utilities.BuildResponse<Book>
-            (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
-            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
-        } 
+            var result = await _unitOfWork.BookRepository.GetAllAsync(b => b.ISBN10 == ISBN10);
+            return result.Any() ? Utilities.BuildResponse<Book>
+                (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
+                Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
+        }
         catch (Exception ex)
         {
             return Utilities.BuildResponse<Book>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
@@ -156,7 +245,7 @@ public class BookService : IBookService
             return result.Any() ? Utilities.BuildResponse<Book>
                 (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
                 Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
-        } 
+        }
         catch (Exception ex)
         {
             return Utilities.BuildResponse<Book>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
@@ -172,8 +261,8 @@ public class BookService : IBookService
             return result.Any() ? Utilities.BuildResponse<Book>
                 (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
                 Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
-        } 
-        catch (Exception ex) 
+        }
+        catch (Exception ex)
         {
             return Utilities.BuildResponse<Book>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
         }
@@ -188,7 +277,7 @@ public class BookService : IBookService
             return result.Any() ? Utilities.BuildResponse<Book>
                 (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
                 Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
-        } 
+        }
         catch (Exception ex)
         {
             return Utilities.BuildResponse<Book>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
@@ -204,7 +293,7 @@ public class BookService : IBookService
             return result.Any() ? Utilities.BuildResponse<Book>
                 (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
                 Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
-        } 
+        }
         catch (Exception ex)
         {
             return Utilities.BuildResponse<Book>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
@@ -226,7 +315,7 @@ public class BookService : IBookService
             return result.Any() ? Utilities.BuildResponse<Book>
                 (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
                 Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
-        } 
+        }
         catch (Exception ex)
         {
             return Utilities.BuildResponse<Book>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
@@ -244,7 +333,7 @@ public class BookService : IBookService
             return result.Any() ? Utilities.BuildResponse<Book>
                 (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
                 Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
-        } 
+        }
         catch (Exception ex)
         {
             return Utilities.BuildResponse<Book>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
@@ -262,7 +351,7 @@ public class BookService : IBookService
             return result.Any() ? Utilities.BuildResponse<Book>
                 (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
                 Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
-        } 
+        }
         catch (Exception ex)
         {
             return Utilities.BuildResponse<Book>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
@@ -280,7 +369,7 @@ public class BookService : IBookService
             return result.Any() ? Utilities.BuildResponse<Book>
                 (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
                 Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
-        } 
+        }
         catch (Exception ex)
         {
             return Utilities.BuildResponse<Book>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
@@ -299,7 +388,7 @@ public class BookService : IBookService
             return result.Any() ? Utilities.BuildResponse<Book>
                 (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
                 Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
-        } 
+        }
         catch (Exception ex)
         {
             return Utilities.BuildResponse<Book>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
@@ -317,7 +406,7 @@ public class BookService : IBookService
             return result.Any() ? Utilities.BuildResponse<Book>
                 (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
                 Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
-        } 
+        }
         catch (Exception ex)
         {
             return Utilities.BuildResponse<Book>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
