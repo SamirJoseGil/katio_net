@@ -26,19 +26,19 @@ public class NarratorTestsException
 
         _narrators = new List<Narrator>
         {
-            new Narrator 
-            { 
-                Id = 1, 
-                Name = "Maria Camila", 
-                LastName = "Gil Rojas", 
-                Genre = "Ficcion" 
+            new Narrator
+            {
+                Id = 1,
+                Name = "Maria Camila",
+                LastName = "Gil Rojas",
+                Genre = "Ficcion"
             },
-            new Narrator 
-            { 
-                Id = 2, 
-                Name = "Juan", 
-                LastName = "Perez", 
-                Genre = "Ficcion" 
+            new Narrator
+            {
+                Id = 2,
+                Name = "Juan",
+                LastName = "Perez",
+                Genre = "Ficcion"
             }
         };
     }
@@ -48,11 +48,11 @@ public class NarratorTestsException
     public async Task CreateNarratorRepositoryException()
     {
         // Arrange
-        var narrator = new Narrator 
-        { 
-            Name = "Maria Camila", 
-            LastName = "Gil Rojas", 
-            Genre = "Ficcion" 
+        var narrator = new Narrator
+        {
+            Name = "Maria Camila",
+            LastName = "Gil Rojas",
+            Genre = "Ficcion"
         };
         _narratorRepository.GetAllAsync(Arg.Any<Expression<Func<Narrator, bool>>>()).Returns(new List<Narrator>());
         _narratorRepository.When(x => x.AddAsync(Arg.Any<Narrator>())).Do(x => throw new Exception("Repository error"));
@@ -70,12 +70,12 @@ public class NarratorTestsException
         // Arrange
         var narratorToUpdate = _narrators.First();
         _narratorRepository.FindAsync(narratorToUpdate.Id).Returns(narratorToUpdate);
-        var updatedNarrator = new Narrator 
-        { 
-            Id = narratorToUpdate.Id, 
-            Name = "John", 
-            LastName = "Doe", 
-            Genre = "Fiction" 
+        var updatedNarrator = new Narrator
+        {
+            Id = narratorToUpdate.Id,
+            Name = "John",
+            LastName = "Doe",
+            Genre = "Fiction"
         };
         _narratorRepository.FindAsync(narratorToUpdate.Id).Returns(narratorToUpdate);
         _narratorRepository.When(x => x.Update(Arg.Any<Narrator>())).Do(x => throw new Exception("Repository exception"));
@@ -110,6 +110,20 @@ public class NarratorTestsException
 
         // Act
         var result = await _narratorService.Index();
+
+        // Assert
+        Assert.AreEqual((int)result.StatusCode, 500);
+    }
+    // Test for getting a narrator omniscient with repository exceptions
+    [TestMethod]
+    public async Task SearchNarratorAsyncRepositoryException()
+    {
+        // Arrange
+        var searchTerm = "John";
+        _narratorRepository.When(x => x.GetAllAsync(Arg.Any<Expression<Func<Narrator, bool>>>())).Do(x => throw new Exception("Repository error"));
+
+        // Act
+        var result = await _narratorService.SearchNarratorAsync(searchTerm);
 
         // Assert
         Assert.AreEqual((int)result.StatusCode, 500);
