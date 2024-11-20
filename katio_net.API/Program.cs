@@ -10,8 +10,10 @@ builder.Services.AddDbContext<KatioContext>(
     opt => opt.UseNpgsql(builder.Configuration.GetConnectionString("KatioDBPSQL")));
 
 // Configure CrossOrigin
-builder.Services.AddCors(options => {
-    options.AddPolicy(name: "katioRules", builder => {
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: "katioRules", builder =>
+    {
         builder.AllowAnyHeader();
         builder.AllowAnyMethod();
         builder.AllowAnyOrigin();
@@ -41,8 +43,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+// await PopulateDB(app);
+
 app.UseHttpsRedirection();
-app.UseCors("katioRules"); // Asegúrate de aplicar la política de CORS aquí
+app.UseCors("katioRules");
 app.MapControllers();
 
 // App run
@@ -51,10 +55,10 @@ app.Run();
 
 // Datos de Base de Datos en Memoria
 #region PopulateDB
-async void PopulateDB(WebApplication app)
+async Task PopulateDB(WebApplication app)
 {
     using (var scope = app.Services.CreateAsyncScope())
-    
+
     {
         // Tabla de Autores
         #region author service
@@ -737,7 +741,7 @@ async void PopulateDB(WebApplication app)
             Name = "Pedro",
             LastName = "Gonzalez",
             Genre = "Ficcion"
-        }); 
+        });
         await NarratorService.CreateNarrator(new katio.Data.Models.Narrator
         {
             Name = "Luisa",
@@ -788,7 +792,8 @@ async void PopulateDB(WebApplication app)
             Genre = "Ficcion",
             LenghtInSeconds = 1,
             Path = "C:/Users/Usuario/Downloads/Cien años de soledad.mp3",
-            NarratorId = 1
+            NarratorId = 1,
+            FrontPage = null
         });
         await AudioBookService.CreateAudioBook(new katio.Data.Models.AudioBook
         {
@@ -801,7 +806,8 @@ async void PopulateDB(WebApplication app)
             Genre = "Ficcion",
             LenghtInSeconds = 10,
             Path = "C:/Users/Usuario/Downloads/Huellas.mp3",
-            NarratorId = 3
+            NarratorId = 3,
+            FrontPage = null
         });
         await AudioBookService.CreateAudioBook(new katio.Data.Models.AudioBook
         {
@@ -814,7 +820,8 @@ async void PopulateDB(WebApplication app)
             Genre = "Ficcion",
             LenghtInSeconds = 20,
             Path = "C:/Users/Usuario/Downloads/Maria.mp3",
-            NarratorId = 2
+            NarratorId = 2,
+            FrontPage = null
         });
         await AudioBookService.CreateAudioBook(new katio.Data.Models.AudioBook
         {
@@ -827,7 +834,8 @@ async void PopulateDB(WebApplication app)
             Genre = "Ficcion",
             LenghtInSeconds = 30,
             Path = "C:/Users/Usuario/Downloads/Mexico Gothic.mp3",
-            NarratorId = 4
+            NarratorId = 4,
+            FrontPage = null
         });
 
         #endregion

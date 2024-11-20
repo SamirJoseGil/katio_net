@@ -12,8 +12,7 @@ namespace katio.Data.Models
         public string Genre { get; set; } = string.Empty;
         public int LenghtInSeconds { get; set; } = 0;
         public string Path { get; set; } = string.Empty;
-
-
+        public string? FrontPage { get; set; } = null;
 
         // Relaciones
         [ForeignKey("Narrator")]
