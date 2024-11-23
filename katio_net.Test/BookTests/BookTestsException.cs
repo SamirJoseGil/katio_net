@@ -97,7 +97,7 @@ public class BookTestsException
         _bookRepository.When(x => x.AddAsync(Arg.Any<Book>())).Do(x => throw new Exception("Repository error"));
 
         // Act
-        var result = await _bookService.CreateBook(newbook);
+        var result = await _bookService.CreateBook(newbook, pdfFile: null);
 
         // Assert
         Assert.AreEqual((int)result.StatusCode, 500);

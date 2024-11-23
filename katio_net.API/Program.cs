@@ -2,6 +2,7 @@ using katio.Business.Services;
 using katio.Business.Interfaces;
 using katio.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Http.Features;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,23 +34,30 @@ builder.Services.AddScoped<IGenreService, GenreService>();
 builder.Services.AddScoped<IAudioBookService, AudioBookService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 104857600; // 100 MB
+});
+
+// Aumenta también el tamaño del cuerpo de la solicitud a nivel global
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    serverOptions.Limits.MaxRequestBodySize = 104857600; // 100 MB
+});
+
 // Build app
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-// await PopulateDB(app);
-
 app.UseHttpsRedirection();
 app.UseCors("katioRules");
 app.MapControllers();
 
-// App run
 app.Run();
 
 
@@ -62,7 +70,8 @@ async Task PopulateDB(WebApplication app)
     {
         // Tabla de Autores
         #region author service
-        var AuthorService = scope.ServiceProvider.GetService<IAuthorService>();
+        var AuthorService = scope.ServiceProvider.GetService<IAuthorService>()!;
+
         await AuthorService.CreateAuthor(new katio.Data.Models.Author
         {
             Name = "Gabriel",
@@ -387,450 +396,491 @@ async Task PopulateDB(WebApplication app)
         // Tabla de Libros
         #region book service
         var bookService = scope.ServiceProvider.GetRequiredService<IBookService>();
-        await bookService.CreateBook(new katio.Data.Models.Book
-        {
-            Name = "Cien años de soledad",
-            ISBN10 = "8420471836",
-            ISBN13 = "978-8420471839",
-            Published = new DateOnly(1967, 06, 05),
-            Edition = "RAE Obra Académica",
-            DeweyIndex = "800",
-            AuthorId = 1,
-            bookCover = ""
-        });
 
-        await bookService.CreateBook(new katio.Data.Models.Book
-        {
-            Name = "Huellas",
-            ISBN10 = "9584277278",
-            ISBN13 = "978-958427275",
-            Published = new DateOnly(2019, 01, 01),
-            Edition = "1ra Edicion",
-            DeweyIndex = "800",
-            AuthorId = 3,
-            bookCover = ""
-        });
+        var pruebaPath = Path.Combine(Directory.GetCurrentDirectory(), "uploads", "prueba", "ArchivoDePrueba.pdf");
 
-        await bookService.CreateBook(new katio.Data.Models.Book
+        using (var fileStream = new FileStream(pruebaPath, FileMode.Open))
         {
-            Name = "María",
-            ISBN10 = "14802722922",
-            ISBN13 = "978-148027292",
-            Published = new DateOnly(1867, 01, 01),
-            Edition = "1ra edición",
-            DeweyIndex = "800",
-            AuthorId = 2,
-            bookCover = ""
-        });
-
-        await bookService.CreateBook(new katio.Data.Models.Book
-        {
-            Name = "Mexico Gothic",
-            ISBN10 = "8420471836",
-            ISBN13 = "978-05256620785",
-            Published = new DateOnly(2020, 06, 30),
-            Edition = "Del Rey",
-            DeweyIndex = "800",
-            AuthorId = 4,
-            bookCover = ""
-        });
-
-        await bookService.CreateBook(new katio.Data.Models.Book
-        {
-            Name = "Sin remedio",
-            ISBN10 = "3161484100",
-            ISBN13 = "978-3161484100",
-            Published = new DateOnly(1984, 01, 01),
-            Edition = "Alfaguara",
-            DeweyIndex = "800",
-            AuthorId = 12,
-            bookCover = ""
-        });
-
-        await bookService.CreateBook(new katio.Data.Models.Book
-        {
-            Name = "Delirio",
-            ISBN10 = "9587041453",
-            ISBN13 = "978-9587041453",
-            Published = new DateOnly(2004, 01, 01),
-            Edition = "Alfaguara",
-            DeweyIndex = "800",
-            AuthorId = 9,
-            bookCover = ""
-        });
-
-        await bookService.CreateBook(new katio.Data.Models.Book
-        {
-            Name = "Infinito en un junco",
-            ISBN10 = "8417860790",
-            ISBN13 = "9788417860790",
-            Published = new DateOnly(2019, 01, 01),
-            Edition = "Siruela",
-            DeweyIndex = "800",
-            AuthorId = 5,
-            bookCover = ""
-        });
-
-        await bookService.CreateBook(new katio.Data.Models.Book
-        {
-            Name = "El olvido que seremos",
-            ISBN10 = "8420426402",
-            ISBN13 = "978-8420426402",
-            Published = new DateOnly(2017, 10, 16),
-            Edition = "Alfaguara",
-            DeweyIndex = "800",
-            AuthorId = 8,
-            bookCover = ""
-        });
-        await bookService.CreateBook(new katio.Data.Models.Book
-        {
-            Name = "El país de la canela",
-            ISBN10 = "8439738831",
-            ISBN13 = "978-8439738831",
-            Published = new DateOnly(2020, 08, 22),
-            Edition = "ndom House",
-            DeweyIndex = "800",
-            AuthorId = 13,
-            bookCover = ""
-        });
-        await bookService.CreateBook(new katio.Data.Models.Book
-        {
-            Name = "Lo que no tiene nombre",
-            ISBN10 = "6287659216",
-            ISBN13 = "978-6287659216",
-            Published = new DateOnly(2024, 03, 19),
-            Edition = "Alfaguara",
-            DeweyIndex = "800",
-            AuthorId = 10,
-            bookCover = ""
-        });
-        await bookService.CreateBook(new katio.Data.Models.Book
-        {
-            Name = "El ruido de las cosas al caer",
-            ISBN10 = "6073137515",
-            ISBN13 = "978-6073137515",
-            Published = new DateOnly(2015, 12, 29),
-            Edition = "ebolsillo",
-            DeweyIndex = "800",
-            AuthorId = 14,
-            bookCover = ""
-        });
-        await bookService.CreateBook(new katio.Data.Models.Book
-        {
-            Name = "El síndrome de Ulises",
-            ISBN10 = "9584211903",
-            ISBN13 = "978-9584211903",
-            Published = new DateOnly(2005, 03, 30),
-            Edition = "Planeta",
-            DeweyIndex = "800",
-            AuthorId = 15,
-            bookCover = ""
-        });
-        await bookService.CreateBook(new katio.Data.Models.Book
-        {
-            Name = "La puta de Babilonia",
-            ISBN10 = "6073158855",
-            ISBN13 = "978-6073158855",
-            Published = new DateOnly(2018, 01, 30),
-            Edition = "ebolsillo",
-            DeweyIndex = "800",
-            AuthorId = 11
-,
-bookCover = ""
-        });
-        await bookService.CreateBook(new katio.Data.Models.Book
-        {
-            Name = "Memorias de un sinvergüenza de siete suelas",
-            ISBN10 = "9504932611",
-            ISBN13 = "978-9504932611",
-            Published = new DateOnly(2012, 01, 01),
-            Edition = "Planeta",
-            DeweyIndex = "800",
-            AuthorId = 16,
-            bookCover = ""
-        });
-        await bookService.CreateBook(new katio.Data.Models.Book
-        {
-            Name = "Satanás",
-            ISBN10 = "9584273543",
-            ISBN13 = "978-9584273543",
-            Published = new DateOnly(2018, 01, 01),
-            Edition = "Planeta DeAgostini Comic",
-            DeweyIndex = "800",
-            AuthorId = 7,
-            bookCover = ""
-        });
-        await bookService.CreateBook(new katio.Data.Models.Book
-        {
-            Name = "It (Eso)",
-            ISBN10 = "0525566267",
-            ISBN13 = "978-0525566267",
-            Published = new DateOnly(2019, 01, 27),
-            Edition = "Vinntage Espanol",
-            DeweyIndex = "800",
-            AuthorId = 17,
-            bookCover = ""
-        });
-        await bookService.CreateBook(new katio.Data.Models.Book
-        {
-            Name = "El Resplandor",
-            ISBN10 = "0593311233",
-            ISBN13 = "978-0593311233",
-            Published = new DateOnly(2005, 08, 25),
-            Edition = "Vintage",
-            DeweyIndex = "800",
-            AuthorId = 17
-,
-bookCover = ""
-        });
-        await bookService.CreateBook(new katio.Data.Models.Book
-        {
-            Name = "Cujo",
-            ISBN10 = "1501192241",
-            ISBN13 = "978-1501192241",
-            Published = new DateOnly(2018, 02, 20),
-            Edition = "Scribner",
-            DeweyIndex = "800",
-            AuthorId = 17,
-            bookCover = ""
-        });
-        await bookService.CreateBook(new katio.Data.Models.Book
-        {
-            Name = "Trono de Cristal",
-            ISBN10 = "8890981547",
-            ISBN13 = "979-8890981547",
-            Published = new DateOnly(2022, 05, 13),
-            Edition = "Alfaguara",
-            DeweyIndex = "800",
-            AuthorId = 6,
-            bookCover = ""
-        });
-        await bookService.CreateBook(new katio.Data.Models.Book
-        {
-            Name = "Entrevista con el Vampiro",
-            ISBN10 = "6073198929",
-            ISBN13 = "978-6073198929",
-            Published = new DateOnly(2021, 05, 18),
-            Edition = "de Bolsillo",
-            DeweyIndex = "800",
-            AuthorId = 18,
-            bookCover = ""
-        });
-        await bookService.CreateBook(new katio.Data.Models.Book
-        {
-            Name = "Anniquilación",
-            ISBN10 = "0374104092",
-            ISBN13 = "978-0374104092",
-            Published = new DateOnly(2014, 02, 04),
-            Edition = "G Originals",
-            DeweyIndex = "800",
-            AuthorId = 19,
-            bookCover = ""
-        });
-        await bookService.CreateBook(new katio.Data.Models.Book
-        {
-            Name = "Autoridad",
-            ISBN10 = "0374104108",
-            ISBN13 = "978-0374104108",
-            Published = new DateOnly(2014, 05, 06),
-            Edition = "G Originals",
-            DeweyIndex = "800",
-            AuthorId = 19,
-            bookCover = ""
-        });
-        await bookService.CreateBook(new katio.Data.Models.Book
-        {
-            Name = "Aceptación",
-            ISBN10 = "374104115",
-            ISBN13 = "978-0374104115",
-            Published = new DateOnly(2014, 09, 02),
-            Edition = "G Originals",
-            DeweyIndex = "800",
-            AuthorId = 19,
-            bookCover = ""
-        });
-        await bookService.CreateBook(new katio.Data.Models.Book
-        {
-            Name = "Historia de Colombia y sus oligarquias",
-            ISBN10 = "9584268754",
-            ISBN13 = "978-9584268754",
-            Published = new DateOnly(2019, 01, 01),
-            Edition = "Crítica",
-            DeweyIndex = "800",
-            AuthorId = 12,
-            bookCover = ""
-        });
-        await bookService.CreateBook(new katio.Data.Models.Book
-        {
-            Name = "El problema de los tres cuerpos",
-            ISBN10 = "8466659734",
-            ISBN13 = "978-8466659734",
-            Published = new DateOnly(2016, 11, 01),
-            Edition = "Nova",
-            DeweyIndex = "800",
-            AuthorId = 20,
-            bookCover = ""
-        });
-        await bookService.CreateBook(new katio.Data.Models.Book
-        {
-            Name = "El Bosque Oscuro",
-            ISBN10 = "978-8413146454",
-            ISBN13 = "978-8413146454",
-            Published = new DateOnly(2024, 05, 01),
-            Edition = "Nova",
-            DeweyIndex = "800",
-            AuthorId = 20,
-            bookCover = ""
-        });
-        await bookService.CreateBook(new katio.Data.Models.Book
-        {
-            Name = "El fin de la muerte",
-            ISBN10 = "8417347017",
-            ISBN13 = "978-8417347017",
-            Published = new DateOnly(2018, 08, 01),
-            Edition = "1",
-            DeweyIndex = "800",
-            AuthorId = 20,
-            bookCover = ""
-        });
-        await bookService.CreateBook(new katio.Data.Models.Book
-        {
-            Name = "Crimen y Castigo",
-            ISBN10 = "8872132677",
-            ISBN13 = "979-8872132677",
-            Published = new DateOnly(1866, 12, 01),
-            Edition = "dependiente",
-            DeweyIndex = "800",
-            AuthorId = 21,
-            bookCover = ""
-        });
-        await bookService.CreateBook(new katio.Data.Models.Book
-        {
-            Name = "Las obras de Leo Tolstoy",
-            ISBN10 = "1016243247",
-            ISBN13 = "978-1016243247",
-            Published = new DateOnly(2022, 10, 27),
-            Edition = "CLassic",
-            DeweyIndex = "800",
-            AuthorId = 22,
-            bookCover = ""
-        });
-        await bookService.CreateBook(new katio.Data.Models.Book
-        {
-            Name = "Historias Cortas",
-            ISBN10 = "9389717105",
-            ISBN13 = "978-9389717105",
-            Published = new DateOnly(2019, 01, 12),
-            Edition = "Finngerprint",
-            DeweyIndex = "800",
-            AuthorId = 23,
-            bookCover = ""
-        });
-        await bookService.CreateBook(new katio.Data.Models.Book
-        {
-            Name = "Trilogía Fundación",
-            ISBN10 = "8499083209",
-            ISBN13 = "978-8499083209",
-            Published = new DateOnly(2023, 03, 23),
-            Edition = "debolsillo",
-            DeweyIndex = "800",
-            AuthorId = 24,
-            bookCover = ""
-        });
-        await bookService.CreateBook(new katio.Data.Models.Book
-        {
-            Name = "El libro de la selva",
-            ISBN10 = "8467871029",
-            ISBN13 = "978-8467871029",
-            Published = new DateOnly(1894, 01, 01),
-            Edition = "Classic",
-            DeweyIndex = "800",
-            AuthorId = 25,
-            bookCover = ""
-        });
-        await bookService.CreateBook(new katio.Data.Models.Book
-        {
-            Name = "El señor de los anillos",
-            ISBN10 = "8445013830",
-            ISBN13 = "978-8445013830",
-            Published = new DateOnly(2023, 11, 02),
-            Edition = "Fantasia epica",
-            DeweyIndex = "800",
-            AuthorId = 26,
-            bookCover = ""
-        });
-        await bookService.CreateBook(new katio.Data.Models.Book
-        {
-            Name = "Juego de tronos",
-            ISBN10 = "1644736135",
-            ISBN13 = "978-1644736135",
-            Published = new DateOnly(2022, 06, 21),
-            Edition = "Vintage",
-            DeweyIndex = "800",
-            AuthorId = 28,
-            bookCover = ""
-        });
-        await bookService.CreateBook(new katio.Data.Models.Book
-        {
-            Name = "Duna",
-            ISBN10 = "6073194648",
-            ISBN13 = "978-6073194648",
-            Published = new DateOnly(2020, 11, 07),
-            Edition = "Classic",
-            DeweyIndex = "800",
-            AuthorId = 29,
-            bookCover = ""
-        });
-        await bookService.CreateBook(new katio.Data.Models.Book
-        {
-            Name = "El extranjero",
-            ISBN10 = "1518660016",
-            ISBN13 = "978-1518660016",
-            Published = new DateOnly(2015, 10, 06),
-            Edition = "Ciencia ficcion",
-            DeweyIndex = "800",
-            AuthorId = 30,
-            bookCover = ""
-        });
-        await bookService.CreateBook(new katio.Data.Models.Book
-        {
-            Name = "El cuento de la criada",
-            ISBN10 = "8498388015",
-            ISBN13 = "978-8498388015",
-            Published = new DateOnly(2017, 06, 17),
-            Edition = "Salamandra",
-            DeweyIndex = "800",
-            AuthorId = 31,
-            bookCover = ""
-        });
-        await bookService.CreateBook(new katio.Data.Models.Book
-        {
-            Name = "Asesinato en el Orient Express",
-            ISBN10 = "6070743986",
-            ISBN13 = "978-6070743986",
-            Published = new DateOnly(2022, 02, 15),
-            Edition = "Planeta",
-            DeweyIndex = "800",
-            AuthorId = 33,
-            bookCover = ""
-        });
-        await bookService.CreateBook(new katio.Data.Models.Book
-        {
-            Name = "Cuentos de Terramar",
-            ISBN10 = "8467437560",
-            ISBN13 = "978-8467437560",
-            Published = new DateOnly(2007, 01, 01),
-            Edition = "Planeta",
-            DeweyIndex = "800",
-            AuthorId = 34,
-            bookCover = ""
-        });
+            var pdfFile = new FormFile(fileStream, 0, fileStream.Length, null!, "2. Cuentos y pasatiempos_Secretos para contar.pdf")
+            {
+                Headers = new HeaderDictionary(),
+                ContentType = "application/pdf"
+            };
+            await bookService.CreateBook(new katio.Data.Models.Book
+            {
+                Name = "Cien años de soledad",
+                ISBN10 = "8420471836",
+                ISBN13 = "978-8420471839",
+                Published = new DateOnly(1967, 06, 05),
+                Edition = "RAE Obra Académica",
+                DeweyIndex = "800",
+                AuthorId = 1,
+                BookCover = "",
+                PdfPath = ""
+            }, pdfFile);
+            await bookService.CreateBook(new katio.Data.Models.Book
+            {
+                Name = "Huellas",
+                ISBN10 = "9584277278",
+                ISBN13 = "978-9584277275",
+                Published = new DateOnly(2019, 01, 01),
+                Edition = "1ra Edicion",
+                DeweyIndex = "800",
+                AuthorId = 3,
+                BookCover = "",
+                PdfPath = ""
+            }, pdfFile);
+            await bookService.CreateBook(new katio.Data.Models.Book
+            {
+                Name = "María",
+                ISBN10 = "14802722922",
+                ISBN13 = "978-148027292",
+                Published = new DateOnly(1867, 01, 01),
+                Edition = "1ra edición",
+                DeweyIndex = "800",
+                AuthorId = 2,
+                BookCover = "",
+                PdfPath = ""
+            }, pdfFile);
+            await bookService.CreateBook(new katio.Data.Models.Book
+            {
+                Name = "Mexico Gothic",
+                ISBN10 = "8420471836",
+                ISBN13 = "978-05256620785",
+                Published = new DateOnly(2020, 06, 30),
+                Edition = "Del Rey",
+                DeweyIndex = "800",
+                AuthorId = 4,
+                BookCover = "",
+                PdfPath = ""
+            }, pdfFile);
+            await bookService.CreateBook(new katio.Data.Models.Book
+            {
+                Name = "Sin remedio",
+                ISBN10 = "3161484100",
+                ISBN13 = "978-3161484100",
+                Published = new DateOnly(1984, 01, 01),
+                Edition = "Alfaguara",
+                DeweyIndex = "800",
+                AuthorId = 12,
+                BookCover = "",
+                PdfPath = ""
+            }, pdfFile);
+            await bookService.CreateBook(new katio.Data.Models.Book
+            {
+                Name = "Delirio",
+                ISBN10 = "9587041453",
+                ISBN13 = "978-9587041453",
+                Published = new DateOnly(2004, 01, 01),
+                Edition = "Alfaguara",
+                DeweyIndex = "800",
+                AuthorId = 9,
+                BookCover = "",
+                PdfPath = ""
+            }, pdfFile);
+            await bookService.CreateBook(new katio.Data.Models.Book
+            {
+                Name = "Infinito en un junco",
+                ISBN10 = "8417860790",
+                ISBN13 = "9788417860790",
+                Published = new DateOnly(2019, 01, 01),
+                Edition = "Siruela",
+                DeweyIndex = "800",
+                AuthorId = 5,
+                BookCover = "",
+                PdfPath = ""
+            }, pdfFile);
+            await bookService.CreateBook(new katio.Data.Models.Book
+            {
+                Name = "El olvido que seremos",
+                ISBN10 = "8420426402",
+                ISBN13 = "978-8420426402",
+                Published = new DateOnly(2017, 10, 16),
+                Edition = "Alfaguara",
+                DeweyIndex = "800",
+                AuthorId = 8,
+                BookCover = "",
+                PdfPath = ""
+            }, pdfFile);
+            await bookService.CreateBook(new katio.Data.Models.Book
+            {
+                Name = "El país de la canela",
+                ISBN10 = "8439738831",
+                ISBN13 = "978-8439738831",
+                Published = new DateOnly(2020, 08, 22),
+                Edition = "ndom House",
+                DeweyIndex = "800",
+                AuthorId = 13,
+                BookCover = "",
+                PdfPath = ""
+            }, pdfFile);
+            await bookService.CreateBook(new katio.Data.Models.Book
+            {
+                Name = "Lo que no tiene nombre",
+                ISBN10 = "6287659216",
+                ISBN13 = "978-6287659216",
+                Published = new DateOnly(2024, 03, 19),
+                Edition = "Alfaguara",
+                DeweyIndex = "800",
+                AuthorId = 10,
+                BookCover = "",
+                PdfPath = ""
+            }, pdfFile);
+            await bookService.CreateBook(new katio.Data.Models.Book
+            {
+                Name = "El ruido de las cosas al caer",
+                ISBN10 = "6073137515",
+                ISBN13 = "978-6073137515",
+                Published = new DateOnly(2015, 12, 29),
+                Edition = "ebolsillo",
+                DeweyIndex = "800",
+                AuthorId = 14,
+                BookCover = "",
+                PdfPath = ""
+            }, pdfFile);
+            await bookService.CreateBook(new katio.Data.Models.Book
+            {
+                Name = "El síndrome de Ulises",
+                ISBN10 = "9584211903",
+                ISBN13 = "978-9584211903",
+                Published = new DateOnly(2005, 03, 30),
+                Edition = "Planeta",
+                DeweyIndex = "800",
+                AuthorId = 15,
+                BookCover = "",
+                PdfPath = ""
+            }, pdfFile);
+            await bookService.CreateBook(new katio.Data.Models.Book
+            {
+                Name = "La puta de Babilonia",
+                ISBN10 = "6073158855",
+                ISBN13 = "978-6073158855",
+                Published = new DateOnly(2018, 01, 30),
+                Edition = "ebolsillo",
+                DeweyIndex = "800",
+                AuthorId = 11,
+                BookCover = "",
+                PdfPath = ""
+            }, pdfFile);
+            await bookService.CreateBook(new katio.Data.Models.Book
+            {
+                Name = "Memorias de un sinvergüenza de siete suelas",
+                ISBN10 = "9504932611",
+                ISBN13 = "978-9504932611",
+                Published = new DateOnly(2012, 01, 01),
+                Edition = "Planeta",
+                DeweyIndex = "800",
+                AuthorId = 16,
+                BookCover = "",
+                PdfPath = ""
+            }, pdfFile);
+            await bookService.CreateBook(new katio.Data.Models.Book
+            {
+                Name = "Satanás",
+                ISBN10 = "9584273543",
+                ISBN13 = "978-9584273543",
+                Published = new DateOnly(2018, 01, 01),
+                Edition = "Planeta DeAgostini Comic",
+                DeweyIndex = "800",
+                AuthorId = 7,
+                BookCover = "",
+                PdfPath = ""
+            }, pdfFile);
+            await bookService.CreateBook(new katio.Data.Models.Book
+            {
+                Name = "It (Eso)",
+                ISBN10 = "0525566267",
+                ISBN13 = "978-0525566267",
+                Published = new DateOnly(2019, 01, 27),
+                Edition = "Vinntage Espanol",
+                DeweyIndex = "800",
+                AuthorId = 17,
+                BookCover = "",
+                PdfPath = ""
+            }, pdfFile);
+            await bookService.CreateBook(new katio.Data.Models.Book
+            {
+                Name = "El Resplandor",
+                ISBN10 = "0593311233",
+                ISBN13 = "978-0593311233",
+                Published = new DateOnly(2005, 08, 25),
+                Edition = "Vintage",
+                DeweyIndex = "800",
+                AuthorId = 17,
+                BookCover = "",
+                PdfPath = ""
+            }, pdfFile);
+            await bookService.CreateBook(new katio.Data.Models.Book
+            {
+                Name = "Cujo",
+                ISBN10 = "1501192241",
+                ISBN13 = "978-1501192241",
+                Published = new DateOnly(2018, 02, 20),
+                Edition = "Scribner",
+                DeweyIndex = "800",
+                AuthorId = 17,
+                BookCover = "",
+                PdfPath = ""
+            }, pdfFile);
+            await bookService.CreateBook(new katio.Data.Models.Book
+            {
+                Name = "Trono de Cristal",
+                ISBN10 = "8890981547",
+                ISBN13 = "979-8890981547",
+                Published = new DateOnly(2022, 05, 13),
+                Edition = "Alfaguara",
+                DeweyIndex = "800",
+                AuthorId = 6,
+                BookCover = "",
+                PdfPath = ""
+            }, pdfFile);
+            await bookService.CreateBook(new katio.Data.Models.Book
+            {
+                Name = "Entrevista con el Vampiro",
+                ISBN10 = "6073198929",
+                ISBN13 = "978-6073198929",
+                Published = new DateOnly(2021, 05, 18),
+                Edition = "de Bolsillo",
+                DeweyIndex = "800",
+                AuthorId = 18,
+                BookCover = "",
+                PdfPath = ""
+            }, pdfFile);
+            await bookService.CreateBook(new katio.Data.Models.Book
+            {
+                Name = "Anniquilación",
+                ISBN10 = "0374104092",
+                ISBN13 = "978-0374104092",
+                Published = new DateOnly(2014, 02, 04),
+                Edition = "G Originals",
+                DeweyIndex = "800",
+                AuthorId = 19,
+                BookCover = "",
+                PdfPath = ""
+            }, pdfFile);
+            await bookService.CreateBook(new katio.Data.Models.Book
+            {
+                Name = "Autoridad",
+                ISBN10 = "0374104108",
+                ISBN13 = "978-0374104108",
+                Published = new DateOnly(2014, 05, 06),
+                Edition = "G Originals",
+                DeweyIndex = "800",
+                AuthorId = 19,
+                BookCover = "",
+                PdfPath = ""
+            }, pdfFile);
+            await bookService.CreateBook(new katio.Data.Models.Book
+            {
+                Name = "Aceptación",
+                ISBN10 = "374104115",
+                ISBN13 = "978-0374104115",
+                Published = new DateOnly(2014, 09, 02),
+                Edition = "G Originals",
+                DeweyIndex = "800",
+                AuthorId = 19,
+                BookCover = "",
+                PdfPath = ""
+            }, pdfFile);
+            await bookService.CreateBook(new katio.Data.Models.Book
+            {
+                Name = "Historia de Colombia y sus oligarquias",
+                ISBN10 = "9584268754",
+                ISBN13 = "978-9584268754",
+                Published = new DateOnly(2019, 01, 01),
+                Edition = "Crítica",
+                DeweyIndex = "800",
+                AuthorId = 12,
+                BookCover = "",
+                PdfPath = ""
+            }, pdfFile);
+            await bookService.CreateBook(new katio.Data.Models.Book
+            {
+                Name = "El problema de los tres cuerpos",
+                ISBN10 = "8466659734",
+                ISBN13 = "978-8466659734",
+                Published = new DateOnly(2016, 11, 01),
+                Edition = "Nova",
+                DeweyIndex = "800",
+                AuthorId = 20,
+                BookCover = "",
+                PdfPath = ""
+            }, pdfFile);
+            await bookService.CreateBook(new katio.Data.Models.Book
+            {
+                Name = "El Bosque Oscuro",
+                ISBN10 = "978-8413146454",
+                ISBN13 = "978-8413146454",
+                Published = new DateOnly(2024, 05, 01),
+                Edition = "Nova",
+                DeweyIndex = "800",
+                AuthorId = 20,
+                BookCover = "",
+                PdfPath = ""
+            }, pdfFile);
+            await bookService.CreateBook(new katio.Data.Models.Book
+            {
+                Name = "El fin de la muerte",
+                ISBN10 = "8417347017",
+                ISBN13 = "978-8417347017",
+                Published = new DateOnly(2018, 08, 01),
+                Edition = "1",
+                DeweyIndex = "800",
+                AuthorId = 20,
+                BookCover = "",
+                PdfPath = ""
+            }, pdfFile);
+            await bookService.CreateBook(new katio.Data.Models.Book
+            {
+                Name = "Crimen y Castigo",
+                ISBN10 = "8872132677",
+                ISBN13 = "979-8872132677",
+                Published = new DateOnly(1866, 12, 01),
+                Edition = "dependiente",
+                DeweyIndex = "800",
+                AuthorId = 21,
+                BookCover = "",
+                PdfPath = ""
+            }, pdfFile);
+            await bookService.CreateBook(new katio.Data.Models.Book
+            {
+                Name = "Las obras de Leo Tolstoy",
+                ISBN10 = "1016243247",
+                ISBN13 = "978-1016243247",
+                Published = new DateOnly(2022, 10, 27),
+                Edition = "CLassic",
+                DeweyIndex = "800",
+                AuthorId = 22,
+                BookCover = "",
+                PdfPath = ""
+            }, pdfFile);
+            await bookService.CreateBook(new katio.Data.Models.Book
+            {
+                Name = "Historias Cortas",
+                ISBN10 = "9389717105",
+                ISBN13 = "978-9389717105",
+                Published = new DateOnly(2019, 01, 12),
+                Edition = "Finngerprint",
+                DeweyIndex = "800",
+                AuthorId = 23,
+                BookCover = "",
+                PdfPath = ""
+            }, pdfFile);
+            await bookService.CreateBook(new katio.Data.Models.Book
+            {
+                Name = "Trilogía Fundación",
+                ISBN10 = "8499083209",
+                ISBN13 = "978-8499083209",
+                Published = new DateOnly(2023, 03, 23),
+                Edition = "debolsillo",
+                DeweyIndex = "800",
+                AuthorId = 24,
+                BookCover = "",
+                PdfPath = ""
+            }, pdfFile);
+            await bookService.CreateBook(new katio.Data.Models.Book
+            {
+                Name = "El libro de la selva",
+                ISBN10 = "8467871029",
+                ISBN13 = "978-8467871029",
+                Published = new DateOnly(1894, 01, 01),
+                Edition = "Classic",
+                DeweyIndex = "800",
+                AuthorId = 25,
+                BookCover = "",
+                PdfPath = ""
+            }, pdfFile);
+            await bookService.CreateBook(new katio.Data.Models.Book
+            {
+                Name = "El señor de los anillos",
+                ISBN10 = "8445013830",
+                ISBN13 = "978-8445013830",
+                Published = new DateOnly(2023, 11, 02),
+                Edition = "Fantasia epica",
+                DeweyIndex = "800",
+                AuthorId = 26,
+                BookCover = "",
+                PdfPath = ""
+            }, pdfFile);
+            await bookService.CreateBook(new katio.Data.Models.Book
+            {
+                Name = "Juego de tronos",
+                ISBN10 = "1644736135",
+                ISBN13 = "978-1644736135",
+                Published = new DateOnly(2022, 06, 21),
+                Edition = "Vintage",
+                DeweyIndex = "800",
+                AuthorId = 28,
+                BookCover = "",
+                PdfPath = ""
+            }, pdfFile);
+            await bookService.CreateBook(new katio.Data.Models.Book
+            {
+                Name = "Duna",
+                ISBN10 = "6073194648",
+                ISBN13 = "978-6073194648",
+                Published = new DateOnly(2020, 11, 07),
+                Edition = "Classic",
+                DeweyIndex = "800",
+                AuthorId = 29,
+                BookCover = "",
+                PdfPath = ""
+            }, pdfFile);
+            await bookService.CreateBook(new katio.Data.Models.Book
+            {
+                Name = "El extranjero",
+                ISBN10 = "1518660016",
+                ISBN13 = "978-1518660016",
+                Published = new DateOnly(2015, 10, 06),
+                Edition = "Ciencia ficcion",
+                DeweyIndex = "800",
+                AuthorId = 30,
+                BookCover = "",
+                PdfPath = ""
+            }, pdfFile);
+            await bookService.CreateBook(new katio.Data.Models.Book
+            {
+                Name = "El cuento de la criada",
+                ISBN10 = "8498388015",
+                ISBN13 = "978-8498388015",
+                Published = new DateOnly(2017, 06, 17),
+                Edition = "Salamandra",
+                DeweyIndex = "800",
+                AuthorId = 31,
+                BookCover = "",
+                PdfPath = ""
+            }, pdfFile);
+            await bookService.CreateBook(new katio.Data.Models.Book
+            {
+                Name = "Asesinato en el Orient Express",
+                ISBN10 = "6070743986",
+                ISBN13 = "978-6070743986",
+                Published = new DateOnly(2022, 02, 15),
+                Edition = "Planeta",
+                DeweyIndex = "800",
+                AuthorId = 33,
+                BookCover = "",
+                PdfPath = ""
+            }, pdfFile);
+            await bookService.CreateBook(new katio.Data.Models.Book
+            {
+                Name = "Cuentos de Terramar",
+                ISBN10 = "8467437560",
+                ISBN13 = "978-8467437560",
+                Published = new DateOnly(2007, 01, 01),
+                Edition = "Planeta",
+                DeweyIndex = "800",
+                AuthorId = 34,
+                BookCover = "",
+                PdfPath = ""
+            }, pdfFile);
+        }
         #endregion
 
         // Tabla de Narradores
         #region narrator service
 
-        var NarratorService = scope.ServiceProvider.GetService<INarratorService>();
+        var NarratorService = scope.ServiceProvider.GetService<INarratorService>()!;
         await NarratorService.CreateNarrator(new katio.Data.Models.Narrator
         {
             Name = "Maria Camila",
@@ -860,7 +910,7 @@ bookCover = ""
         // Tabla de Generos
         #region genre service
 
-        var GenreService = scope.ServiceProvider.GetService<IGenreService>();
+        var GenreService = scope.ServiceProvider.GetService<IGenreService>()!;
         await GenreService.CreateGenre(new katio.Data.Models.Genre
         {
             Name = "Ficcion",
@@ -887,7 +937,7 @@ bookCover = ""
         // Tabla de AudioLibros
         #region audiobook service
 
-        var AudioBookService = scope.ServiceProvider.GetService<IAudioBookService>();
+        var AudioBookService = scope.ServiceProvider.GetService<IAudioBookService>()!;
         await AudioBookService.CreateAudioBook(new katio.Data.Models.AudioBook
         {
             Id = 1,

@@ -10,4 +10,8 @@
     <ProjectReference Include="..\katio_net.Data\katio_net.Data.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
+  </ItemGroup>
+
 </Project>

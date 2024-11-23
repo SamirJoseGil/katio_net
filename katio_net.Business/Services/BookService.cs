@@ -4,6 +4,7 @@ using katio.Data.Dto;
 using katio.Data;
 using System.Net;
 using System.Linq.Expressions;
+using Microsoft.AspNetCore.Http;
 
 namespace katio.Business.Services;
 
@@ -23,7 +24,7 @@ public class BookService : IBookService
     {
         try
         {
-            var result = await _unitOfWork.BookRepository.GetAllAsync();
+            var result = await _unitOfWork.BookRepository.GetAllAsync(includeProperties: "Author");
             return result.Any() ? Utilities.BuildResponse<Book>(HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
                 Utilities.BuildResponse<Book>(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
         }
@@ -122,17 +123,47 @@ public class BookService : IBookService
     #region Create Update Delete
 
     // Crear un Libro
-    public async Task<BaseMessage<Book>> CreateBook(Book book)
+    public async Task<BaseMessage<Book>> CreateBook(Book book, IFormFile pdfFile)
     {
+        // Verificar si el libro ya existe en base a ISBN
         var existingBook = await _unitOfWork.BookRepository.GetAllAsync(b => b.ISBN10 == book.ISBN10 || b.ISBN13 == book.ISBN13);
 
         if (existingBook.Any())
         {
-
             return Utilities.BuildResponse<Book>(HttpStatusCode.Conflict, BaseMessageStatus.BOOK_ALREADY_EXISTS);
         }
         try
         {
+            // Homogeneizar el archivo PDF: convertir el nombre a minúsculas y quitar caracteres especiales
+            var sanitizedFileName = Path.GetFileNameWithoutExtension(pdfFile.FileName)
+                .ToLowerInvariant()
+                .Replace(" ", "_") + Path.GetExtension(pdfFile.FileName).ToLowerInvariant();
+
+            // Verificar si ya existe un libro con la misma ruta relativa en la base de datos
+            var relativePath = Path.Combine("uploads", "books", sanitizedFileName);
+            var existingFile = await _unitOfWork.BookRepository.GetAllAsync(b => b.PdfPath == relativePath);
+
+            if (existingFile.Any())
+            {
+                return Utilities.BuildResponse<Book>(HttpStatusCode.Conflict, BaseMessageStatus.ALREADY_EXISTS_409);
+            }
+
+            // Ruta donde se guardará el archivo físicamente
+            var uploadsFolderPath = Path.Combine(Directory.GetCurrentDirectory(), "uploads", "books");
+            Directory.CreateDirectory(uploadsFolderPath); // Crear el directorio si no existe
+
+            var filePath = Path.Combine(uploadsFolderPath, sanitizedFileName);
+
+            // Guardar el archivo físicamente
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await pdfFile.CopyToAsync(stream);
+            }
+
+            // Asignar la ruta relativa al libro
+            book.PdfPath = relativePath;
+
+            // Guardar el libro en la base de datos
             await _unitOfWork.BookRepository.AddAsync(book);
             await _unitOfWork.SaveAsync();
         }
@@ -140,8 +171,10 @@ public class BookService : IBookService
         {
             return Utilities.BuildResponse<Book>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
         }
+
         return Utilities.BuildResponse(HttpStatusCode.OK, BaseMessageStatus.OK_200, new List<Book> { book });
     }
+
 
     // Actualizar un Libro
     public async Task<BaseMessage<Book>> UpdateBook(Book book)
@@ -328,7 +361,7 @@ public class BookService : IBookService
         try
         {
             var result = await _unitOfWork.BookRepository.GetAllAsync
-                (b => b.Author.Name.ToLower().Contains(authorName.ToLower()),
+                (b => b.Author != null && b.Author.Name.ToLower().Contains(authorName.ToLower()),
                 includeProperties: "Author");
             return result.Any() ? Utilities.BuildResponse<Book>
                 (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
@@ -346,7 +379,7 @@ public class BookService : IBookService
         try
         {
             var result = await _unitOfWork.BookRepository.GetAllAsync
-                (b => b.Author.LastName.ToLower().Contains(authorLastName.ToLower()),
+                (b => b.Author != null && b.Author.LastName.ToLower().Contains(authorLastName.ToLower()),
                 includeProperties: "Author");
             return result.Any() ? Utilities.BuildResponse<Book>
                 (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
@@ -364,7 +397,7 @@ public class BookService : IBookService
         try
         {
             var result = await _unitOfWork.BookRepository.GetAllAsync(
-                b => b.Author.Country.ToLower().Contains(authorCountry.ToLower()),
+                b => b.Author != null && b.Author.Country.ToLower().Contains(authorCountry.ToLower()),
                 includeProperties: "Author");
             return result.Any() ? Utilities.BuildResponse<Book>
                 (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
@@ -382,7 +415,7 @@ public class BookService : IBookService
         try
         {
             var result = await _unitOfWork.BookRepository.GetAllAsync((
-                b => b.Author.Name.ToLower().Contains(authorName.ToLower()) &&
+                b => b.Author != null && b.Author.Name.ToLower().Contains(authorName.ToLower()) &&
                 b.Author.LastName.ToLower().Contains(authorLastName.ToLower())),
                 includeProperties: "Author");
             return result.Any() ? Utilities.BuildResponse<Book>
@@ -401,7 +434,7 @@ public class BookService : IBookService
         try
         {
             var result = await _unitOfWork.BookRepository.GetAllAsync(
-                b => b.Author.BirthDate >= startDate && b.Author.BirthDate <= endDate,
+                b => b.Author != null && b.Author.BirthDate >= startDate && b.Author.BirthDate <= endDate,
                 includeProperties: "Author");
             return result.Any() ? Utilities.BuildResponse<Book>
                 (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :

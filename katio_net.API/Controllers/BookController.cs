@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using katio.Business.Interfaces;
 using katio.Data.Models;
+using katio.Data.Models.Dto;
 
 
 
@@ -24,7 +25,7 @@ namespace katio.API.Controllers
         public async Task<IActionResult> Index()
         {
             var response = await _bookService.Index();
-            return response !=null ? Ok(response) : StatusCode(StatusCodes.Status404NotFound, response);
+            return response != null ? Ok(response) : StatusCode(StatusCodes.Status404NotFound, response);
         }
 
         // Busca libros por término de búsqueda
@@ -41,9 +42,22 @@ namespace katio.API.Controllers
         // Crea un libro
         [HttpPost]
         [Route("CreateBook")]
-        public async Task<IActionResult> CreateBook(Book book)
+        public async Task<IActionResult> CreateBook(BookInsert bookInsert)
         {
-            var response = await _bookService.CreateBook(book);
+            var book = new Book
+            {
+                Name = bookInsert.Name,
+                ISBN10 = bookInsert.ISBN10,
+                ISBN13 = bookInsert.ISBN13,
+                Published = bookInsert.Published,
+                Edition = bookInsert.Edition,
+                DeweyIndex = bookInsert.DeweyIndex,
+                AuthorId = bookInsert.AuthorId,
+                BookCover = bookInsert.BookCover,
+            };
+
+            var response = await _bookService.CreateBook(book, bookInsert.PdfFile);
+
             return response.StatusCode == System.Net.HttpStatusCode.OK ? Ok(response) : StatusCode((int)response.StatusCode, response);
         }
 

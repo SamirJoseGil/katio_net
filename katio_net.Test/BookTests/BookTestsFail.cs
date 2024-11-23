@@ -80,7 +80,7 @@ public class BookTestsFail
         _bookRepository.GetAllAsync(Arg.Any<Expression<Func<Book, bool>>>()).ReturnsForAnyArgs(new List<Book> { existingBook });
 
         // Act
-        var result = await _bookService.CreateBook(newBook);
+        var result = await _bookService.CreateBook(newBook, pdfFile: null);
 
         // Assert
         Assert.IsFalse(result.ResponseElements.Any());
