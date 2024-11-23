@@ -948,10 +948,9 @@ async Task PopulateDB(WebApplication app)
             Edition = "RAE Obra Académica",
             Genre = "Ficcion",
             LenghtInSeconds = 1,
-            Path = "C:/Users/Usuario/Downloads/Cien años de soledad.mp3",
             NarratorId = 1,
             FrontPage = null
-        });
+        }, audioFile: null);
         await AudioBookService.CreateAudioBook(new katio.Data.Models.AudioBook
         {
             Id = 2,
@@ -962,10 +961,9 @@ async Task PopulateDB(WebApplication app)
             Edition = "1ra Edicion",
             Genre = "Ficcion",
             LenghtInSeconds = 10,
-            Path = "C:/Users/Usuario/Downloads/Huellas.mp3",
             NarratorId = 3,
             FrontPage = null
-        });
+        }, audioFile: null);
         await AudioBookService.CreateAudioBook(new katio.Data.Models.AudioBook
         {
             Id = 3,
@@ -976,10 +974,9 @@ async Task PopulateDB(WebApplication app)
             Edition = "1ra edición",
             Genre = "Ficcion",
             LenghtInSeconds = 20,
-            Path = "C:/Users/Usuario/Downloads/Maria.mp3",
             NarratorId = 2,
             FrontPage = null
-        });
+        }, audioFile: null);
         await AudioBookService.CreateAudioBook(new katio.Data.Models.AudioBook
         {
             Id = 4,
@@ -990,10 +987,9 @@ async Task PopulateDB(WebApplication app)
             Edition = "Del Rey",
             Genre = "Ficcion",
             LenghtInSeconds = 30,
-            Path = "C:/Users/Usuario/Downloads/Mexico Gothic.mp3",
             NarratorId = 4,
             FrontPage = null
-        });
+        }, audioFile: null);
 
         #endregion
     }

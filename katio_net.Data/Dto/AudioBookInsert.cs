@@ -1,8 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Http;
 
-namespace katio.Data.Models
+namespace katio.Data.Models.Dto
 {
-    public class AudioBook : BaseEntity<int>
+    public class AudioBookInsert : BaseEntity<int>
     {
         public string Name { get; set; } = string.Empty;
         public string ISBN10 { get; set; } = string.Empty;
@@ -13,6 +14,7 @@ namespace katio.Data.Models
         public int LenghtInSeconds { get; set; } = 0;
         public string FrontPage { get; set; } = string.Empty;
         public string? AudioPath { get; set; } = null;
+        public IFormFile AudioFile { get; set; }
 
         // Relaciones
         [ForeignKey("Narrator")]

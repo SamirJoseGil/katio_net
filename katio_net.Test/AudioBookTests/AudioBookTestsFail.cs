@@ -35,7 +35,6 @@ public class AudioBookTestsFail
         Edition = "RAE Obra Académica",
         Genre = "Ficcion",
         LenghtInSeconds = 1,
-        Path = "C:/Users/Usuario/Downloads/Cien a�os de soledad.mp3",
         NarratorId = 1
       }, new AudioBook {
         Id = 2,
@@ -46,7 +45,6 @@ public class AudioBookTestsFail
         Edition = "1ra Edicion",
         Genre = "Ficcion",
         LenghtInSeconds = 1,
-        Path = "C:/Users/Usuario/Downloads/Huellas.mp3",
         NarratorId = 3
       }};
     }
@@ -65,14 +63,13 @@ public class AudioBookTestsFail
             Edition = "RAE Obra Académica",
             Genre = "Ficcion",
             LenghtInSeconds = 1,
-            Path = "C:/Users/Usuario/Downloads/Cien a�os de soledad.mp3",
             NarratorId = 1
 
         };
         _audioBookRepository.GetAllAsync(Arg.Any<Expression<Func<AudioBook, bool>>>()).ReturnsForAnyArgs(new List<AudioBook> { existingAudioBook });
 
         // Act
-        var result = await _audioBookService.CreateAudioBook(existingAudioBook);
+        var result = await _audioBookService.CreateAudioBook(existingAudioBook, audioFile: null);
 
         // Assert
         Assert.IsFalse(result.ResponseElements.Any());

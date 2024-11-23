@@ -34,7 +34,6 @@ public class AudioBookTestsException
         Edition = "RAE Obra Académica",
         Genre = "Ficcion",
         LenghtInSeconds = 1,
-        Path = "C:/Users/Usuario/Downloads/Cien a�os de soledad.mp3",
         NarratorId = 1
       }, new AudioBook {
         Id = 2,
@@ -45,7 +44,6 @@ public class AudioBookTestsException
         Edition = "1ra Edicion",
         Genre = "Ficcion",
         LenghtInSeconds = 1,
-        Path = "C:/Users/Usuario/Downloads/Huellas.mp3",
         NarratorId = 3
       }};
     }
@@ -276,14 +274,13 @@ public class AudioBookTestsException
             Edition = "RAE Obra Académica",
             Genre = "Ficcion",
             LenghtInSeconds = 1,
-            Path = "C:/Users/Usuario/Downloads/Cien a�os de soledad.mp3",
             NarratorId = 1
         };
         _audioBookRepository.GetAllAsync(Arg.Any<Expression<Func<AudioBook, bool>>>()).Returns(new List<AudioBook>());
         _audioBookRepository.When(x => x.AddAsync(Arg.Any<AudioBook>())).Do(x => throw new Exception("Repository error"));
 
         // Act
-        var result = await _audioBookService.CreateAudioBook(newAudioBook);
+        var result = await _audioBookService.CreateAudioBook(newAudioBook, audioFile: null);
 
         // Assert
         Assert.AreEqual((int)result.StatusCode, 500);
@@ -305,7 +302,6 @@ public class AudioBookTestsException
             Edition = "RAE Obra Académica",
             Genre = "Ficcion",
             LenghtInSeconds = 1,
-            Path = "C:/Users/Usuario/Downloads/Cien a�os de soledad.mp3",
             NarratorId = 1
         };
         _audioBookRepository.FindAsync(audioBookToUpdate.Id).Returns(audioBookToUpdate);

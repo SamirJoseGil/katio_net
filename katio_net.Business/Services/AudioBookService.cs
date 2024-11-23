@@ -4,6 +4,7 @@ using katio.Data.Dto;
 using katio.Data;
 using System.Net;
 using System.Linq.Expressions;
+using Microsoft.AspNetCore.Http;
 
 namespace katio.Business.Services;
 
@@ -123,7 +124,7 @@ public class AudioBookService : IAudioBookService
     #region Create Update Delete
 
     // Crear un Audiolibro
-    public async Task<BaseMessage<AudioBook>> CreateAudioBook(AudioBook audioBook)
+    public async Task<BaseMessage<AudioBook>> CreateAudioBook(AudioBook audioBook, IFormFile audioFile)
     {
         var existingAudioBook = await _unitOfWork.AudioBookRepository.GetAllAsync(ab => ab.ISBN10 == audioBook.ISBN10 || ab.ISBN13 == audioBook.ISBN13);
 
@@ -133,6 +134,34 @@ public class AudioBookService : IAudioBookService
         }
         try
         {
+            // Homogeneizar el archivo de audio: convertir el nombre a minusculas y quitar caracteres especiales
+            var sanitizedFileName = Path.GetFileNameWithoutExtension(audioFile.FileName)
+            .ToLowerInvariant()
+            .Replace(" ", "_") + Path.GetExtension(audioFile.FileName).ToLowerInvariant();
+
+            // Verificar si ya existe un audio con la misma ruta en la BD
+            var relativePath = Path.Combine("uploads", "audiobooks", sanitizedFileName);
+            var existingfile = await _unitOfWork.AudioBookRepository.GetAllAsync(ab => ab.AudioPath == relativePath);
+
+            if (existingfile.Any())
+            {
+                return Utilities.BuildResponse<AudioBook>(HttpStatusCode.Conflict, BaseMessageStatus.ALREADY_EXISTS_409);
+            }
+
+            // Ruta donde se guardara el archivo fisicamente
+            var uploadsFolderPath = Path.Combine(Directory.GetCurrentDirectory(), "uploads", "audiobooks");
+            Directory.CreateDirectory(uploadsFolderPath); // Crear el directorio si no existes
+
+            var filePath = Path.Combine(uploadsFolderPath, sanitizedFileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await audioFile.CopyToAsync(stream);
+            }
+
+            audioBook.AudioPath = relativePath;
+
+
             await _unitOfWork.AudioBookRepository.AddAsync(audioBook);
             await _unitOfWork.SaveAsync();
         }
@@ -339,7 +368,7 @@ public class AudioBookService : IAudioBookService
     {
         try
         {
-            var result = await _unitOfWork.AudioBookRepository.GetAllAsync(a => a.Narrator.Name.ToLower().Contains(narratorName.ToLower()),
+            var result = await _unitOfWork.AudioBookRepository.GetAllAsync(b => b.Narrator.Name.ToLower().Contains(narratorName.ToLower()),
             includeProperties: "Narrator");
             return result.Any()
                 ? Utilities.BuildResponse<AudioBook>(HttpStatusCode.OK, BaseMessageStatus.OK_200, result)
