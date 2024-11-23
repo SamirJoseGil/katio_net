@@ -33,7 +33,6 @@ public class AudioBookTests
             Edition = "RAE Obra Académica",
             Genre = "Ficcion",
             LenghtInSeconds = 1,
-            Path = "C:/Users/Usuario/Downloads/Cien años de soledad.mp3",
             NarratorId = 1,
             FrontPage = null
       }, new AudioBook {
@@ -45,7 +44,6 @@ public class AudioBookTests
             Edition = "1ra Edicion",
             Genre = "Ficcion",
             LenghtInSeconds = 10,
-            Path = "C:/Users/Usuario/Downloads/Huellas.mp3",
             NarratorId = 3,
             FrontPage = null
       }};
@@ -208,7 +206,6 @@ public class AudioBookTests
             Edition = "RAE Obra Académica",
             Genre = "Ficcion",
             LenghtInSeconds = 1,
-            Path = "C:/Users/Usuario/Downloads/Cien a�os de soledad.mp3",
             NarratorId = 1
 
         };
@@ -216,7 +213,7 @@ public class AudioBookTests
         _audioBookRepository.AddAsync(newAudioBook).Returns(Task.CompletedTask);
 
         // Act
-        var result = await _audioBookService.CreateAudioBook(newAudioBook);
+        var result = await _audioBookService.CreateAudioBook(newAudioBook, audioFile: null);
 
         // Assert
         Assert.IsTrue(result.ResponseElements.Any());
@@ -237,7 +234,6 @@ public class AudioBookTests
             Edition = "RAE Obra Académica",
             Genre = "Ficcion",
             LenghtInSeconds = 1,
-            Path = "C:/Users/Usuario/Downloads/Cien a�os de soledad.mp3",
             NarratorId = 1
 
         };

@@ -1,5 +1,6 @@
 ﻿using katio.Data.Dto;
 using katio.Data.Models;
+using Microsoft.AspNetCore.Http;
 
 namespace katio.Business.Interfaces;
 
@@ -7,7 +8,7 @@ public interface IAudioBookService
 {
     Task<BaseMessage<AudioBook>> Index();
     Task<BaseMessage<AudioBook>> SearchAudioBookAsync(string searchTerm);
-    Task<BaseMessage<AudioBook>> CreateAudioBook(AudioBook audioBook);
+    Task<BaseMessage<AudioBook>> CreateAudioBook(AudioBook audioBook, IFormFile audioFile);
     Task<BaseMessage<AudioBook>> DeleteAudioBook(int id);
     Task<BaseMessage<AudioBook>> UpdateAudioBook(AudioBook audioBook);
     Task<BaseMessage<AudioBook>> GetAudioBookById(int id);

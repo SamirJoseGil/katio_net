@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using katio.Business.Interfaces;
 using katio.Data.Models;
+using katio.Data.Models.Dto;
 
 namespace katio.API.Controllers
 {
@@ -39,9 +40,24 @@ namespace katio.API.Controllers
         // Crea un Audiolibro
         [HttpPost]
         [Route("CreateAudioBook")]
-        public async Task<IActionResult> CreateAudioBook(AudioBook audioBook)
+        public async Task<IActionResult> CreateAudioBook(AudioBookInsert audioBookInsert)
         {
-            var response = await _audioBookService.CreateAudioBook(audioBook);
+            var audiobook = new AudioBook
+            {
+                Name = audioBookInsert.Name,
+                ISBN10 = audioBookInsert.ISBN10,
+                ISBN13 = audioBookInsert.ISBN13,
+                Published = audioBookInsert.Published,
+                Edition = audioBookInsert.Edition,
+                Genre = audioBookInsert.Genre,
+                LenghtInSeconds = audioBookInsert.LenghtInSeconds,
+                FrontPage = audioBookInsert.FrontPage,
+                NarratorId = audioBookInsert.NarratorId
+            };
+
+            var response = await _audioBookService.CreateAudioBook(audiobook, audioBookInsert.AudioFile);
+
+
             return response.StatusCode == System.Net.HttpStatusCode.OK ? Ok(response) : StatusCode((int)response.StatusCode, response);
         }
 
