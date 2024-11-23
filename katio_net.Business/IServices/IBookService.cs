@@ -1,5 +1,6 @@
 ﻿using katio.Data.Dto;
 using katio.Data.Models;
+using Microsoft.AspNetCore.Http;
 
 namespace katio.Business.Interfaces;
 
@@ -15,7 +16,7 @@ public interface IBookService
     Task<BaseMessage<Book>> GetBooksByDeweyIndex(string DeweyIndex);
     Task<BaseMessage<Book>> GetBooksByPublished(DateOnly StartDate, DateOnly EndDate);
     Task<BaseMessage<Book>> DeleteBook(int id);
-    Task<BaseMessage<Book>> CreateBook(Book book);
+    Task<BaseMessage<Book>> CreateBook(Book book, IFormFile pdfFile);
     Task<BaseMessage<Book>> UpdateBook(Book book);
 
 

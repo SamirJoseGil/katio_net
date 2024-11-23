@@ -3,6 +3,12 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/main/VisualStudio.gitignore
 
+# Ignorar todo en uploads
+/katio_net.API/uploads/*
+
+# Excepciones para uploads/prueba
+!/katio_net.API/uploads/prueba/
+
 # User-specific files
 *.rsuser
 *.suo

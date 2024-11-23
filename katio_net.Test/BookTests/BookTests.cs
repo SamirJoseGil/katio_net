@@ -98,7 +98,7 @@ public class BookTests
         _bookRepository.AddAsync(newBook).Returns(Task.CompletedTask);
 
         // Act
-        var result = await _bookService.CreateBook(newBook);
+        var result = await _bookService.CreateBook(newBook, pdfFile: null);
 
         // Assert
         Assert.IsTrue(result.ResponseElements.Any());
