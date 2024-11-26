@@ -90,8 +90,8 @@ public class BookTestsFail
     public async Task UpdateBookFail()
     {
         // Arrange
-        _bookRepository.Update(Arg.Any<Book>()).ThrowsAsyncForAnyArgs(new Exception());
-        _unitOfWork.BookRepository.Returns(_bookRepository);
+        _unitOfWork.BookRepository.GetAllAsync(Arg.Any<Expression<Func<Book, bool>>>())
+        .Returns(new List<Book>());
 
         // Act
         var result = await _bookService.UpdateBook(new Book());
@@ -104,11 +104,11 @@ public class BookTestsFail
     public async Task DeleteBookFail()
     {
         // Arrange
-        var bookToDelete = _books.First();
-        _bookRepository.FindAsync(bookToDelete.Id).ReturnsForAnyArgs(Task.FromResult<Book>(null!));
-
+        var nonExistentBookId = -5;
+        _unitOfWork.BookRepository.GetAllAsync(Arg.Any<Expression<Func<Book, bool>>>())
+        .Returns(new List<Book>());
         // Act
-        var result = await _bookService.DeleteBook(bookToDelete.Id);
+        var result = await _bookService.DeleteBook(nonExistentBookId);
 
         // Assert
         Assert.IsFalse(result.ResponseElements.Any());

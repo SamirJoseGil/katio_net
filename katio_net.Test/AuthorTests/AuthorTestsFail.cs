@@ -76,8 +76,8 @@ public class AuthorTestsFail
     public async Task UpdateAuthorFail()
     {
         // Arrange
-        _authorRepository.Update(Arg.Any<Author>()).ThrowsAsyncForAnyArgs(new Exception());
-        _unitOfWork.AuthorRepository.Returns(_authorRepository);
+        _unitOfWork.AuthorRepository.GetAllAsync(Arg.Any<Expression<Func<Author, bool>>>())
+        .Returns(new List<Author>());
 
         // Act
         var result = await _authorService.UpdateAuthor(new Author());
@@ -90,14 +90,15 @@ public class AuthorTestsFail
     public async Task DeleteAuthorFail()
     {
         // Arrange
-        var authorToDelete = _authors.First();
-        _authorRepository.FindAsync(authorToDelete.Id).ReturnsForAnyArgs(Task.FromResult<Author>(null));
+        var nonExistentAuthorId = -5;
+        _unitOfWork.AuthorRepository.GetAllAsync(Arg.Any<Expression<Func<Author, bool>>>())
+        .Returns(new List<Author>());
 
         // Act
-        var result = await _authorService.DeleteAuthor(authorToDelete.Id);
+        var result = await _authorService.DeleteAuthor(nonExistentAuthorId);
 
         // Assert
-        Assert.IsFalse(result.ResponseElements.Any());
+        Assert.AreEqual((int)result.StatusCode, 404);
     }
     // Test for getting all authors Fail
     [TestMethod]

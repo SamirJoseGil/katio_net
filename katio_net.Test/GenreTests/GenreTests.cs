@@ -62,21 +62,28 @@ public class GenreTests
     [TestMethod]
     public async Task UpdateGenre()
     {
-        // Arrange
-        var GenreToUpdate = _genres.First();
-        _genreRepository.FindAsync(GenreToUpdate.Id).Returns(GenreToUpdate);
+        var existingGenre = new Genre
+        {
+            Id = 1,
+            Name = "Original name",
+            Description = "description"
 
-        var updatedGenre = new Genre 
+        };
+        var updateGenre = new Genre 
         { 
-            Id = GenreToUpdate.Id,
+
             Name = "Fantasy", 
             Description = "La Fantasia es..." 
         };
-        _genreRepository.FindAsync(updatedGenre.Id).Returns(updatedGenre);
-        _genreRepository.Update(updatedGenre).Returns(Task.CompletedTask);
+
+        // Arrange
+        _unitOfWork.GenreRepository.GetAllAsync(Arg.Any<Expression<Func<Genre, bool>>>())
+        .Returns(new List<Genre> { existingGenre });
+        _unitOfWork.GenreRepository.Update(Arg.Any<Genre>()).Returns(Task.CompletedTask);
+        _unitOfWork.SaveAsync().Returns(Task.CompletedTask);
 
         // Act
-        var result = await _genreService.UpdateGenre(updatedGenre);
+        var result = await _genreService.UpdateGenre(updateGenre);
 
         // Assert
         Assert.IsTrue(result.ResponseElements.Any());
@@ -86,16 +93,18 @@ public class GenreTests
     public async Task DeleteGenre()
     {
         // Arrange
-        var genreToDelete = _genres.First();
-        _genreRepository.FindAsync(genreToDelete.Id).Returns(genreToDelete);
+        var genreToDelete = _genres.First(); 
 
-        _genreRepository.Delete(genreToDelete).Returns(Task.CompletedTask);
+        _genreRepository.GetAllAsync(Arg.Any<Expression<Func<Genre, bool>>>())
+        .Returns(Task.FromResult(new List<Genre> { genreToDelete }));
+
+        _genreRepository.Delete(genreToDelete.Id).Returns(Task.CompletedTask);
 
         // Act
         var result = await _genreService.DeleteGenre(genreToDelete.Id);
 
         // Assert
-        Assert.IsTrue(result.ResponseElements.Any());
+        Assert.AreEqual(HttpStatusCode.OK, result.StatusCode); 
     }    
     // Test for getting all genres
     [TestMethod]

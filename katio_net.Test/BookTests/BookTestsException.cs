@@ -106,13 +106,21 @@ public class BookTestsException
     [TestMethod]
     public async Task UpdateBookRepositoryException()
     {
-        // Arrange
-        var bookToUpdate = _books.First();
-        _bookRepository.FindAsync(bookToUpdate.Id).Returns(bookToUpdate);
+        var existingBook = new Book
+        {
+            Id = 1,
+            Name = "Original Name",
+            ISBN10 = "1234567890",
+            ISBN13 = "123-1234567890",
+            Published = new DateOnly(2020, 01, 01),
+            Edition = "First",
+            DeweyIndex = "800",
+            AuthorId = 1
+        };
 
         var updatedBook = new Book
         {
-            Id = bookToUpdate.Id,
+            Id = 1,
             Name = "Cien años de soledad (Edición Actualizada)",
             ISBN10 = "8420471836",
             ISBN13 = "978-8420471839",
@@ -121,9 +129,9 @@ public class BookTestsException
             DeweyIndex = "800",
             AuthorId = 1
         };
-        _bookRepository.FindAsync(updatedBook.Id).Returns(updatedBook);
-        _bookRepository.When(x => x.Update(updatedBook)).Do(x => throw new Exception("Repository error"));
-
+        _unitOfWork.BookRepository.GetAllAsync(Arg.Any<Expression<Func<Book, bool>>>())
+            .Returns(new List<Book> { existingBook });
+        _unitOfWork.BookRepository.When(x => x.Update(Arg.Any<Book>())).Do(x => throw new Exception("Repository error"));
         // Act
         var result = await _bookService.UpdateBook(updatedBook);
 
@@ -134,13 +142,26 @@ public class BookTestsException
     [TestMethod]
     public async Task DeleteBookRepositoryException()
     {
-        // Arrange
-        var bookToDelete = _books.First();
-        _bookRepository.FindAsync(bookToDelete.Id).Returns(bookToDelete);
-        _bookRepository.When(x => x.Delete(bookToDelete)).Do(x => throw new Exception("Repository error"));
+        var BookToDelete = new Book
+        {
+            Id = 1,
+            Name = "Cien años de soledad (Edición Actualizada)",
+            ISBN10 = "8420471836",
+            ISBN13 = "978-8420471839",
+            Published = new DateOnly(1967, 06, 05),
+            Edition = "Edición Académica Actualizada",
+            DeweyIndex = "800",
+            AuthorId = 1
+        };
 
+        // Arrange
+        _unitOfWork.BookRepository.GetAllAsync(Arg.Any<Expression<Func<Book, bool>>>())
+            .Returns(new List<Book> { BookToDelete });
+
+        _unitOfWork.BookRepository.When(x => x.Delete(BookToDelete.Id))
+            .Do(x => throw new Exception("Repository error"));
         // Act
-        var result = await _bookService.DeleteBook(bookToDelete.Id);
+        var result = await _bookService.DeleteBook(BookToDelete.Id);
 
         // Assert
         Assert.AreEqual((int)result.StatusCode, 500);

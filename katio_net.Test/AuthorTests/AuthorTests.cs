@@ -5,6 +5,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using katio.Business.Interfaces;
 using katio.Business.Services;
 using System.Linq.Expressions;
+using System.Net;
 
 namespace katio.Test.AuthorTests;
 
@@ -68,39 +69,54 @@ public class AuthorTests
     public async Task UpdateAuthor()
     {
         // Arrange
-        var authorToUpdate = _authors.First();
-        _authorRepository.FindAsync(authorToUpdate.Id).Returns(authorToUpdate);
+        var existingAuthor = new Author
+        {
+            Id = 1,
+            Name = "Gabriel",
+            LastName = "García Márquez",
+            Country = "Colombia",
+            BirthDate = new DateOnly(1927, 03, 06)
+        };
+
         var updatedAuthor = new Author
         {
-            Id = authorToUpdate.Id,
+            Id = 1,
             Name = "Gabriel Updated",
             LastName = "García Márquez Updated",
             Country = "Colombia Updated",
             BirthDate = new DateOnly(1950, 01, 01)
         };
-        _authorRepository.FindAsync(updatedAuthor.Id).Returns(updatedAuthor);
-        _authorRepository.Update(updatedAuthor).Returns(Task.CompletedTask);        
+
+        _unitOfWork.AuthorRepository.GetAllAsync(Arg.Any<Expression<Func<Author, bool>>>())
+            .Returns(new List<Author> { existingAuthor });
+
+        _unitOfWork.AuthorRepository.Update(updatedAuthor).Returns(Task.CompletedTask);
+        _unitOfWork.SaveAsync().Returns(Task.CompletedTask);
 
         // Act
         var result = await _authorService.UpdateAuthor(updatedAuthor);
 
         // Assert
-        Assert.IsTrue(result.ResponseElements.Any());
+        Assert.AreEqual((int)result.StatusCode, 200); 
     }
+
     // Test for deleting author
     [TestMethod]
     public async Task DeleteAuthor()
     {
-        // Arrange
-        var authorToDelete = _authors.First();
-        _authorRepository.FindAsync(authorToDelete.Id).Returns(authorToDelete);
-        _authorRepository.Delete(authorToDelete).Returns(Task.CompletedTask);
+                // Arrange
+        var authorToDelete = _authors.First(); 
+
+        _authorRepository.GetAllAsync(Arg.Any<Expression<Func<Author, bool>>>())
+        .Returns(Task.FromResult(new List<Author> { authorToDelete }));
+
+        _authorRepository.Delete(authorToDelete.Id).Returns(Task.CompletedTask);
 
         // Act
         var result = await _authorService.DeleteAuthor(authorToDelete.Id);
 
         // Assert
-        Assert.IsTrue(result.ResponseElements.Any());
+        Assert.AreEqual(HttpStatusCode.OK, result.StatusCode); 
     }
     // Test for getting all authors
     [TestMethod]

@@ -79,8 +79,8 @@ public class AudioBookTestsFail
     public async Task UpdateAuthor_NotFound()
     {
         // Arrange
-        _audioBookRepository.Update(Arg.Any<AudioBook>()).Throws(new Exception());
-        _unitOfWork.AudioBookRepository.Returns(_audioBookRepository);
+        _unitOfWork.AudioBookRepository.GetAllAsync(Arg.Any<Expression<Func<AudioBook, bool>>>())
+        .Returns(new List<AudioBook>());
 
         // Act
         var result = await _audioBookService.UpdateAudioBook(new AudioBook());
@@ -93,14 +93,15 @@ public class AudioBookTestsFail
     public async Task DeleteAuthor_NotFound()
     {
         // Arrange
-        var authorToDelete = _audioBooks.First();
-        _audioBookRepository.FindAsync(authorToDelete.Id).ReturnsForAnyArgs(Task.FromResult<AudioBook>(null));
+        var nonExistentAudioBookId = -5;
+        _unitOfWork.AudioBookRepository.GetAllAsync(Arg.Any<Expression<Func<AudioBook, bool>>>())
+        .Returns(new List<AudioBook>());
 
         // Act
-        var result = await _audioBookService.DeleteAudioBook(authorToDelete.Id);
+        var result = await _audioBookService.DeleteAudioBook(nonExistentAudioBookId);
 
         // Assert
-        Assert.IsFalse(result.ResponseElements.Any());
+        Assert.AreEqual((int)result.StatusCode, 404);
     }
     // Test for find by audiobook  Fail
     [TestMethod]
