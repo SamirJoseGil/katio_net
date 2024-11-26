@@ -138,7 +138,7 @@ public class NarratorService : INarratorService
     {
         var existingNarrator = await _unitOfWork.NarratorRepository.GetAllAsync(n => n.Id == id);
 
-        if (existingNarrator.Any())
+        if (!existingNarrator.Any())
         {
             return Utilities.BuildResponse<Narrator>(HttpStatusCode.NotFound, BaseMessageStatus.NARRATOR_NOT_FOUND, new List<Narrator>());
         }

@@ -149,7 +149,7 @@ public class AuthorService : IAuthorService
 
         if (!existingAuthor.Any())
         {
-            return Utilities.BuildResponse<Author>(HttpStatusCode.Conflict, BaseMessageStatus.AUTHOR_NOT_FOUND);
+            return Utilities.BuildResponse<Author>(HttpStatusCode.NotFound, BaseMessageStatus.AUTHOR_NOT_FOUND);
         }
         try
         {
