@@ -68,18 +68,24 @@ public class NarratorTests
     public async Task UpdateNarrator()
     {
         // Arrange
-        var narratorToUpdate = _narrators.First();
-        _narratorRepository.FindAsync(narratorToUpdate.Id).Returns(narratorToUpdate);
-
-        var updatedNarrator = new Narrator
+        var existingNarrator = new Narrator
         {
-            Id = narratorToUpdate.Id,
+            Id = 1,
             Name = "Maria Updated",
             LastName = "Gil Updated",
             Genre = "Ficcion Updated"
         };
-        _narratorRepository.FindAsync(updatedNarrator.Id).Returns(updatedNarrator);
-        _narratorRepository.Update(updatedNarrator).Returns(Task.CompletedTask);
+
+        var updatedNarrator = new Narrator
+        {
+            Name = "Maria Updated",
+            LastName = "Gil Updated",
+            Genre = "Ficcion Updated"
+        };
+        _unitOfWork.NarratorRepository.GetAllAsync(Arg.Any<Expression<Func<Narrator, bool>>>())
+        .Returns(new List<Narrator> { existingNarrator });
+        _unitOfWork.NarratorRepository.Update(Arg.Any<Narrator>()).Returns(Task.CompletedTask);
+        _unitOfWork.SaveAsync().Returns(Task.CompletedTask);
 
         // Act
         var result = await _narratorService.UpdateNarrator(updatedNarrator);
@@ -93,8 +99,10 @@ public class NarratorTests
     {
         // Arrange
         var narratorToDelete = _narrators.First();
-        _narratorRepository.FindAsync(narratorToDelete.Id).Returns(narratorToDelete);
-        _narratorRepository.Delete(narratorToDelete).Returns(Task.CompletedTask);
+        _narratorRepository.GetAllAsync(Arg.Any<Expression<Func<Narrator, bool>>>())
+        .Returns(Task.FromResult(new List<Narrator> { narratorToDelete }));
+
+        _narratorRepository.Delete(narratorToDelete.Id).Returns(Task.CompletedTask);
 
         // Act
         var result = await _narratorService.DeleteNarrator(narratorToDelete.Id);

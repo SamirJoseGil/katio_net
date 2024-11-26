@@ -5,6 +5,9 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using katio.Business.Interfaces;
 using katio.Business.Services;
 using System.Linq.Expressions;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Internal;
+using System.Net;
 
 namespace katio.Test.AudioBookTests;
 
@@ -196,6 +199,12 @@ public class AudioBookTests
     [TestMethod]
     public async Task CreateAudioBook()
     {
+        var emptyStream = new MemoryStream();
+        var emptyFile = new FormFile(emptyStream, 0, 0, "file", "testfile.txt")
+        {
+        Headers = new HeaderDictionary(),
+        ContentType = "text/plain"
+        };
         // Arrange
         var newAudioBook = new AudioBook
         {
@@ -213,7 +222,7 @@ public class AudioBookTests
         _audioBookRepository.AddAsync(newAudioBook).Returns(Task.CompletedTask);
 
         // Act
-        var result = await _audioBookService.CreateAudioBook(newAudioBook, audioFile: null);
+        var result = await _audioBookService.CreateAudioBook(newAudioBook, emptyFile);
 
         // Assert
         Assert.IsTrue(result.ResponseElements.Any());
@@ -222,9 +231,21 @@ public class AudioBookTests
     [TestMethod]
     public async Task UpdateAudioBook()
     {
+        var existingAudioBook = new AudioBook
+        {
+            Id = 1,
+            Name = "Original Name",
+            ISBN10 = "1234567890",
+            ISBN13 = "123-1234567890",
+            Published = new DateOnly(2020, 01, 01),
+            Edition = "First",
+            Genre = "Fiction",
+            LenghtInSeconds = 100,
+            NarratorId = 1
+        };
+
         // Arrange
         var audioBookToUpdate = _audioBooks.First();
-        _audioBookRepository.FindAsync(audioBookToUpdate.Id).Returns(audioBookToUpdate);
         var updateAudioBook = new AudioBook
         {
             Name = "Cien años de soledad",
@@ -237,30 +258,37 @@ public class AudioBookTests
             NarratorId = 1
 
         };
-        _audioBookRepository.FindAsync(updateAudioBook.Id).Returns(updateAudioBook);
-        _audioBookRepository.Update(updateAudioBook).Returns(Task.CompletedTask);
+        _unitOfWork.AudioBookRepository.GetAllAsync(Arg.Any<Expression<Func<AudioBook, bool>>>())
+        .Returns(new List<AudioBook> { existingAudioBook });
+
+        _unitOfWork.AudioBookRepository.Update(Arg.Any<AudioBook>()).Returns(Task.CompletedTask);
+        _unitOfWork.SaveAsync().Returns(Task.CompletedTask);
 
         // Act
         var result = await _audioBookService.UpdateAudioBook(updateAudioBook);
 
         // Assert
-        Assert.AreEqual((int)result.StatusCode, 200);
+        Assert.AreEqual((int)result.StatusCode, 200); 
     }
     // Test for deleting Audio book
     [TestMethod]
     public async Task DeleteAudioBook()
     {
-        // Arrange
-        var AudioBookToDelete = _audioBooks.First();
-        _audioBookRepository.FindAsync(AudioBookToDelete.Id).Returns(AudioBookToDelete);
-        _audioBookRepository.Delete(AudioBookToDelete).Returns(Task.CompletedTask);
+        // Arrange
+        var audioBookToDelete = _audioBooks.First(); 
+
+        _audioBookRepository.GetAllAsync(Arg.Any<Expression<Func<AudioBook, bool>>>())
+        .Returns(Task.FromResult(new List<AudioBook> { audioBookToDelete }));
+
+        _audioBookRepository.Delete(audioBookToDelete.Id).Returns(Task.CompletedTask);
 
         // Act
-        var result = await _audioBookService.DeleteAudioBook(AudioBookToDelete.Id);
+        var result = await _audioBookService.DeleteAudioBook(audioBookToDelete.Id);
 
         // Assert
-        Assert.IsTrue(result.ResponseElements.Any());
+        Assert.AreEqual(HttpStatusCode.OK, result.StatusCode); 
     }
+
     // Test for find by narrator
     [TestMethod]
     public async Task GetAudioBookByNarrator()

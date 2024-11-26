@@ -62,20 +62,24 @@ public class GenreTestsException
     [TestMethod]
     public async Task UpdateGenreRepositoryException()
     {
-        // Arange
-        var genreToUpdate = _genres.First();
-        _genreRepository.FindAsync(genreToUpdate.Id).Returns(genreToUpdate);
-
-        var updatedGenre = new Genre 
-        { 
-            Id = genreToUpdate.Id, 
-            Name = "Fantasy", 
-            Description = "La Fantasia es..." 
+        // Arrange
+        var existingGenre = new Genre
+        {
+            Id = 1,
+            Name = "Science Fiction",
+            Description = "A genre about futuristic and scientific concepts"
         };
 
-        _genreRepository.FindAsync(genreToUpdate.Id).Returns(genreToUpdate);
-        _genreRepository.When(x => x.Update(Arg.Any<Genre>())).Do(x => throw new Exception("Repository error"));
+        var updatedGenre = new Genre
+        {
+            Id = existingGenre.Id,
+            Name = "Fantasy",
+            Description = "La Fantasía es un género literario..."
+        };
 
+        _unitOfWork.GenreRepository.GetAllAsync(Arg.Any<Expression<Func<Genre, bool>>>())
+            .Returns(new List<Genre> { existingGenre });
+        _genreRepository.When(x => x.Update(Arg.Any<Genre>())).Do(x => throw new Exception("Repository error"));
 
         // Act
         var result = await _genreService.UpdateGenre(updatedGenre);
@@ -83,15 +87,24 @@ public class GenreTestsException
         // Assert
         Assert.AreEqual((int)result.StatusCode, 500);
     }
+
     // Test for deleting genre
     [TestMethod]
     public async Task DeleteGenreRepositoryException()
     {
-        // Arange
-        var genreToDelete = _genres.First();
-        _genreRepository.FindAsync(genreToDelete.Id).Returns(genreToDelete);
-        _genreRepository.When(x => x.Delete(Arg.Any<Genre>())).Do(x => throw new Exception("Repository error"));
+        var genreToDelete = new Genre
+        {
+            Id = 1,
+            Name = "Fantasy",
+            Description = "La Fantasía es un género literario..."
+        };
 
+        // Arange
+        _unitOfWork.GenreRepository.GetAllAsync(Arg.Any<Expression<Func<Genre, bool>>>())
+            .Returns(new List<Genre> { genreToDelete });
+
+        _unitOfWork.GenreRepository.When(x => x.Delete(genreToDelete.Id))
+            .Do(x => throw new Exception("Repository error"));
         // Act
         var result = await _genreService.DeleteGenre(genreToDelete.Id);
 

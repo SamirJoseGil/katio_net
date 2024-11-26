@@ -5,6 +5,9 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using katio.Business.Interfaces;
 using katio.Business.Services;
 using System.Linq.Expressions;
+using Microsoft.AspNetCore.Http.Internal;
+using Microsoft.AspNetCore.Http;
+using System.Net;
 
 namespace katio.Test.BookTests;
 
@@ -54,7 +57,7 @@ public class BookTests
     [TestMethod]
     public async Task GetAllBooks()
     {
-        // Arrange
+       // Arrange
         _bookRepository.GetAllAsync().Returns(_books);
 
         // Act
@@ -83,6 +86,14 @@ public class BookTests
     [TestMethod]
     public async Task CreateBook()
     {
+        // Crear un archivo PDF de ejemplo
+        var pdfStream = new MemoryStream(new byte[] { 1, 2, 3, 4 }); // Simula contenido de archivo
+        var pdfFile = new FormFile(pdfStream, 0, pdfStream.Length, "file", "testfile.pdf")
+        {
+            Headers = new HeaderDictionary(),
+            ContentType = "application/pdf"
+        };
+
         // Arrange
         var newBook = new Book
         {
@@ -94,11 +105,13 @@ public class BookTests
             DeweyIndex = "800",
             AuthorId = 1
         };
+
         _bookRepository.GetAllAsync(Arg.Any<Expression<Func<Book, bool>>>()).Returns(new List<Book>());
         _bookRepository.AddAsync(newBook).Returns(Task.CompletedTask);
+        _unitOfWork.SaveAsync().Returns(Task.CompletedTask);
 
         // Act
-        var result = await _bookService.CreateBook(newBook, pdfFile: null);
+        var result = await _bookService.CreateBook(newBook, pdfFile);
 
         // Assert
         Assert.IsTrue(result.ResponseElements.Any());
@@ -109,7 +122,8 @@ public class BookTests
     {
         // Arrange
         var bookToUpdate = _books.First();
-        _bookRepository.FindAsync(bookToUpdate.Id).Returns(bookToUpdate);
+        _bookRepository.GetAllAsync(Arg.Any<Expression<Func<Book, bool>>>())
+        .Returns(Task.FromResult(new List<Book> { bookToUpdate }));
 
         var updatedBook = new Book
         {
@@ -135,16 +149,19 @@ public class BookTests
     [TestMethod]
     public async Task DeleteBook()
     {
-        // Arrange
-        var bookToDelete = _books.First();
-        _bookRepository.FindAsync(bookToDelete.Id).Returns(bookToDelete);
-        _bookRepository.Delete(bookToDelete).Returns(Task.CompletedTask);
+         // Arrange
+        var BookToDelete = _books.First(); 
+
+        _bookRepository.GetAllAsync(Arg.Any<Expression<Func<Book, bool>>>())
+        .Returns(Task.FromResult(new List<Book> { BookToDelete }));
+
+        _bookRepository.Delete(BookToDelete.Id).Returns(Task.CompletedTask);
 
         // Act
-        var result = await _bookService.DeleteBook(bookToDelete.Id);
+        var result = await _bookService.DeleteBook(BookToDelete.Id);
 
         // Assert
-        Assert.IsTrue(result.ResponseElements.Any());
+        Assert.AreEqual(HttpStatusCode.OK, result.StatusCode); 
     }
     // Test for getting a book by ID
     [TestMethod]

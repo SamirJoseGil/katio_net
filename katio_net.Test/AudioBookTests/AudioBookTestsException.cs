@@ -290,8 +290,19 @@ public class AudioBookTestsException
     public async Task UpdateAudioBookRepositoryException()
     {
         // Arrange
-        var audioBookToUpdate = _audioBooks.First();
-        _audioBookRepository.FindAsync(audioBookToUpdate.Id).Returns(audioBookToUpdate);
+        var existingAudioBook = new AudioBook
+        {
+            Id = 1,
+            Name = "Original Name",
+            ISBN10 = "1234567890",
+            ISBN13 = "123-1234567890",
+            Published = new DateOnly(2020, 01, 01),
+            Edition = "First",
+            Genre = "Fiction",
+            LenghtInSeconds = 100,
+            NarratorId = 1
+        };
+
         var updatedAudioBook = new AudioBook
         {
             Id = 1,
@@ -304,8 +315,12 @@ public class AudioBookTestsException
             LenghtInSeconds = 1,
             NarratorId = 1
         };
-        _audioBookRepository.FindAsync(audioBookToUpdate.Id).Returns(audioBookToUpdate);
-        _audioBookRepository.When(x => x.Update(Arg.Any<AudioBook>())).Do(x => throw new Exception("Repository error"));
+
+        _unitOfWork.AudioBookRepository.GetAllAsync(Arg.Any<Expression<Func<AudioBook, bool>>>())
+            .Returns(new List<AudioBook> { existingAudioBook });
+
+        _unitOfWork.AudioBookRepository.When(x => x.Update(Arg.Any<AudioBook>()))
+            .Do(x => throw new Exception("Repository error"));
 
         // Act
         var result = await _audioBookService.UpdateAudioBook(updatedAudioBook);
@@ -313,14 +328,30 @@ public class AudioBookTestsException
         // Assert
         Assert.AreEqual((int)result.StatusCode, 500);
     }
+
     // Test for deleting audio book with repository exceptions
     [TestMethod]
-    public async Task DeleteAuthorRepositoryException()
+    public async Task DeleteAudioBookRepositoryException()
     {
         // Arrange
-        var audioBookToDelete = _audioBooks.First();
-        _audioBookRepository.FindAsync(audioBookToDelete.Id).Returns(audioBookToDelete);
-        _audioBookRepository.When(x => x.Delete(Arg.Any<AudioBook>())).Do(x => throw new Exception("Repository error"));
+        var audioBookToDelete = new AudioBook
+        {
+            Id = 1,
+            Name = "Cien años de soledad",
+            ISBN10 = "8420471836",
+            ISBN13 = "978-8420471839",
+            Published = new DateOnly(1967, 06, 05),
+            Edition = "RAE Obra Académica",
+            Genre = "Ficcion",
+            LenghtInSeconds = 1,
+            NarratorId = 1
+        };
+
+        _unitOfWork.AudioBookRepository.GetAllAsync(Arg.Any<Expression<Func<AudioBook, bool>>>())
+            .Returns(new List<AudioBook> { audioBookToDelete });
+
+        _unitOfWork.AudioBookRepository.When(x => x.Delete(audioBookToDelete.Id))
+            .Do(x => throw new Exception("Repository error"));
 
         // Act
         var result = await _audioBookService.DeleteAudioBook(audioBookToDelete.Id);
@@ -328,4 +359,5 @@ public class AudioBookTestsException
         // Assert
         Assert.AreEqual((int)result.StatusCode, 500);
     }
+
 }

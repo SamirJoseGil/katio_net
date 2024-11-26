@@ -68,18 +68,22 @@ public class AuthorTestsException
     public async Task UpdateAuthorRepositoryException()
     {
         // Arrange
-        var authorToUpdate = _authors.First();
-        _authorRepository.FindAsync(authorToUpdate.Id).Returns(authorToUpdate);
         var updatedAuthor = new Author
         {
-            Id = authorToUpdate.Id,
-            Name = "Gabriel",
-            LastName = "García Márquez",
-            Country = "Colombia",
-            BirthDate = new DateOnly(1940, 03, 03)
+            Id = 1,
+            Name = "Gabriel Updated",
+            LastName = "García Márquez Updated",
+            Country = "Colombia Updated",
+            BirthDate = new DateOnly(1950, 01, 01)
         };
-        _authorRepository.FindAsync(authorToUpdate.Id).Returns(authorToUpdate);
-        _authorRepository.When(x => x.Update(Arg.Any<Author>())).Do(x => throw new Exception("Repository error"));
+
+        _unitOfWork.AuthorRepository
+            .GetAllAsync(Arg.Any<Expression<Func<Author, bool>>>())
+            .Returns(Task.FromResult(new List<Author> { updatedAuthor }));
+
+        _unitOfWork.AuthorRepository
+            .When(repo => repo.Update(Arg.Any<Author>()))
+            .Do(x => throw new Exception("Repository error"));
 
         // Act
         var result = await _authorService.UpdateAuthor(updatedAuthor);
@@ -93,8 +97,12 @@ public class AuthorTestsException
     {
         // Arrange
         var authorToDelete = _authors.First();
-        _authorRepository.FindAsync(authorToDelete.Id).Returns(authorToDelete);
-        _authorRepository.When(x => x.Delete(Arg.Any<Author>())).Do(x => throw new Exception("Repository error"));
+        _unitOfWork.AuthorRepository.GetAllAsync(Arg.Any<Expression<Func<Author, bool>>>())
+            .Returns(new List<Author> { authorToDelete });
+
+        _unitOfWork.AuthorRepository.When(x => x.Delete(authorToDelete.Id))
+            .Do(x => throw new Exception("Repository error"));
+
 
         // Act
         var result = await _authorService.DeleteAuthor(authorToDelete.Id);

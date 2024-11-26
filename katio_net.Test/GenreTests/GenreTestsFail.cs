@@ -69,8 +69,8 @@ public class GenreTestsFail
     public async Task UpdateGenreFail()
     {
         // Arrange
-        _genreRepository.Update(Arg.Any<Genre>()).ThrowsAsyncForAnyArgs(new Exception());
-        _unitOfWork.GenreRepository.Returns(_genreRepository);
+        _unitOfWork.GenreRepository.GetAllAsync(Arg.Any<Expression<Func<Genre, bool>>>())
+        .Returns(new List<Genre>());
 
         // Act
         var result = await _genreService.UpdateGenre(new Genre());
@@ -83,11 +83,11 @@ public class GenreTestsFail
     public async Task DeleteGenreFail()
     {
         // Arrange
-        var genreToDelete = _genres.First();
-        _genreRepository.FindAsync(genreToDelete.Id).ReturnsForAnyArgs(Task.FromResult<Genre>(null));
-
+        var nonExistingGenreId = -5;
+        _unitOfWork.GenreRepository.GetAllAsync(Arg.Any<Expression<Func<Genre, bool>>>())
+        .Returns(new List<Genre>());
         // Act
-        var result = await _genreService.DeleteGenre(genreToDelete.Id);
+        var result = await _genreService.DeleteGenre(nonExistingGenreId);
 
         // Assert
         Assert.IsFalse(result.ResponseElements.Any());
