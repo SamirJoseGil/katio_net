@@ -6,6 +6,7 @@ using katio.Business.Interfaces;
 using katio.Business.Services;
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore.Query;
+using System.Net;
 
 namespace katio.Test.NarratorTests;
 
@@ -100,15 +101,15 @@ public class NarratorTests
         // Arrange
         var narratorToDelete = _narrators.First();
         _narratorRepository.GetAllAsync(Arg.Any<Expression<Func<Narrator, bool>>>())
-        .Returns(Task.FromResult(new List<Narrator> { narratorToDelete }));
-
+            .Returns(Task.FromResult(new List<Narrator> { narratorToDelete }));
+        
         _narratorRepository.Delete(narratorToDelete.Id).Returns(Task.CompletedTask);
 
         // Act
         var result = await _narratorService.DeleteNarrator(narratorToDelete.Id);
 
         // Assert
-        Assert.IsTrue(result.ResponseElements.Any());
+        Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
     }
     // Test for getting all narrators
     [TestMethod]
