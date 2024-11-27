@@ -226,9 +226,10 @@ public class BookService : IBookService
     {
         try
         {
-            var result = await _unitOfWork.BookRepository.FindAsync(id);
-            return result != null ? Utilities.BuildResponse<Book>
-                (HttpStatusCode.OK, BaseMessageStatus.OK_200, new List<Book> { result }) :
+            var result = await _unitOfWork.BookRepository.GetAllAsync(b => b.Id == id, includeProperties: "Author"
+            );
+            return result.Any() ? Utilities.BuildResponse<Book>
+                (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
                 Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
         }
         catch (Exception ex)
