@@ -885,25 +885,29 @@ async Task PopulateDB(WebApplication app)
         {
             Name = "Maria Camila",
             LastName = "Gil Rojas",
-            Genre = "Ficcion"
+            Genre = "Ficcion",
+            ProfilePicture = ""
         });
         await NarratorService.CreateNarrator(new katio.Data.Models.Narrator
         {
             Name = "Juan",
             LastName = "Perez",
-            Genre = "Ficcion"
+            Genre = "Ficcion",
+            ProfilePicture = ""
         });
         await NarratorService.CreateNarrator(new katio.Data.Models.Narrator
         {
             Name = "Pedro",
             LastName = "Gonzalez",
-            Genre = "Ficcion"
+            Genre = "Ficcion",
+            ProfilePicture = ""
         });
         await NarratorService.CreateNarrator(new katio.Data.Models.Narrator
         {
             Name = "Luisa",
             LastName = "Fernanda",
-            Genre = "Ficcion"
+            Genre = "Ficcion",
+            ProfilePicture = ""
         });
         #endregion
 
