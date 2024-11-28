@@ -351,9 +351,9 @@ public class AudioBookService : IAudioBookService
     {
         try
         {
-            var result = await _unitOfWork.AudioBookRepository.FindAsync(narratorId);
+            var result = await _unitOfWork.AudioBookRepository.GetAllAsync(b => b.NarratorId == narratorId, includeProperties: "Narrator");
             return (result != null)
-                ? Utilities.BuildResponse<AudioBook>(HttpStatusCode.OK, BaseMessageStatus.OK_200, new List<AudioBook> { result })
+                ? Utilities.BuildResponse<AudioBook>(HttpStatusCode.OK, BaseMessageStatus.OK_200, result)
                 : Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.AUDIOBOOK_NOT_FOUND, new List<AudioBook>());
         }
         catch (Exception ex)
