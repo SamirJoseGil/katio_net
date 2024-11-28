@@ -68,33 +68,52 @@ public class NarratorTestsException
     public async Task UpdateNarratorRepositoryException()
     {
         // Arrange
-        var narratorToUpdate = _narrators.First();
-        _narratorRepository.FindAsync(narratorToUpdate.Id).Returns(narratorToUpdate);
-        var updatedNarrator = new Narrator
+        var existingNarrator = new Narrator
         {
-            Id = narratorToUpdate.Id,
+            Id = 1,
             Name = "John",
             LastName = "Doe",
             Genre = "Fiction"
         };
-        _narratorRepository.FindAsync(narratorToUpdate.Id).Returns(narratorToUpdate);
-        _narratorRepository.When(x => x.Update(Arg.Any<Narrator>())).Do(x => throw new Exception("Repository exception"));
+
+        var newNarrator = new Narrator
+        {
+            Id = 2,
+            Name = "John",
+            LastName = "Doe",
+            Genre = "Non-Fiction"
+        };
+
+        _unitOfWork.NarratorRepository.GetAllAsync(Arg.Any<Expression<Func<Narrator, bool>>>())
+            .Returns(Task.FromResult(new List<Narrator> { existingNarrator }));
+
+        _unitOfWork.NarratorRepository.When(x => x.AddAsync(Arg.Any<Narrator>()))
+            .Do(x => throw new Exception("Repository error"));
 
         // Act
-        var result = await _narratorService.UpdateNarrator(updatedNarrator);
+        var result = await _narratorService.UpdateNarrator(newNarrator);
 
         // Assert
-        Assert.AreEqual((int)result.StatusCode, 500);
+        Assert.AreEqual(HttpStatusCode.InternalServerError, result.StatusCode);
     }
+
     // Test for deleting a narrator with repository exceptions
     [TestMethod]
     public async Task DeleteNarratorRepositoryException()
     {
+        var narratorToDelete = new Narrator
+        {
+            Id = 1,
+            Name = "John",
+            LastName = "Doe",
+            Genre = "Non-Fiction"
+        };
         // Arrange
-        var narratorToDelete = _narrators.First();
-        _narratorRepository.FindAsync(narratorToDelete.Id).Returns(narratorToDelete);
-        _narratorRepository.When(x => x.Delete(narratorToDelete)).Do(x => throw new Exception("Repository error"));
+        _unitOfWork.NarratorRepository.GetAllAsync(Arg.Any<Expression<Func<Narrator, bool>>>())
+            .Returns(new List<Narrator> { narratorToDelete });
 
+        _unitOfWork.NarratorRepository.When(x => x.Delete(narratorToDelete.Id))
+            .Do(x => throw new Exception("Repository error"));
         // Act
         var result = await _narratorService.DeleteNarrator(narratorToDelete.Id);
 

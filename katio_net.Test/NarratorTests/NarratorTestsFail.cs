@@ -73,8 +73,9 @@ public class NarratorTestsFail
     public async Task UpdateNarratorFail()
     {
         // Arrange
-        _narratorRepository.Update(Arg.Any<Narrator>()).ThrowsAsyncForAnyArgs(new Exception());
-        _unitOfWork.NarratorRepository.Returns(_narratorRepository);
+        _unitOfWork.NarratorRepository.GetAllAsync(Arg.Any<Expression<Func<Narrator, bool>>>())
+        .Returns(new List<Narrator>());
+
         // Act
         var result = await _narratorService.UpdateNarrator(new Narrator());
 
@@ -86,11 +87,11 @@ public class NarratorTestsFail
     public async Task DeleteNarratorFail()
     {
         // Arrange
-        var narratorToDelete = _narrators.First();
-        _narratorRepository.FindAsync(narratorToDelete.Id).ReturnsForAnyArgs(Task.FromResult<Narrator>(null));
-
+        var nonExistingNarratorId = -5;
+        _unitOfWork.NarratorRepository.GetAllAsync(Arg.Any<Expression<Func<Narrator, bool>>>())
+        .Returns(new List<Narrator>());
         // Act
-        var result = await _narratorService.DeleteNarrator(narratorToDelete.Id);
+        var result = await _narratorService.DeleteNarrator(nonExistingNarratorId);
 
         // Assert
         Assert.IsFalse(result.ResponseElements.Any());
