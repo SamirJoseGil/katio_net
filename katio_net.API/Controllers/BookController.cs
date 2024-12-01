@@ -2,6 +2,7 @@
 using katio.Business.Interfaces;
 using katio.Data.Models;
 using katio.Data.Models.Dto;
+using katio.Data.Dto;
 
 
 
@@ -60,7 +61,6 @@ namespace katio.API.Controllers
 
             return response.StatusCode == System.Net.HttpStatusCode.OK ? Ok(response) : StatusCode((int)response.StatusCode, response);
         }
-
         // Actualiza un libro
         [HttpPut]
         [Route("UpdateBook")]
@@ -90,6 +90,39 @@ namespace katio.API.Controllers
         {
             var response = await _bookService.GetBookById(Id);
             return response != null ? Ok(response) : StatusCode(StatusCodes.Status404NotFound, response);
+        }
+
+        // Trae un libro con su PDF
+        [HttpGet]
+        [Route("GetBookPdf")]
+        public async Task<IActionResult> GetBook(int id)
+        {
+            var response = await _bookService.GetBookWithPdf(id);
+
+            if (response.StatusCode != System.Net.HttpStatusCode.OK)
+            {
+                return StatusCode((int)response.StatusCode, response.Message);
+            }
+
+            var bookWithPdf = response.ResponseElements?.FirstOrDefault();
+            if (bookWithPdf == null)
+            {
+                return NotFound(BaseMessageStatus.BOOK_NOT_FOUND);
+            }
+
+            if (bookWithPdf.PdfFile == null || bookWithPdf.PdfFile.Length == 0)
+            {
+                return NotFound("PDF file not found.");
+            }
+
+            // Retornar el archivo PDF como un stream
+            var stream = new MemoryStream(bookWithPdf.PdfFile);
+            stream.Position = 0;
+
+            return new FileStreamResult(stream, "application/pdf")
+            {
+                FileDownloadName = $"{bookWithPdf.Book.Name}.pdf"
+            };
         }
 
         //Trae un libro por su nombre

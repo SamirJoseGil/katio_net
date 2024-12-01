@@ -2,6 +2,7 @@
 using katio.Business.Interfaces;
 using katio.Data.Models;
 using katio.Data.Models.Dto;
+using katio.Data.Dto;
 
 namespace katio.API.Controllers
 {
@@ -24,6 +25,38 @@ namespace katio.API.Controllers
         {
             var response = await _audioBookService.Index();
             return response.TotalElements > 0 ? Ok(response) : StatusCode(StatusCodes.Status404NotFound, response);
+        }
+        // Trae un mp3
+        [HttpGet]
+        [Route("GetAudioBookFile")]
+        public async Task<IActionResult> GetAudioBookFile(int id)
+        {
+            var response = await _audioBookService.GetAudioBookWithId(id);
+
+            if (response.StatusCode != System.Net.HttpStatusCode.OK)
+            {
+                return StatusCode((int)response.StatusCode, response.Message);
+            }
+
+            var audioBookWithAudio = response.ResponseElements?.FirstOrDefault();
+            if (audioBookWithAudio == null)
+            {
+                return NotFound(BaseMessageStatus.AUDIOBOOK_NOT_FOUND);
+            }
+
+            if (audioBookWithAudio.AudioFile == null || audioBookWithAudio.AudioFile.Length == 0)
+            {
+                return NotFound("MP3 file not found.");
+            }
+
+            // Retornar el archivo MP3 como un stream
+            var stream = new MemoryStream(audioBookWithAudio.AudioFile);
+            stream.Position = 0;
+
+            return new FileStreamResult(stream, "audio/mpeg")
+            {
+                FileDownloadName = $"{audioBookWithAudio.AudioBook.Name}.mp3"
+            };
         }
 
         // Busca un Audiolibro omniscient
@@ -176,7 +209,7 @@ namespace katio.API.Controllers
             var response = await _audioBookService.GetAudioBookByNarratorName(narratorName);
             return response != null ? Ok(response) : StatusCode(StatusCodes.Status404NotFound, response);
         }
-        
+
         // Busca un Audiolibro por apellido del narrador
         [HttpGet]
         [Route("FindAudioBookByNarratorLastName")]
