@@ -5,6 +5,7 @@ using katio.Data;
 using System.Net;
 using System.Linq.Expressions;
 using Microsoft.AspNetCore.Http;
+using katio.Data.Models.Dto;
 
 namespace katio.Business.Services;
 
@@ -24,7 +25,7 @@ public class AudioBookService : IAudioBookService
     {
         try
         {
-            var result = await _unitOfWork.AudioBookRepository.GetAllAsync();
+            var result = await _unitOfWork.AudioBookRepository.GetAllAsync(includeProperties: "Narrator");
             return result.Any() ? Utilities.BuildResponse<AudioBook>(HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
                 Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.AUDIOBOOK_NOT_FOUND, new List<AudioBook>());
         }
@@ -221,14 +222,74 @@ public class AudioBookService : IAudioBookService
     {
         try
         {
-            var result = await _unitOfWork.AudioBookRepository.FindAsync(id);
-            return result != null ? Utilities.BuildResponse<AudioBook>
-                (HttpStatusCode.OK, BaseMessageStatus.OK_200, new List<AudioBook> { result }) :
+            var result = await _unitOfWork.AudioBookRepository.GetAllAsync(a => a.Id == id, includeProperties: "Narrator");
+            return result.Any() ? Utilities.BuildResponse<AudioBook>
+                (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
                 Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.AUDIOBOOK_NOT_FOUND, new List<AudioBook>());
         }
         catch (Exception ex)
         {
             return Utilities.BuildResponse<AudioBook>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
+        }
+    }
+    // Traer MP3 del libro
+    public async Task<BaseMessage<AudioBookAudioResponse>> GetAudioBookWithId(int id)
+    {
+        try
+        {
+            // Traer libro por ID incluyendo el autor
+            var audiobook = await _unitOfWork.AudioBookRepository.GetAllAsync(
+                b => b.Id == id,
+                includeProperties: "Narrator"
+            );
+            var audiobookEntity = audiobook.FirstOrDefault();
+
+            if (audiobookEntity == null)
+            {
+                return Utilities.BuildResponse<AudioBookAudioResponse>(
+                    HttpStatusCode.NotFound,
+                    BaseMessageStatus.BOOK_NOT_FOUND
+                );
+            }
+
+            // Verificar existencia del archivo PDF
+            var audioFilePath = Path.Combine(Directory.GetCurrentDirectory(), audiobookEntity.AudioPath ?? string.Empty);
+            if (!System.IO.File.Exists(audioFilePath))
+            {
+                return Utilities.BuildResponse<AudioBookAudioResponse>(
+                    HttpStatusCode.NotFound,
+                    BaseMessageStatus.FILE_NOT_FOUND
+                );
+            }
+
+            // Leer el archivo PDF
+            var audioFileBytes = await System.IO.File.ReadAllBytesAsync(audioFilePath);
+
+            // Mapear al DTO del libro
+            var audioBookDto = new AudioBookResponse
+            {
+                Name = audiobookEntity.Name,
+                ISBN10 = audiobookEntity.ISBN10,
+                ISBN13 = audiobookEntity.ISBN13,
+                Published = audiobookEntity.Published,
+                Edition = audiobookEntity.Edition,
+            };
+
+            // Crear la respuesta con el libro y los bytes del PDF
+            var audioBookAudioResponse = new AudioBookAudioResponse
+            {
+                AudioBook = audioBookDto,
+                AudioFile = audioFileBytes
+            };
+
+            return Utilities.BuildResponse(HttpStatusCode.OK, BaseMessageStatus.OK_200, new List<AudioBookAudioResponse> { audioBookAudioResponse });
+        }
+        catch (Exception ex)
+        {
+            return Utilities.BuildResponse<AudioBookAudioResponse>(
+                HttpStatusCode.InternalServerError,
+                $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}"
+            );
         }
     }
     // Buscar por Nombre

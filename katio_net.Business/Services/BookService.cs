@@ -5,6 +5,7 @@ using katio.Data;
 using System.Net;
 using System.Linq.Expressions;
 using Microsoft.AspNetCore.Http;
+using katio.Data.Models.Dto;
 
 namespace katio.Business.Services;
 
@@ -226,8 +227,7 @@ public class BookService : IBookService
     {
         try
         {
-            var result = await _unitOfWork.BookRepository.GetAllAsync(b => b.Id == id, includeProperties: "Author"
-            );
+            var result = await _unitOfWork.BookRepository.GetAllAsync(b => b.Id == id, includeProperties: "Author");
             return result.Any() ? Utilities.BuildResponse<Book>
                 (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
                 Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
@@ -237,6 +237,71 @@ public class BookService : IBookService
             return Utilities.BuildResponse<Book>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
         }
     }
+
+    // Traer PDF del libro
+    public async Task<BaseMessage<BookWithPdfResponse>> GetBookWithPdf(int id)
+    {
+        try
+        {
+            // Traer libro por ID incluyendo el autor
+            var book = await _unitOfWork.BookRepository.GetAllAsync(
+                b => b.Id == id,
+                includeProperties: "Author"
+            );
+            var bookEntity = book.FirstOrDefault();
+
+            if (bookEntity == null)
+            {
+                return Utilities.BuildResponse<BookWithPdfResponse>(
+                    HttpStatusCode.NotFound,
+                    BaseMessageStatus.BOOK_NOT_FOUND
+                );
+            }
+
+            // Verificar existencia del archivo PDF
+            var pdfFilePath = Path.Combine(Directory.GetCurrentDirectory(), bookEntity.PdfPath ?? string.Empty);
+            if (!System.IO.File.Exists(pdfFilePath))
+            {
+                return Utilities.BuildResponse<BookWithPdfResponse>(
+                    HttpStatusCode.NotFound,
+                    BaseMessageStatus.FILE_NOT_FOUND
+                );
+            }
+
+            // Leer el archivo PDF
+            var pdfFileBytes = await System.IO.File.ReadAllBytesAsync(pdfFilePath);
+
+            // Mapear al DTO del libro
+            var bookDto = new BookResponse
+            {
+                Name = bookEntity.Name,
+                ISBN10 = bookEntity.ISBN10,
+                ISBN13 = bookEntity.ISBN13,
+                Published = bookEntity.Published,
+                Edition = bookEntity.Edition,
+                DeweyIndex = bookEntity.DeweyIndex,
+                BookCover = bookEntity.BookCover,
+                PdfPath = bookEntity.PdfPath,
+            };
+
+            // Crear la respuesta con el libro y los bytes del PDF
+            var bookWithPdfResponse = new BookWithPdfResponse
+            {
+                Book = bookDto,
+                PdfFile = pdfFileBytes
+            };
+
+            return Utilities.BuildResponse(HttpStatusCode.OK, BaseMessageStatus.OK_200, new List<BookWithPdfResponse> { bookWithPdfResponse });
+        }
+        catch (Exception ex)
+        {
+            return Utilities.BuildResponse<BookWithPdfResponse>(
+                HttpStatusCode.InternalServerError,
+                $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}"
+            );
+        }
+    }
+
 
     // Traer libros por nombre
     public async Task<BaseMessage<Book>> GetBooksByName(string name)

@@ -1,5 +1,6 @@
 ﻿using katio.Data.Dto;
 using katio.Data.Models;
+using katio.Data.Models.Dto;
 using Microsoft.AspNetCore.Http;
 
 namespace katio.Business.Interfaces;
@@ -9,6 +10,7 @@ public interface IBookService
     Task<BaseMessage<Book>> Index();
     Task<BaseMessage<Book>> SearchBookAsync(string searchTerm);
     Task<BaseMessage<Book>> GetBookById(int Id);
+    Task<BaseMessage<BookWithPdfResponse>> GetBookWithPdf(int id);
     Task<BaseMessage<Book>> GetBooksByName(string Name);
     Task<BaseMessage<Book>> GetBooksByISBN10(string ISBN10);
     Task<BaseMessage<Book>> GetBooksByISBN13(string ISBN13);

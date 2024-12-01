@@ -33,4 +33,8 @@ public static class BaseMessageStatus
     public const string NARRATOR_ALREADY_EXISTS = "409 Narrator Already Exist";
     public const string GENRE_ALREADY_EXISTS = "409 Genre Already Exist";
 
+    // Files
+    public const string NO_CONTENT = "No content available.";
+    public const string FILE_NOT_FOUND = "File not found.";
+
 }
