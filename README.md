@@ -1,174 +1,354 @@
-# Biblioteca Digital Secretos Para Contar
+# **Documentación Técnica del Backend**
 
-## Katio: Proyecto .NET con C#
+## **Introducción**
 
-Este es un proyecto sencillo desarrollado en .NET con C#, diseñado para ser una biblioteca o repositorio de libros digital para la Fundación Secretos Para contar.
+Este documento describe los pasos para ejecutar el backend del proyecto, incluyendo los requisitos previos, configuración del entorno y comandos necesarios para su ejecución.
 
-## integrantes
+---
 
-- Sara Castrillon
-- Felipe Ochoa
-- Samir Gil
-- Maria Estefania
+## **Requisitos Previos**
 
-## Requisitos previos:
-Asegúrate de tener lo siguiente instalado en tu sistema:
+Asegúrate de tener los siguientes elementos instalados y configurados en tu entorno:
 
-- .NET SDK (Versión 6.0 o superior)
-- Un IDE o editor de texto compatible con C#, como Visual Studio o Visual Studio Code con la extensión de C# instalada.
-- Git para clonar el repositorio.
+1. **.NET SDK**  
+    Versión recomendada: `.NET 7.0` o superior.  
+    [Descargar aquí](https://dotnet.microsoft.com/download)
+    
+2. **IDE recomendado**
+    
+    - Visual Studio 2022 (con la carga de trabajo de desarrollo .NET instalada)
+    - Visual Studio Code (con extensión C#)
+    - Extension .Net Install Tool
+    - C# Dev Kit
+3. **Base de datos**  
+     - **PostgreSQL**
+     La base de datos con la que desplegamos es PostgreSQL usamos su ultima versión al momento 17.2 (https://www.enterprisedb.com/downloads/postgres-postgresql-downloads)
+    - **Beekeeper**(Opcional)
+	  El manejo de la base de datos lo hicimos con Beekeeper Studio (https://www.beekeeperstudio.io/get)
+    
+5. **Herramientas adicionales**
+    
+    - PowerShell o Terminal de comandos integrada(cmd).
+    - Git para control de versiones y para copiar el repositorio.
 
-## Clonar el repositorio:
-Abre una terminal y ejecuta el siguiente comando para clonar el repositorio en tu máquina local:
+---
 
-```
-git clone https://github.com/SamirJoseGil/katio_back.git
-```
+## **Configuración del Proyecto**
 
-Luego, navega al directorio del proyecto:
+1. **Clonar el repositorio**  
+    En GitHub, clonar el repositorio utilizando el siguiente comando:
+    
+     ```bash
+    git clone https://github.com/SamirJoseGil/katio_back.git
+	```
+	
+    Despues dirigirse a la carpeta raiz
+    
+     ``` bash
+    cd katio_net
+	```
+    
+1. **Configurar la Base de Datos**
+    
+    - Edita el archivo `appsettings.json` para configurar la cadena de conexión a la base de datos:
+    
+    Copiar código y agregar tu usuario y contraseña de PostgreSQL
+	```json
+	{   "ConnectionStrings": {     "DefaultConnection": "Server=localhost;Database=DatabaseName;User Id=username;Password=password;"   } }
+   
+	``` 
+	
+	
+1. **Restaurar paquetes NuGet**  
+    Ejecuta el siguiente comando para restaurar las dependencias del proyecto:
+    
+    ```bash
+    dotnet restore
+	```
+	
+1. **Aplicar migraciones de la base de datos**  
+    Necesitas añadir las migraciones, para eso necesitas dirigirte a la carpeta .API
+    
+    ```bash
+    cd katio_net.API
+	```
+    
+    Despues ejecutar este codigo
+    
+    ```bash
+    dotnet ef migrations add InitialCreate --project ../Katio_net.Data dotnet ef       database update
+	```
+	
+---
 
-```
-cd katio_back
-```
+## **Ejecución del Proyecto**
+
+1. **Iniciar el servidor**  
+    Usa el siguiente comando para ejecutar el proyecto:
+  
+    ```bash
+    dotnet run
+	```
+	
+    o usar el siguiente codigo que te llevara al Swagger UI
+       
+    ```bash
+    dotnet watch --project katio_net.API
+    ```
+    
+1. **Acceso al backend**  
+    El backend estará disponible en la siguiente URL por defecto:
+    
+    `http://localhost:5125`
+    
+    
+3. **Endpoints disponibles**  
+    En el proyecto manejamos los metodos **CRUD**.
+    De forma local los endpoints se verian de la siguiente forma: 
+	Ruta por defecto
+    `Http://localhost:(Puerto)/api/(Controlador)`
+    - C (`Crear`) -> este es un metodo **POST**
+	    Para acceder al metodo de crear debes usar la ruta por defecto `/api/(Controlador)/Create(Controlador)`
+	
+	- R(`Leer`) -> este es un metodo **GET**
+		Para acceder al metodo de leer debes usar la ruta por defecto
+		pero este tiene otros puntos dependiendo de lo que se desee buscar y dependiendo del controlador, siempre se acompaña de **GetBy** junto con lo que deseas.
+		- En los libros `Name, Id, ISBN10, ISBN13, Edition, Published, Edition, DeweyIndex `
+		 `/api/(Controlador)/GetBookBy(Controlador)`
+		
+		- En los Audiolibros `Id, Name, ISBN10, ISBN13, Published, Edition, Genre, LenghtInSeconds, Narrator, NarratorName, NarratorLastName, NarratorFullName, NarratorGenre`
+		 `/api/(Controlador)/GetAudioBookBy(Controlador)`
+		 
+		- En los Autores `Id, Name, LastName, Country, BirthDate`
+		 `/api/(Controlador)/GetAuthorBy(Controlador)`
+		
+		- En los Generos `Name, Description`
+		  `/api/(Controlador)/GetGenresBy(Controlador)`
+		
+		- En los Narradores `Name, LastName, Id`
+		 `/api/(Controlador)/GetNarratorBy(Controlador)`
+	
+	- U(`Actualizar`) ->este es un metodo **PUT**  
+		Para acceder al metodo Actualizar debes usar la ruta por defecto
+		`/api/(Controlador)/Update(Controlador)`
+	
+	- D(`Eliminar`) -> este es un metodo **DELETE** -> este encuentra el id y elimina
+		Para acceder al metodo Eliminar debes usar la ruta por defecto
+		`/api/(Controlador)/Delete(Controlador)`
+    - `GET /api/books` - Obtiene todos los libros.
+    - `POST /api/books` - Crea un nuevo libro.
+    - `GET /api/books/{id}` - Obtiene un libro por ID.
+
+---
+
+## **Comandos Útiles**
+
+- **Compilar el proyecto sin ejecutarlo:**
+	Esto te ayudara para ver que se esta ejecutando y si hay algun error.
+    
+    ```bash
+    dotnet build
+	```
+	
+- **Para limpiar la construccion del proyecto:**
+- 
+	```bash
+    dotnet clean
+	```
+	
+- **Publicar el proyecto para producción:**
+    
+    ```
+    dotnet publish -c Release -o ./published
+	```
+	
+
+---
+
+## **Solución de Problemas**
+
+- **Error de conexión a la base de datos:**  
+    Verifica que la cadena de conexión en `appsettings.json` sea correcta y que el servidor de la base de datos esté en ejecución.
+    
+- **Paquetes faltantes:**  
+    Asegúrate de haber ejecutado `dotnet restore`.
+    
+- **Problemas con migraciones:**  
+    Revisa las migraciones pendientes y verifica que Entity Framework esté configurado correctamente.
 
 
-## Compilación automática (GitHub Actions):
+  ### **Technical Documentation of the Backend**
 
-Este proyecto utiliza GitHub Actions para la compilación automática. Cada vez que se realice un push o se abra un pull request en la rama main, se activará un workflow que compila automáticamente el proyecto en un entorno de CI/CD (Continuous Integration/Continuous Deployment). Puedes ver el estado de la compilación en la pestaña Actions de este repositorio.
+## **Introduction**
 
-Para compilar y ejecutar el proyecto localmente, sigue los pasos a continuación:
+This document outlines the steps required to run the backend of the project, including prerequisites, environment setup, and the necessary commands for execution.
 
-## Compilar el proyecto localmente:
-Para compilar el proyecto, ejecuta el siguiente comando en la terminal:
-```
-dotnet build
-```
+---
 
-## Ejecutar el proyecto:
-Una vez compilado, puedes ejecutar el proyecto con el siguiente comando:
-```
-dotnet watch --project Katio_net.API
-```
+## **Prerequisites**
 
-Esto ejecutará la aplicación en la terminal. Se abrirá en el navegador en la URL especificada (por defecto es http://localhost:5000).
+Ensure you have the following tools installed and configured in your environment:
 
+1. **.NET SDK**  
+    Recommended version: `.NET 7.0` or higher.  
+    [Download here](https://dotnet.microsoft.com/download)
+    
+2. **Recommended IDEs**
+    
+    - Visual Studio 2022 (with the .NET development workload installed)
+    - Visual Studio Code (with C# extension)
+    - .Net Install Tool extension
+    - C# Dev Kit
+3. **Database**
+    
+    - **PostgreSQL**  
+        The project uses PostgreSQL, specifically version 17.2.  
+        [Download here](https://www.enterprisedb.com/downloads/postgres-postgresql-downloads)
+        
+    - **Beekeeper** (Optional)  
+        For database management, we used Beekeeper Studio.  
+        [Download here](https://www.beekeeperstudio.io/get)
+        
+4. **Additional Tools**
+    
+    - PowerShell or integrated command terminal (cmd).
+    - Git for version control and repository cloning.
 
-## Compilar el proyecto:
-Para compilar el proyecto, ejecuta el siguiente comando en la terminal:
-```
-dotnet build
-```
+---
 
+## **Project Setup**
 
-## Historia de Usuario / Requisitos:
+1. **Clone the Repository**  
+    Clone the repository from GitHub using the following command:
+    
+    ```bash
+    git clone https://github.com/SamirJoseGil/katio_back.git
+	```
+	
+    
+    Then, navigate to the root folder:
+    
+    ``` bash
+    cd katio_net
+	```
+    
+2. **Configure the Database**  
+    Edit the `appsettings.json` file to set up the database connection string:
+    
+    ```json
+{   "ConnectionStrings": {     "DefaultConnection": "Server=localhost;Database=DatabaseName;User Id=username;Password=password;"   } }
+   
+	``` 
+	
+1. **Restore NuGet Packages**  
+    Run the following command to restore project dependencies:
+    
+    ```bash
+    dotnet restore
+	```
+	
+    
+4. **Apply Database Migrations**  
+    Navigate to the `.API` folder:
+    
+    ```bash
+    cd katio_net.API
+	```
+    
+    
+    Run these commands to add and apply migrations:
+    
+    ```bash
+    dotnet ef migrations add InitialCreate --project ../Katio_net.Data dotnet ef       database update
+    
+	```
+	
 
-### Usuarios
+---
 
-- [ ] Crear un usuario, utilizar el registro.
-- [ ] Login del usuario: debe regresar un token bearer. Al hacer login, debo poder usar el token para cuaquier otra acción.
-- [ ] Todas mis acciones deben quedar bajo llave, con la sola excepción de: Login, Signup.
-- [ ] Editar un usuario.
-- [ ] Debo poder reiniciar mi clave, solo mi clave. Debo colocar la clave anterior, y dos veces la clave nueva.
-- [ ] Listar todos mis usuarios.
-- [ ] Listar todos mis usuarios por email, o identificación.
-- [ ] Agregar un username. No todos los usuarios tienen un correo hábil. Ambos campos son distintos, pero puede repetir la información.
-- [ ] Manejar los perfiles (Roles) del usuario.
+## **Running the Project**
 
-### Libros
+1. **Start the Server**  
+    Use this command to run the project:
+    
+    ```bash
+    dotnet run
+	```
+    
+    Alternatively, to access the Swagger UI:
+    
+    ```bash
+    dotnet watch --project katio_net.API
+    ```
+       
+2. **Backend Access**  
+    The backend will be available at the default URL:
+       
+    `http://localhost:5125`
+    
+3. **Available Endpoints**  
+    The project includes **CRUD** methods. Locally, the endpoints follow this pattern:
+    `http://localhost:(Port)/api/(Controller)`
+    
+    - **C (Create)** -> **POST**  
+        Example: `/api/(Controller)/Create`
+        
+    - **R (Read)** -> **GET**  
+        Example: `/api/(Controller)/GetByProperty`
+        
+        Supported queries include:
+        
+        - **Books**: `Name, Id, ISBN10, ISBN13, Edition, Published, DeweyIndex`
+        - **Audiobooks**: `Id, Name, ISBN10, Genre, NarratorName`
+        - **Authors**: `Id, Name, LastName, Country`
+        - **Genres**: `Name, Description`
+        - **Narrators**: `Name, LastName, Id`
+    - **U (Update)** -> **PUT**  
+        Example: `/api/(Controller)/Update`
+        
+    - **D (Delete)** -> **DELETE**  
+        Example: `/api/(Controller)/Delete`
+        
+    
+    Examples for the **Books** controller:
+    
+    - `GET /api/books` - Retrieve all books.
+    - `POST /api/books` - Create a new book.
+    - `GET /api/books/{id}` - Retrieve a book by ID.
 
-- [x] Crear un libro.
-- [x] Editar un libro.
-- [x] Buscar libro por nombre, de forma relativa.
-- [x] Buscar libro por autor, de forma relativa, por nombre y apellido del autor.
-- [x] Buscar libro por editorial.
-- [x] Buscar libro por genero.
-- [x] Buscar libro por fecha de publicación.
-- [ ] Subir un libro en PDF a la biblioteca.
-- [ ] Servir un libro en PDF al cliente.
-- [ ] Agregar varios géneros a un libro.
-- [ ] Los libros pueden tener varios autores.
-- [ ] Agregar temas al libro.
-- [ ] un libro puede tener varios temas.
-- [x] No pueden haber dos versiones del mismo libro.
-- [ ] Agregar libros relacionados a un libro principal
+---
 
-### Audiolibros
+## **Useful Commands**
 
-- [x] Crear un audiolibro.
-- [x] Editar un audiolibro.
-- [x] Buscar Audiolibro por nombre, de forma relativa.
-- [x] Buscar Audiolibro por autor, de forma relativa, por nombre y apellido del autor.
-- [x] Buscar Audiolibro por editorial.
-- [x] Buscar Audiolibro por genero.
-- [x] Buscar Audiolibro por fecha de publicación.
-- [ ] Subir un audiolibro en MP3/OGG a la biblioteca.
-- [ ] Servir un audiolibro en MP3/OGG al cliente.
-- [ ] Buscar un audiolibro por narrador.
-- [x] Buscar un audiolibro por longitud.
-- [ ] Agregar varios géneros a un libro.
-- [ ] Los libros pueden tener varios autores.
-- [ ] Agregar temas al libro.
-- [ ] un libro puede tener varios temas.
-- [ ] No pueden haber dos versiones del mismo libro.
+- **Build the project without running it:**  
+    This checks for errors in the build process:
+    
+    ```bash
+    dotnet build
+	```
+    
+- **Clean the project build:**
+    
+    ```bash
+    dotnet clean
+	```
+	
+- **Publish the project for production:**
+    
+    ```
+    dotnet publish -c Release -o ./published
+	```
+	
 
-### Autores
+---
 
-- [x] Crear un Autor
-- [x] Editar un Autor
-- [x] Buscar un autor por nombre y apellido de forma relativa.
-- [x] Buscar un autor por fecha de nacimiento
-- [x] Buscar un autor por país de procedencia
+## **Troubleshooting**
 
-### Narradores
-
-- [x] Crear un narrador
-- [x] Editar un narrador
-- [x] Buscar narrador por nombre.
-- [ ] Buscar narrador por perfil de voz.
-- [ ] Buscar todos los audiolibros de un narradores por relación.
-
-### Utils
-
-- [ ] manejo correcto de errores.
-- [ ] utilizar try catch donde sea necesario
-- [ ] Hacer rollback donde sea necesario.
-- [x] Usar el tipo correcto para mejorar la memoria.
-- [x] no hacer llamados innecesarios.
-- [x] Extraer funcionalidad repetida en su propia clase, o método.
-
-### Admin / Estadísticas
-
-- [ ] Ver mis usuarios, editarlos y desactivarlos.
-- [ ] Asignar una clave de forma directa a un usuario a través de la edición
-- [ ] El username y el email no son mutables.
-- [ ] Agregar estadísticas al sitio.
-- [ ] Cada vez que se descargue un libro, tener un contador que se encargue de llevar la cuenta.
-- [ ] Cada vez que  se reproduzca un audilibro, tener un contador que se encargue de llevar la cuenta.
-- [ ] Cada vez que se mire el perfil de un autor con sus libros, tener un contador que se encargue de llevar la cuenta.
-- [ ] Cada vez que se descargue un libro, o se escuche un audiolibro, marcar el género en una tabla de contadores que lleve la cuenta.
-- [ ] Última conexión al usuario.
-- [ ] Llevar la cuenta de cuantos dias distintos se conecta un usuario. Diferente a la última conexión.
-- [ ] Agregar logs al sistema.
-- [ ] Basada en las conexiones y la cuenta de las mismas, emitir una estadística que diga cuales son los días más activos para el sistema.
-- [ ] llevar la cuenta de intentos fallidos al hacer login. Al llegar a 10, bloquear el usuario. una vez se ingrese la clave correcta, reiniciar el contador a 0;
-- [ ] Cambiar la longitud de duración del token a 24H.'
-- [ ] Actualizar su sistema a la última versión de Java y Spring.
-
-## BONUS TRACKS (Actividades Extra Curriculares)
-
-- Crear un front end en react. Que sea capaz de implementar todos los dominios.
-
-    - Crear pagina de signup
-    - crear página de login
-
-    - crear Modulo de libros
-        - Buscar        
-        - Descargar
-
-    - Crear módulo de Autores
-        - Buscar
-        - listar
-
-    - Crear módulo de Audiolibros
-        - Buscar
-        - Listar
+- **Database connection error:**  
+    Ensure the connection string in `appsettings.json` is correct and the database server is running.
+    
+- **Missing packages:**  
+    Make sure to run `dotnet restore`.
+    
+- **Migration issues:**  
+    Check for pending migrations and verify that Entity Framework is properly configured.
