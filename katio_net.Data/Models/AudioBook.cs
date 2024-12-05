@@ -11,13 +11,12 @@ namespace katio.Data.Models
         public string Edition { get; set; } = string.Empty;
         public string Genre { get; set; } = string.Empty;
         public int LenghtInSeconds { get; set; } = 0;
-        public string Path { get; set; } = string.Empty;
-
-
+        public string FrontPage { get; set; } = string.Empty;
+        public string? AudioPath { get; set; } = null;
 
         // Relaciones
-        [ForeignKey("Author")]
-        public int AuthorId { get; set; }
-        public virtual Author? Author { get; set; }
+        [ForeignKey("Narrator")]
+        public int NarratorId { get; set; }
+        public virtual Narrator? Narrator { get; set; }
     }
 }

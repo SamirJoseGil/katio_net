@@ -26,6 +26,14 @@ namespace katio.API.Controllers
             return response.TotalElements > 0 ? Ok(response) : StatusCode(StatusCodes.Status404NotFound, response);
         }
 
+        [HttpPost]
+        [Route("SearchAuthor")]
+        public async Task<IActionResult> SearchAuthorsAsync(string searchTerm)
+        {
+            var response = await _authorService.SearchAuthorAsync(searchTerm);
+            return response.TotalElements > 0 ? Ok(response) : StatusCode(StatusCodes.Status404NotFound, response);
+        }
+
         #region Create Update Delete
 
         // Crear Autores
@@ -58,6 +66,15 @@ namespace katio.API.Controllers
         #endregion
 
         #region Find By Author
+
+        // Trae un Autor por su Id
+        [HttpGet]
+        [Route("GetAuthorById")]
+        public async Task<IActionResult> GetAuthorById(int Id)
+        {
+            var author = await _authorService.GetAuthorById(Id);
+            return author != null ? Ok(author) : StatusCode(StatusCodes.Status404NotFound, author);
+        }
 
         // Trae un autor por su nombre
         [HttpGet]

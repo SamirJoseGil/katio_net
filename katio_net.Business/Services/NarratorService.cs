@@ -1,31 +1,92 @@
-﻿using katio.Data.Models;
+﻿using katio.Business.Interfaces;
+using katio.Data.Models;
 using katio.Data.Dto;
 using katio.Data;
 using System.Net;
-using Microsoft.EntityFrameworkCore;
-using katio.Business.Interfaces;
-
+using System.Linq.Expressions;
 
 namespace katio.Business.Services;
 
 public class NarratorService : INarratorService
 {
     // Lista de narradores
-    private readonly katioContext _context;
+    private readonly IUnitOfWork _unitOfWork;
 
     // Constructor
-    public NarratorService(katioContext context)
+    public NarratorService(IUnitOfWork unitOfWork)
     {
-        _context = context;
+        _unitOfWork = unitOfWork;
     }
+
 
     // Traer todos los Narradores
     public async Task<BaseMessage<Narrator>> Index()
     {
-        var result = _context.Narrators.ToList();
-        return result.Any() ? Utilities.BuildResponse<Narrator>
-            (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
-            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Narrator>());
+        try
+        {
+            var result = await _unitOfWork.NarratorRepository.GetAllAsync();
+            return result.Any() ? Utilities.BuildResponse<Narrator>(HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
+                Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.NARRATOR_NOT_FOUND, new List<Narrator>());
+        }
+        catch (Exception ex)
+        {
+            return Utilities.BuildResponse<Narrator>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
+        }
+    }
+
+    public async Task<BaseMessage<Narrator>> SearchNarratorAsync(string searchTerm)
+    {
+        try
+        {
+            var parameter = Expression.Parameter(typeof(Narrator), "narrator");
+            var searchExpressions = new List<Expression>();
+
+            var lowerSearchTerm = Expression.Constant(searchTerm.ToLower(), typeof(string));
+
+            // Search in Name
+            var nameProperty = Expression.Property(parameter, nameof(Narrator.Name));
+            var nameToLower = Expression.Call(nameProperty, "ToLower", null);
+            var nameContains = Expression.Call(
+                nameToLower,
+                "Contains",
+                null,
+                lowerSearchTerm
+            );
+            searchExpressions.Add(nameContains);
+
+            // Search in LastName
+            var lastNameProperty = Expression.Property(parameter, nameof(Narrator.LastName));
+            var lastNameToLower = Expression.Call(lastNameProperty, "ToLower", null);
+            var lastNameContains = Expression.Call(
+                lastNameToLower,
+                "Contains",
+                null,
+                lowerSearchTerm
+            );
+
+            // Search in Genre
+            var genreProperty = Expression.Property(parameter, nameof(Narrator.Genre));
+            var genreToLower = Expression.Call(genreProperty, "ToLower", null);
+            var genreContains = Expression.Call(
+                genreToLower,
+                "Contains",
+                null,
+                lowerSearchTerm
+            );
+            searchExpressions.Add(genreContains);
+
+            // Combine all search expressions with OR
+            var body = searchExpressions.Aggregate(Expression.OrElse);
+            var lambda = Expression.Lambda<Func<Narrator, bool>>(body, parameter);
+
+            var result = await _unitOfWork.NarratorRepository.GetAllAsync(lambda);
+            return result.Any() ? Utilities.BuildResponse(HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
+                Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.NARRATOR_NOT_FOUND, new List<Narrator>());
+        }
+        catch (Exception ex)
+        {
+            return Utilities.BuildResponse<Narrator>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
+        }
     }
 
     #region Create Update Delete
@@ -33,81 +94,132 @@ public class NarratorService : INarratorService
     // Crear Narradores
     public async Task<BaseMessage<Narrator>> CreateNarrator(Narrator narrator)
     {
-        var newNarrator = new Narrator()
+        var existingNarrator = await _unitOfWork.NarratorRepository.GetAllAsync(n => n.Name == narrator.Name && n.LastName == narrator.LastName);
+
+        if (existingNarrator.Any())
         {
-            Name = narrator.Name,
-            LastName = narrator.LastName,
-            Genre = narrator.Genre
-        };
+            return Utilities.BuildResponse<Narrator>(HttpStatusCode.Conflict, BaseMessageStatus.NARRATOR_ALREADY_EXISTS);
+        }
         try
         {
-            await _context.Narrators.AddAsync(newNarrator);
-            await _context.SaveChangesAsync();
+            await _unitOfWork.NarratorRepository.AddAsync(narrator);
+            await _unitOfWork.SaveAsync();
         }
         catch (Exception ex)
         {
             return Utilities.BuildResponse<Narrator>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
         }
-        return Utilities.BuildResponse(HttpStatusCode.OK, BaseMessageStatus.OK_200, new List<Narrator> { newNarrator });
+        return Utilities.BuildResponse(HttpStatusCode.OK, BaseMessageStatus.OK_200, new List<Narrator> { narrator });
     }
 
-
     // Actualizar Narradores
-    public async Task<Narrator> UpdateNarrator(Narrator narrator)
+    public async Task<BaseMessage<Narrator>> UpdateNarrator(Narrator narrator)
     {
-        var result = _context.Narrators.FirstOrDefault(b => b.Id == narrator.Id);
-        if (result != null)
+        var existingNarrator = await _unitOfWork.NarratorRepository.GetAllAsync(n => n.Name == narrator.Name && n.LastName == narrator.LastName);
+
+        if (!existingNarrator.Any())
         {
-            result.Name = narrator.Name;
-            result.LastName = narrator.LastName;
-            result.Genre = narrator.Genre;
-            await _context.SaveChangesAsync();
+            return Utilities.BuildResponse<Narrator>(HttpStatusCode.NotFound, BaseMessageStatus.NARRATOR_NOT_FOUND, new List<Narrator>());
         }
-        return result;
+        try
+        {
+            await _unitOfWork.NarratorRepository.AddAsync(narrator);
+            await _unitOfWork.SaveAsync();
+        }
+        catch (Exception ex)
+        {
+            return Utilities.BuildResponse<Narrator>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
+        }
+        return Utilities.BuildResponse(HttpStatusCode.OK, BaseMessageStatus.OK_200, new List<Narrator> { narrator });
     }
 
     // Eliminar Narradores
     public async Task<BaseMessage<Narrator>> DeleteNarrator(int id)
     {
-        var result = _context.Narrators.FirstOrDefault(b => b.Id == id);
-        if (result != null)
-        {
-            _context.Narrators.Remove(result);
-            await _context.SaveChangesAsync();
-        }
-        return result != null ? Utilities.BuildResponse(HttpStatusCode.OK, BaseMessageStatus.OK_200, new List<Narrator> { result }) :
-            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Narrator>());
-    }
+        var existingNarrator = await _unitOfWork.NarratorRepository.GetAllAsync(n => n.Id == id);
 
+        if (!existingNarrator.Any())
+        {
+            return Utilities.BuildResponse<Narrator>(HttpStatusCode.NotFound, BaseMessageStatus.NARRATOR_NOT_FOUND, new List<Narrator>());
+        }
+        try
+        {
+            await _unitOfWork.NarratorRepository.Delete(id);
+
+        }
+        catch (Exception ex)
+        {
+            return Utilities.BuildResponse<Narrator>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
+        }
+        return Utilities.BuildResponse(HttpStatusCode.OK, BaseMessageStatus.OK_200, new List<Narrator> { });
+    }
     #endregion
 
     #region  Find By Narrator
+    //Buscar narrador por Id
+    public async Task<BaseMessage<Narrator>> GetNarratorById(int id)
+    {
+        try
+        {
+            var result = await _unitOfWork.NarratorRepository.FindAsync(id);
+            return result != null ? Utilities.BuildResponse<Narrator>
+                (HttpStatusCode.OK, BaseMessageStatus.OK_200, new List<Narrator> { result }) :
+                Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.NARRATOR_NOT_FOUND, new List<Narrator>());
+        }
+        catch (Exception ex)
+        {
+            return Utilities.BuildResponse<Narrator>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
+        }
+
+    }
 
     // Buscar Narradores por Nombre
     public async Task<BaseMessage<Narrator>> GetNarratorsByName(string name)
     {
-        var result = await _context.Narrators.Where(b => b.Name.Contains(name, StringComparison.InvariantCultureIgnoreCase)).ToListAsync();
-        return result.Any() ? Utilities.BuildResponse<Narrator>
-            (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
-            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Narrator>());
+        try
+        {
+            var result = await _unitOfWork.NarratorRepository.GetAllAsync(a => a.Name.ToLower().Contains(name.ToLower()));
+            return result.Any() ? Utilities.BuildResponse<Narrator>
+                (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
+                Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.NARRATOR_NOT_FOUND, new List<Narrator>());
+        }
+        catch (Exception ex)
+        {
+            return Utilities.BuildResponse<Narrator>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
+        }
     }
+
     // Buscar Narradores por Apellido  
     public async Task<BaseMessage<Narrator>> GetNarratorsByLastName(string lastName)
     {
-        var result = await _context.Narrators.Where(b => b.LastName.Contains(lastName, StringComparison.InvariantCultureIgnoreCase)).ToListAsync();
-        return result.Any() ? Utilities.BuildResponse<Narrator>
-            (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
-            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Narrator>());
-    }
-    // Buscar Narradores por Genero
-    public async Task<BaseMessage<Narrator>> GetNarratorsByGenre(string Genre)
-    {
-        var result = await _context.Narrators.Where(b => b.Genre.Contains(Genre, StringComparison.InvariantCultureIgnoreCase)).ToListAsync();
-        return result.Any() ? Utilities.BuildResponse<Narrator>
-            (HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
-            Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Narrator>());
+        try
+        {
+            var result = await _unitOfWork.NarratorRepository.GetAllAsync(b => b.LastName.ToLower().Contains(lastName.ToLower()));
+            return result.Any()
+                ? Utilities.BuildResponse<Narrator>(HttpStatusCode.OK, BaseMessageStatus.OK_200, result)
+                : Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.NARRATOR_NOT_FOUND, new List<Narrator>());
+        }
+        catch (Exception ex)
+        {
+            return Utilities.BuildResponse<Narrator>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
+        }
     }
 
+    // Buscar Narradores por Genero
+    public async Task<BaseMessage<Narrator>> GetNarratorsByGenre(string genre)
+    {
+        try
+        {
+            var result = await _unitOfWork.NarratorRepository.GetAllAsync(b => b.Genre.ToLower().Contains(genre.ToLower()));
+            return result.Any()
+                ? Utilities.BuildResponse<Narrator>(HttpStatusCode.OK, BaseMessageStatus.OK_200, result)
+                : Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.NARRATOR_NOT_FOUND, new List<Narrator>());
+        }
+        catch (Exception ex)
+        {
+            return Utilities.BuildResponse<Narrator>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
+        }
+    }
     #endregion
 
 }

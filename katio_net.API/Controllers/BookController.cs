@@ -1,6 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using katio.Business.Interfaces;
 using katio.Data.Models;
+using katio.Data.Models.Dto;
+using katio.Data.Dto;
+
+
 
 namespace katio.API.Controllers
 {
@@ -22,7 +26,16 @@ namespace katio.API.Controllers
         public async Task<IActionResult> Index()
         {
             var response = await _bookService.Index();
-            return response.TotalElements > 0 ? Ok(response) : StatusCode(StatusCodes.Status404NotFound, response);
+            return response != null ? Ok(response) : StatusCode(StatusCodes.Status404NotFound, response);
+        }
+
+        // Busca libros por término de búsqueda
+        [HttpGet]
+        [Route("SearchBook")]
+        public async Task<IActionResult> SearchBook(string searchTerm)
+        {
+            var response = await _bookService.SearchBookAsync(searchTerm);
+            return response != null ? Ok(response) : StatusCode(StatusCodes.Status404NotFound, response);
         }
 
         #region Create Update Delete
@@ -30,12 +43,25 @@ namespace katio.API.Controllers
         // Crea un libro
         [HttpPost]
         [Route("CreateBook")]
-        public async Task<IActionResult> CreateBook(Book book)
+        public async Task<IActionResult> CreateBook(BookInsert bookInsert)
         {
-            var response = await _bookService.CreateBook(book);
+            var book = new Book
+            {
+                Name = bookInsert.Name,
+                ISBN10 = bookInsert.ISBN10,
+                ISBN13 = bookInsert.ISBN13,
+                Published = bookInsert.Published,
+                Edition = bookInsert.Edition,
+                DeweyIndex = bookInsert.DeweyIndex,
+                AuthorId = bookInsert.AuthorId,
+                BookCover = bookInsert.BookCover,
+                Description = bookInsert.Description
+            };
+
+            var response = await _bookService.CreateBook(book, bookInsert.PdfFile);
+
             return response.StatusCode == System.Net.HttpStatusCode.OK ? Ok(response) : StatusCode((int)response.StatusCode, response);
         }
-
         // Actualiza un libro
         [HttpPut]
         [Route("UpdateBook")]
@@ -48,16 +74,57 @@ namespace katio.API.Controllers
         //Elimina un libro
         [HttpDelete]
         [Route("DeleteBook")]
-        public async Task<IActionResult> DeleteBook(int id)
+        public async Task<IActionResult> DeleteBook(int Id)
         {
-            var response = await _bookService.DeleteBook(id);
+            var response = await _bookService.DeleteBook(Id);
             return response.StatusCode == System.Net.HttpStatusCode.OK ? Ok(response) : StatusCode((int)response.StatusCode, response);
         }
-
 
         #endregion
 
         #region Find By Book
+
+        //Trae un libro por su Id
+        [HttpGet]
+        [Route("GetBookById")]
+        public async Task<IActionResult> GetBookById(int Id)
+        {
+            var response = await _bookService.GetBookById(Id);
+            return response != null ? Ok(response) : StatusCode(StatusCodes.Status404NotFound, response);
+        }
+
+        // Trae un libro con su PDF
+        [HttpGet]
+        [Route("GetBookPdf")]
+        public async Task<IActionResult> GetBook(int id)
+        {
+            var response = await _bookService.GetBookWithPdf(id);
+
+            if (response.StatusCode != System.Net.HttpStatusCode.OK)
+            {
+                return StatusCode((int)response.StatusCode, response.Message);
+            }
+
+            var bookWithPdf = response.ResponseElements?.FirstOrDefault();
+            if (bookWithPdf == null)
+            {
+                return NotFound(BaseMessageStatus.BOOK_NOT_FOUND);
+            }
+
+            if (bookWithPdf.PdfFile == null || bookWithPdf.PdfFile.Length == 0)
+            {
+                return NotFound("PDF file not found.");
+            }
+
+            // Retornar el archivo PDF como un stream
+            var stream = new MemoryStream(bookWithPdf.PdfFile);
+            stream.Position = 0;
+
+            return new FileStreamResult(stream, "application/pdf")
+            {
+                FileDownloadName = $"{bookWithPdf.Book.Name}.pdf"
+            };
+        }
 
         //Trae un libro por su nombre
         [HttpGet]

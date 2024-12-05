@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using katio.Business.Interfaces;
 using katio.Data.Models;
+using katio.Data.Models.Dto;
+using katio.Data.Dto;
 
 namespace katio.API.Controllers
 {
@@ -24,15 +26,71 @@ namespace katio.API.Controllers
             var response = await _audioBookService.Index();
             return response.TotalElements > 0 ? Ok(response) : StatusCode(StatusCodes.Status404NotFound, response);
         }
+        // Trae un mp3
+        [HttpGet]
+        [Route("GetAudioBookFile")]
+        public async Task<IActionResult> GetAudioBookFile(int id)
+        {
+            var response = await _audioBookService.GetAudioBookWithId(id);
+
+            if (response.StatusCode != System.Net.HttpStatusCode.OK)
+            {
+                return StatusCode((int)response.StatusCode, response.Message);
+            }
+
+            var audioBookWithAudio = response.ResponseElements?.FirstOrDefault();
+            if (audioBookWithAudio == null)
+            {
+                return NotFound(BaseMessageStatus.AUDIOBOOK_NOT_FOUND);
+            }
+
+            if (audioBookWithAudio.AudioFile == null || audioBookWithAudio.AudioFile.Length == 0)
+            {
+                return NotFound("MP3 file not found.");
+            }
+
+            // Retornar el archivo MP3 como un stream
+            var stream = new MemoryStream(audioBookWithAudio.AudioFile);
+            stream.Position = 0;
+
+            return new FileStreamResult(stream, "audio/mpeg")
+            {
+                FileDownloadName = $"{audioBookWithAudio.AudioBook.Name}.mp3"
+            };
+        }
+
+        // Busca un Audiolibro omniscient
+        [HttpGet]
+        [Route("SearchAudioBook")]
+        public async Task<IActionResult> SearchAudioBook(string searchTerm)
+        {
+            var response = await _audioBookService.SearchAudioBookAsync(searchTerm);
+            return response.TotalElements > 0 ? Ok(response) : StatusCode(StatusCodes.Status404NotFound, response);
+        }
 
         #region Create Update Delete
 
         // Crea un Audiolibro
         [HttpPost]
         [Route("CreateAudioBook")]
-        public async Task<IActionResult> CreateAudioBook(AudioBook audioBook)
+        public async Task<IActionResult> CreateAudioBook(AudioBookInsert audioBookInsert)
         {
-            var response = await _audioBookService.CreateAudioBook(audioBook);
+            var audiobook = new AudioBook
+            {
+                Name = audioBookInsert.Name,
+                ISBN10 = audioBookInsert.ISBN10,
+                ISBN13 = audioBookInsert.ISBN13,
+                Published = audioBookInsert.Published,
+                Edition = audioBookInsert.Edition,
+                Genre = audioBookInsert.Genre,
+                LenghtInSeconds = audioBookInsert.LenghtInSeconds,
+                FrontPage = audioBookInsert.FrontPage,
+                NarratorId = audioBookInsert.NarratorId
+            };
+
+            var response = await _audioBookService.CreateAudioBook(audiobook, audioBookInsert.AudioFile);
+
+
             return response.StatusCode == System.Net.HttpStatusCode.OK ? Ok(response) : StatusCode((int)response.StatusCode, response);
         }
 
@@ -57,6 +115,15 @@ namespace katio.API.Controllers
         #endregion
 
         #region Find By AudioBook
+
+        // Busca AudioLibro por su Id
+        [HttpGet]
+        [Route("FindAudioBookById")]
+        public async Task<IActionResult> GetByAudioBookId(int id)
+        {
+            var response = await _audioBookService.GetAudioBookById(id);
+            return response != null ? Ok(response) : StatusCode(StatusCodes.Status404NotFound, response);
+        }
 
         // Busca un Audiolibro por su Nombre
         [HttpGet]
@@ -123,59 +190,49 @@ namespace katio.API.Controllers
 
         #endregion
 
-        #region Find By Author
+        #region Find By Narrator
 
-        // Busca un Audiolibro por su Autor
+        // Busca un Audiolibro por su Narrador
         [HttpGet]
-        [Route("FindAudioBookByAuthor")]
-        public async Task<IActionResult> GetAudioBookByAuthor(int authorId)
+        [Route("FindAudioBookByNarrator")]
+        public async Task<IActionResult> GetAudioBookByNarrator(int narratorId)
         {
-            var response = await _audioBookService.GetAudioBookByAuthor(authorId);
+            var response = await _audioBookService.GetAudioBookByNarrator(narratorId);
             return response != null ? Ok(response) : StatusCode(StatusCodes.Status404NotFound, response);
         }
 
-        // Busca un Audiolibro por nombre de su Autor
+        // Busca un Audiolibro por nombre de su narrador
         [HttpGet]
-        [Route("FindAudioBookByAuthorName")]
-        public async Task<IActionResult> GetAudioBookByAuthorName(string authorName)
+        [Route("FindAudioBookByNarratorName")]
+        public async Task<IActionResult> GetAudioBookByNarratorName(string narratorName)
         {
-            var response = await _audioBookService.GetAudioBookByAuthorName(authorName);
-            return response != null ? Ok(response) : StatusCode(StatusCodes.Status404NotFound, response);
-        }
-        
-        // Busca un Audiolibro por apellido del autor
-        [HttpGet]
-        [Route("FindAudioBookByAuthorLastName")]
-        public async Task<IActionResult> GetAudioBookByAuthorLastName(string authorLastName)
-        {
-            var response = await _audioBookService.GetAudioBookByAuthorLastName(authorLastName);
+            var response = await _audioBookService.GetAudioBookByNarratorName(narratorName);
             return response != null ? Ok(response) : StatusCode(StatusCodes.Status404NotFound, response);
         }
 
-        // Busca un Audiolibro por nombre completo de su Autor
+        // Busca un Audiolibro por apellido del narrador
         [HttpGet]
-        [Route("FindAudioBookByAuthorFullName")]
-        public async Task<IActionResult> GetAudioBookByAuthorFullName(string authorName, string authorLastName)
+        [Route("FindAudioBookByNarratorLastName")]
+        public async Task<IActionResult> GetAudioBookByNarratorLastName(string narratorLastName)
         {
-            var response = await _audioBookService.GetAudioBookByAuthorFullName(authorName, authorLastName);
+            var response = await _audioBookService.GetAudioBookByNarratorLastName(narratorLastName);
             return response != null ? Ok(response) : StatusCode(StatusCodes.Status404NotFound, response);
         }
 
-        // Busca un Audiolibro por rango de fecha de nacimiento de su Autor
+        // Busca un Audiolibro por nombre completo de su narrador
         [HttpGet]
-        [Route("FindAudioBookByAuthorBirthDateRange")]
-        public async Task<IActionResult> GetAudioBookByAuthorBirthDateRange(DateOnly startDate, DateOnly endDate)
+        [Route("FindAudioBookByNarratorFullName")]
+        public async Task<IActionResult> GetAudioBookByNarratorFullName(string narratorName, string narratorLastName)
         {
-            var response = await _audioBookService.GetAudioBookByAuthorBirthDateRange(startDate, endDate);
+            var response = await _audioBookService.GetAudioBookByNarratorFullName(narratorName, narratorLastName);
             return response != null ? Ok(response) : StatusCode(StatusCodes.Status404NotFound, response);
         }
 
-        // Busca un Audiolibro por pais de nacimiento de su Autor
         [HttpGet]
-        [Route("FindAudioBookByAuthorCountry")]
-        public async Task<IActionResult> GetAudioBookByAuthorCountry(string authorCountry)
+        [Route("FindAudioBookByNarratorGenre")]
+        public async Task<IActionResult> GetAudioBookByNarratorGenre(string genre)
         {
-            var response = await _audioBookService.GetAudioBookByAuthorCountry(authorCountry);
+            var response = await _audioBookService.GetAudioBookByNarratorGenre(genre);
             return response != null ? Ok(response) : StatusCode(StatusCodes.Status404NotFound, response);
         }
 

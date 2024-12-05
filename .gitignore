@@ -3,6 +3,12 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/main/VisualStudio.gitignore
 
+# Ignorar todo en uploads
+/katio_net.API/uploads/*
+
+# Excepciones para uploads/prueba
+!/katio_net.API/uploads/prueba/
+
 # User-specific files
 *.rsuser
 *.suo
@@ -31,6 +37,7 @@ bld/
 [Oo]bj/
 [Ll]og/
 [Ll]ogs/
+Migrations/
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
@@ -397,3 +404,5 @@ FodyWeavers.xsd
 # JetBrains Rider
 *.sln.iml
 .DS_Store
+katio_net.API/appsettings.Development.json
+katio_net.API/appsettings.json
