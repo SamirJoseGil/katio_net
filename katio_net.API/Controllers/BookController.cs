@@ -55,6 +55,7 @@ namespace katio.API.Controllers
                 DeweyIndex = bookInsert.DeweyIndex,
                 AuthorId = bookInsert.AuthorId,
                 BookCover = bookInsert.BookCover,
+                Description = bookInsert.Description
             };
 
             var response = await _bookService.CreateBook(book, bookInsert.PdfFile);
