@@ -12,6 +12,7 @@ namespace katio.Data.Models
         public string DeweyIndex { get; set; } = string.Empty;
         public string BookCover { get; set; } = string.Empty;
         public string? PdfPath { get; set; } = null;
+        public string Description { get; set; } = string.Empty;
 
 
         // Relaciones
