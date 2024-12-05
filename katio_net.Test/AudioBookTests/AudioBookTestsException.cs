@@ -209,7 +209,7 @@ public class AudioBookTestsException
     {
         // Arrange
         var audioBook = _audioBooks.First();
-        _audioBookRepository.When(x => x.FindAsync(audioBook.LenghtInSeconds)).Do(x => throw new Exception());
+        _audioBookRepository.When(x => x.GetAllAsync(Arg.Any<Expression<Func<AudioBook, bool>>>(), includeProperties: "Narrator")).Do(x => throw new Exception());
 
         // Act
         var result = await _audioBookService.GetAudioBookByNarrator(audioBook.NarratorId);

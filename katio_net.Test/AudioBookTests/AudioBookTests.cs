@@ -57,7 +57,7 @@ public class AudioBookTests
     public async Task GetAllAudioBooks()
     {
         // Arrange
-        _audioBookRepository.GetAllAsync().Returns(_audioBooks);
+        _audioBookRepository.GetAllAsync(includeProperties: "Narrator").Returns(_audioBooks);
 
         // Act
         var result = await _audioBookService.Index();
@@ -87,7 +87,7 @@ public class AudioBookTests
     {
         // Arrange
         var audioBook = _audioBooks.First();
-        _audioBookRepository.FindAsync(audioBook.Id).Returns(audioBook);
+        _audioBookRepository.GetAllAsync(Arg.Any<Expression<Func<AudioBook, bool>>>(), includeProperties: "Narrator").ReturnsForAnyArgs(new List<AudioBook> { audioBook });
 
         // Act
         var result = await _audioBookService.GetAudioBookById(audioBook.Id);
@@ -295,7 +295,7 @@ public class AudioBookTests
     {
         // Arrange
         var audioBook = _audioBooks.First();
-        _audioBookRepository.FindAsync(audioBook.NarratorId).Returns(audioBook);
+        _audioBookRepository.GetAllAsync(Arg.Any<Expression<Func<AudioBook, bool>>>(), includeProperties: "Narrator").ReturnsForAnyArgs(new List<AudioBook> { audioBook });
 
         // Act
         var result = await _audioBookService.GetAudioBookByNarrator(audioBook.NarratorId);

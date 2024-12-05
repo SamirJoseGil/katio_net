@@ -57,8 +57,8 @@ public class BookTests
     [TestMethod]
     public async Task GetAllBooks()
     {
-       // Arrange
-        _bookRepository.GetAllAsync().Returns(_books);
+        // Arrange
+        _bookRepository.GetAllAsync(includeProperties: "Author").Returns(_books);
 
         // Act
         var result = await _bookService.Index();
@@ -169,7 +169,7 @@ public class BookTests
     {
         // Arrange
         var book = _books.First();
-        _bookRepository.FindAsync(book.Id).Returns(book);
+        _bookRepository.GetAllAsync(Arg.Any<Expression<Func<Book, bool>>>(), includeProperties: "Author").Returns(new List<Book> { book });
 
         // Act
         var result = await _bookService.GetBookById(book.Id);

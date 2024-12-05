@@ -133,6 +133,7 @@ public class BookService : IBookService
         {
             return Utilities.BuildResponse<Book>(HttpStatusCode.Conflict, BaseMessageStatus.BOOK_ALREADY_EXISTS);
         }
+
         try
         {
             // Homogeneizar el archivo PDF: convertir el nombre a minúsculas y quitar caracteres especiales
@@ -149,6 +150,13 @@ public class BookService : IBookService
                 return Utilities.BuildResponse<Book>(HttpStatusCode.Conflict, BaseMessageStatus.ALREADY_EXISTS_409);
             }
 
+            // Asignar la ruta relativa al libro
+            book.PdfPath = relativePath;
+
+            // Guardar el libro en la base de datos
+            await _unitOfWork.BookRepository.AddAsync(book);
+            await _unitOfWork.SaveAsync();
+
             // Ruta donde se guardará el archivo físicamente
             var uploadsFolderPath = Path.Combine(Directory.GetCurrentDirectory(), "uploads", "books");
             Directory.CreateDirectory(uploadsFolderPath); // Crear el directorio si no existe
@@ -160,16 +168,13 @@ public class BookService : IBookService
             {
                 await pdfFile.CopyToAsync(stream);
             }
-
-            // Asignar la ruta relativa al libro
-            book.PdfPath = relativePath;
-
-            // Guardar el libro en la base de datos
-            await _unitOfWork.BookRepository.AddAsync(book);
-            await _unitOfWork.SaveAsync();
         }
         catch (Exception ex)
         {
+            // Si ocurre un error, eliminar el libro de la base de datos
+            await _unitOfWork.BookRepository.Delete(book);
+            await _unitOfWork.SaveAsync();
+
             return Utilities.BuildResponse<Book>(HttpStatusCode.InternalServerError, $"{BaseMessageStatus.INTERNAL_SERVER_ERROR_500} | {ex.Message}");
         }
 
