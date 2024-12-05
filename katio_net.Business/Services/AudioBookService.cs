@@ -108,11 +108,34 @@ public class AudioBookService : IAudioBookService
                 searchExpressions.Add(publishedEquals);
             }
 
+            // Search in Narrator.Name
+            var narratorProperty = Expression.Property(parameter, "Narrator");
+            var narratorNameProperty = Expression.Property(narratorProperty, nameof(Narrator.Name));
+            var narratorNameToLower = Expression.Call(narratorNameProperty, "ToLower", null);
+            var narratorNameContains = Expression.Call(
+                narratorNameToLower,
+                "Contains",
+                null,
+                lowerSearchTerm
+            );
+            searchExpressions.Add(narratorNameContains);
+
+            // Search in Narrator.LastName
+            var narratorLastNameProperty = Expression.Property(narratorProperty, nameof(Narrator.LastName));
+            var narratorLastNameToLower = Expression.Call(narratorLastNameProperty, "ToLower", null);
+            var narratorLastNameContains = Expression.Call(
+                narratorLastNameToLower,
+                "Contains",
+                null,
+                lowerSearchTerm
+            );
+            searchExpressions.Add(narratorLastNameContains);
+
             // Combine all search expressions with OR
             var body = searchExpressions.Aggregate(Expression.OrElse);
             var lambda = Expression.Lambda<Func<AudioBook, bool>>(body, parameter);
 
-            var result = await _unitOfWork.AudioBookRepository.GetAllAsync(lambda);
+            var result = await _unitOfWork.AudioBookRepository.GetAllAsync(lambda, includeProperties: "Narrator");
             return result.Any() ? Utilities.BuildResponse(HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
                 Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.AUDIOBOOK_NOT_FOUND, new List<AudioBook>());
         }
