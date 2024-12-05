@@ -165,6 +165,12 @@ Asegúrate de tener los siguientes elementos instalados y configurados en tu ent
 
 ---
 
+## **Pruebas Unitarias**
+
+Todas las pruebas unitarias se encuentran en una carpeta **katio_net.Test** las cuales pueden ser ejecutadas despues de tener las extenciones de **C# dev kit** en donde enontraras pruebas para cada servicio, solo debes ir a tu visual studio code y correrlas, recuerda que estas si fallan debes revisar cambios hechos.
+
+---
+
 ## **Solución de Problemas**
 
 - **Error de conexión a la base de datos:**  
@@ -177,7 +183,7 @@ Asegúrate de tener los siguientes elementos instalados y configurados en tu ent
     Revisa las migraciones pendientes y verifica que Entity Framework esté configurado correctamente.
 
 
-  ### **Technical Documentation of the Backend**
+### **Technical Documentation of the Backend**
 
 ## **Introduction**
 
@@ -339,6 +345,12 @@ Ensure you have the following tools installed and configured in your environment
     dotnet publish -c Release -o ./published
 	```
 	
+
+---
+
+## **Unit Tests**
+
+All unit tests are located in the **katio_net.Test** folder and can be executed after installing the **C# Dev Kit** extensions. You will find tests for each service. Simply open Visual Studio Code and run them. If any tests fail, make sure to review any changes made.
 
 ---
 
