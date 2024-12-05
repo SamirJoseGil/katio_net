@@ -107,11 +107,34 @@ public class BookService : IBookService
                 searchExpressions.Add(publishedEquals);
             }
 
+            // Search in Author.Name
+            var authorProperty = Expression.Property(parameter, "Author");
+            var authorNameProperty = Expression.Property(authorProperty, nameof(Author.Name));
+            var authorNameToLower = Expression.Call(authorNameProperty, "ToLower", null);
+            var authorNameContains = Expression.Call(
+                authorNameToLower,
+                "Contains",
+                null,
+                lowerSearchTerm
+            );
+            searchExpressions.Add(authorNameContains);
+
+            // Search in Author.LastName
+            var authorLastNameProperty = Expression.Property(authorProperty, nameof(Author.LastName));
+            var authorLastNameToLower = Expression.Call(authorLastNameProperty, "ToLower", null);
+            var authorLastNameContains = Expression.Call(
+                authorLastNameToLower,
+                "Contains",
+                null,
+                lowerSearchTerm
+            );
+            searchExpressions.Add(authorLastNameContains);
+
             // Combine all search expressions with OR
             var body = searchExpressions.Aggregate(Expression.OrElse);
             var lambda = Expression.Lambda<Func<Book, bool>>(body, parameter);
 
-            var result = await _unitOfWork.BookRepository.GetAllAsync(lambda);
+            var result = await _unitOfWork.BookRepository.GetAllAsync(lambda, includeProperties: "Author");
             return result.Any() ? Utilities.BuildResponse(HttpStatusCode.OK, BaseMessageStatus.OK_200, result) :
                 Utilities.BuildResponse(HttpStatusCode.NotFound, BaseMessageStatus.BOOK_NOT_FOUND, new List<Book>());
         }
